@@ -14,7 +14,6 @@ import {
   ArrowUpRight,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Badge, Button, Card, CardHeader } from './ui';
 
 interface LocalUploadedFile {
   fileName: string;
@@ -185,7 +184,9 @@ export default function VideoDropzone({
                 if (xhr.status >= 200 && xhr.status < 300) {
                   resolve();
                 } else {
-                  reject(new Error(`R2 direct upload returned HTTP ${xhr.status}`));
+                  reject(
+                    new Error(`R2 direct upload returned HTTP ${xhr.status}`)
+                  );
                 }
               };
 
@@ -213,7 +214,10 @@ export default function VideoDropzone({
           }
         }
       } catch (r2Err) {
-        console.warn('R2 direct upload unavailable, falling back to local chunked upload:', r2Err);
+        console.warn(
+          'R2 direct upload unavailable, falling back to local chunked upload:',
+          r2Err
+        );
       }
 
       if (!directR2Success) {
@@ -389,40 +393,50 @@ export default function VideoDropzone({
   const activeCoverSrc = localCoverPreview || coverUrl;
 
   return (
-    <Card padding="sm" className="space-y-3.5">
-      <CardHeader
-        icon={<Film className="w-4 h-4 text-accent-soft" />}
-        title="Video Asset &amp; Cover Studio"
-        subtitle="Upload MP4/MOV or pick an existing file from your media library"
-        className="pb-2.5"
-        action={
-          <div className="flex items-center gap-2">
-            <Link
-              href="/media"
-              className="text-xs font-medium text-ink-secondary hover:text-ink-primary inline-flex items-center gap-1"
-            >
-              <span>Media Library</span>
-              <ArrowUpRight className="w-3 h-3" />
-            </Link>
-            {videoUrl && (
-              <Button
-                size="xs"
-                variant="danger"
-                onClick={() => {
-                  setLocalCoverPreview('');
-                  onClearVideo();
-                }}
-                icon={<X className="w-3 h-3" />}
-              >
-                Remove
-              </Button>
-            )}
+    <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-4">
+      {/* Header */}
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100">
+        <div className="flex items-center gap-2.5">
+          <span className="w-9 h-9 rounded-xl bg-slate-100 border border-slate-200 text-slate-800 flex items-center justify-center">
+            <Film className="w-4 h-4" />
+          </span>
+          <div>
+            <h2 className="text-sm font-bold text-slate-900">
+              Video Asset &amp; Thumbnail Cover Studio
+            </h2>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Upload MP4/MOV or pick an existing video from your media library
+            </p>
           </div>
-        }
-      />
+        </div>
+
+        <div className="flex items-center gap-2.5">
+          <Link
+            href="/media"
+            className="h-9 px-3 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-xs font-bold text-slate-700 inline-flex items-center gap-1.5 shadow-2xs transition-colors"
+          >
+            <FolderOpen className="w-3.5 h-3.5 text-slate-500" />
+            <span>Media Library</span>
+            <ArrowUpRight className="w-3.5 h-3.5 text-slate-400" />
+          </Link>
+          {videoUrl && (
+            <button
+              type="button"
+              onClick={() => {
+                setLocalCoverPreview('');
+                onClearVideo();
+              }}
+              className="h-9 px-3 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-xs font-bold text-rose-700 inline-flex items-center gap-1.5 transition-colors"
+            >
+              <X className="w-3.5 h-3.5" />
+              <span>Remove Video</span>
+            </button>
+          )}
+        </div>
+      </div>
 
       {!videoUrl ? (
-        <div className="space-y-3">
+        <div className="space-y-4">
           <div
             onDragOver={(e) => {
               e.preventDefault();
@@ -432,10 +446,10 @@ export default function VideoDropzone({
             onDrop={handleDrop}
             onClick={() => !isUploading && fileInputRef.current?.click()}
             className={cn(
-              'border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-colors',
+              'border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all',
               isDragging
-                ? 'border-accent bg-accent/10'
-                : 'border-studio-border hover:border-studio-borderStrong bg-studio-subtle'
+                ? 'border-[#211832] bg-slate-50'
+                : 'border-slate-300 hover:border-slate-400 bg-slate-50/60 hover:bg-slate-50'
             )}
           >
             <input
@@ -450,27 +464,27 @@ export default function VideoDropzone({
               }}
             />
 
-            <div className="w-10 h-10 rounded-xl bg-accent/12 border border-accent/25 text-accent-soft flex items-center justify-center mx-auto mb-2.5">
+            <div className="w-12 h-12 rounded-2xl bg-[#211832] text-[#D8FF36] flex items-center justify-center mx-auto mb-3 shadow-xs">
               {isUploading ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <Loader2 className="w-5 h-5 animate-spin" />
               ) : (
-                <UploadCloud className="w-4 h-4" />
+                <UploadCloud className="w-5 h-5" />
               )}
             </div>
 
-            <p className="text-[13px] font-semibold text-ink-primary">
+            <p className="text-sm font-bold text-slate-900">
               {isUploading
-                ? `Uploading video... ${uploadProgress}%`
-                : 'Drop MP4 / MOV here or click to browse'}
+                ? `Uploading video to cloud... ${uploadProgress}%`
+                : 'Drop MP4 / MOV video here or click to browse'}
             </p>
-            <p className="text-xs text-ink-muted mt-1">
-              Supports 9:16 vertical Shorts/Reels/TikTok and 16:9 landscape video via R2 or chunked upload
+            <p className="text-xs text-slate-500 mt-1">
+              Supports 9:16 vertical Shorts/Reels/TikTok and 16:9 landscape video via Cloudflare R2 or chunked upload
             </p>
 
             {isUploading && (
-              <div className="w-56 h-1.5 bg-studio-canvas rounded-full overflow-hidden mx-auto mt-3">
+              <div className="w-64 h-2 bg-slate-200 rounded-full overflow-hidden mx-auto mt-4">
                 <div
-                  className="h-full bg-accent transition-all duration-200"
+                  className="h-full bg-[#211832] transition-all duration-200"
                   style={{ width: `${uploadProgress}%` }}
                 />
               </div>
@@ -478,17 +492,20 @@ export default function VideoDropzone({
           </div>
 
           {localFiles.length > 0 && (
-            <div className="p-3 rounded-lg bg-studio-subtle border border-studio-border space-y-2">
-              <div className="flex items-center justify-between text-[11px] font-medium text-ink-secondary">
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2.5">
+              <div className="flex items-center justify-between text-xs font-bold text-slate-700">
                 <span className="inline-flex items-center gap-1.5">
-                  <FolderOpen className="w-3.5 h-3.5 text-status-success" />
-                  <span>Recent Library Videos ({localFiles.length})</span>
+                  <FolderOpen className="w-4 h-4 text-emerald-600" />
+                  <span>Quick Select from Uploaded Videos ({localFiles.length})</span>
                 </span>
-                <Link href="/media" className="text-accent-soft hover:underline">
-                  View all
+                <Link
+                  href="/media"
+                  className="text-xs font-bold text-slate-800 hover:underline"
+                >
+                  Open Full Library →
                 </Link>
               </div>
-              <div className="flex flex-wrap gap-1.5">
+              <div className="flex flex-wrap gap-2">
                 {localFiles.slice(0, 6).map((lf) => (
                   <button
                     key={lf.url}
@@ -503,11 +520,11 @@ export default function VideoDropzone({
                         sizeMb: lf.sizeMb,
                       })
                     }
-                    className="h-8 px-2.5 rounded-lg bg-studio-surface hover:bg-studio-hover border border-studio-border text-xs text-ink-primary flex items-center gap-1.5 transition-colors"
+                    className="h-9 px-3 rounded-xl bg-white hover:bg-slate-100 border border-slate-300 text-xs font-semibold text-slate-800 flex items-center gap-2 shadow-2xs transition-colors"
                   >
-                    <Film className="w-3 h-3 text-accent-soft" />
-                    <span className="truncate max-w-[180px]">{lf.fileName}</span>
-                    <span className="text-[10px] text-ink-muted font-mono">
+                    <Film className="w-3.5 h-3.5 text-slate-600 flex-shrink-0" />
+                    <span className="truncate max-w-[200px]">{lf.fileName}</span>
+                    <span className="px-1.5 py-0.5 rounded bg-slate-100 text-[11px] text-slate-600 font-mono">
                       {lf.sizeMb} MB
                     </span>
                   </button>
@@ -517,8 +534,9 @@ export default function VideoDropzone({
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-start">
-          <div className="md:col-span-5 bg-black rounded-lg overflow-hidden border border-studio-border">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-start">
+          {/* Video Preview Box */}
+          <div className="md:col-span-5 bg-slate-950 rounded-xl overflow-hidden border border-slate-300 shadow-xs">
             <video
               ref={videoPlayerRef}
               src={activeVideoSrc}
@@ -547,38 +565,47 @@ export default function VideoDropzone({
                   });
                 }
               }}
-              className="w-full max-h-[250px] object-contain bg-black"
+              className="w-full max-h-[260px] object-contain bg-black"
             />
           </div>
 
-          <div className="md:col-span-7 space-y-3">
-            <div className="p-3 rounded-lg bg-studio-subtle border border-studio-border space-y-2">
-              <p className="text-xs font-semibold text-ink-primary truncate">
-                {videoFileName}
-              </p>
-              <div className="flex flex-wrap items-center gap-1.5">
-                <Badge className="font-mono">{videoDuration}s</Badge>
-                <Badge>{videoAspectRatio}</Badge>
-                <Badge className="font-mono">{videoSizeMb} MB</Badge>
-                <Badge tone="success">
-                  <CheckCircle2 className="w-3 h-3" />
+          {/* Video Info & Cover Frame Studio */}
+          <div className="md:col-span-7 space-y-4">
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2.5">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-sm font-bold text-slate-900 truncate">
+                  {videoFileName}
+                </p>
+                <span className="px-2.5 py-1 rounded-full bg-emerald-100 border border-emerald-300 text-emerald-800 text-xs font-bold inline-flex items-center gap-1 flex-shrink-0">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
                   <span>Ready</span>
-                </Badge>
+                </span>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-xs font-semibold text-slate-700 font-mono">
+                  Duration: {videoDuration}s
+                </span>
+                <span className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-xs font-semibold text-slate-700">
+                  {videoAspectRatio}
+                </span>
+                <span className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-xs font-semibold text-slate-700 font-mono">
+                  {videoSizeMb} MB
+                </span>
               </div>
             </div>
 
-            <div className="p-3 rounded-lg bg-studio-subtle border border-studio-border space-y-2.5">
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-ink-primary flex items-center gap-1.5">
-                  <ImageIcon className="w-3.5 h-3.5 text-accent-soft" />
-                  <span>Thumbnail / Cover Frame</span>
+                <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                  <ImageIcon className="w-4 h-4 text-slate-700" />
+                  <span>Thumbnail / Cover Frame Selector</span>
                 </span>
-                <span className="text-[11px] font-mono text-ink-muted">
+                <span className="px-2 py-0.5 rounded bg-white border border-slate-200 text-xs font-mono font-semibold text-slate-700">
                   Offset {(thumbOffsetMs / 1000).toFixed(1)}s
                 </span>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <input
                   type="range"
                   min={0}
@@ -592,21 +619,25 @@ export default function VideoDropzone({
                       videoPlayerRef.current.currentTime = val;
                     }
                   }}
-                  className="flex-1 accent-accent h-1.5 bg-studio-canvas rounded-lg cursor-pointer"
+                  className="flex-1 accent-[#211832] h-2 bg-slate-200 rounded-lg cursor-pointer"
                 />
-                <Button
-                  size="xs"
-                  variant="primary"
-                  loading={isCapturingThumb}
+                <button
+                  type="button"
+                  disabled={isCapturingThumb}
                   onClick={() => handleCaptureFrameAt(seekSec)}
-                  icon={<Camera className="w-3 h-3" />}
+                  className="h-9 px-3.5 rounded-xl bg-[#211832] hover:bg-[#2d2144] text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-xs transition-colors flex-shrink-0"
                 >
-                  Capture ({seekSec}s)
-                </Button>
+                  {isCapturingThumb ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <Camera className="w-3.5 h-3.5 text-[#D8FF36]" />
+                  )}
+                  <span>Capture ({seekSec}s)</span>
+                </button>
               </div>
 
               <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1.5">
                   {[
                     { label: '1.0s', sec: 1.0 },
                     {
@@ -626,7 +657,7 @@ export default function VideoDropzone({
                       key={preset.label}
                       type="button"
                       onClick={() => handleCaptureFrameAt(preset.sec)}
-                      className="px-2 py-1 rounded-md bg-studio-surface hover:bg-studio-hover border border-studio-border text-[11px] text-ink-secondary font-mono"
+                      className="h-8 px-2.5 rounded-lg bg-white hover:bg-slate-100 border border-slate-300 text-xs font-bold text-slate-700 font-mono transition-colors"
                     >
                       {preset.label}
                     </button>
@@ -645,31 +676,32 @@ export default function VideoDropzone({
                       }
                     }}
                   />
-                  <Button
-                    size="xs"
-                    variant="secondary"
+                  <button
+                    type="button"
                     onClick={() => thumbInputRef.current?.click()}
-                    icon={<ImageIcon className="w-3 h-3 text-status-success" />}
+                    className="h-8 px-3 rounded-lg bg-white hover:bg-slate-100 border border-slate-300 text-xs font-bold text-slate-800 inline-flex items-center gap-1.5 shadow-2xs transition-colors"
                   >
-                    Upload Cover
-                  </Button>
+                    <ImageIcon className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Upload Custom Cover</span>
+                  </button>
                 </div>
               </div>
 
               {activeCoverSrc && (
-                <div className="pt-2 border-t border-studio-border flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2.5">
+                <div className="pt-3 border-t border-slate-200 flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={activeCoverSrc}
                       alt="Selected cover"
-                      className="w-10 h-14 rounded-md object-cover border border-accent/50"
+                      className="w-12 h-16 rounded-lg object-cover border-2 border-emerald-500 shadow-2xs"
                     />
                     <div>
-                      <p className="text-xs font-medium text-status-success">
-                        Custom Cover Active
+                      <p className="text-xs font-bold text-emerald-800">
+                        Custom Cover Image Active
                       </p>
-                      <p className="text-[11px] text-ink-muted">
-                        Applied to YouTube thumbnail &amp; Reels cover
+                      <p className="text-xs text-slate-500">
+                        Will be uploaded as YouTube Thumbnail &amp; Reels Cover
                       </p>
                     </div>
                   </div>
@@ -679,9 +711,9 @@ export default function VideoDropzone({
                       setLocalCoverPreview('');
                       onCoverUpdated('', 0);
                     }}
-                    className="text-[11px] text-ink-muted hover:text-status-danger"
+                    className="px-2.5 py-1 rounded-lg border border-rose-200 bg-rose-50 hover:bg-rose-100 text-xs font-bold text-rose-700"
                   >
-                    Clear
+                    Clear Cover
                   </button>
                 </div>
               )}
@@ -689,6 +721,6 @@ export default function VideoDropzone({
           </div>
         </div>
       )}
-    </Card>
+    </div>
   );
 }

@@ -12,10 +12,11 @@ import {
   Heart,
   MessageCircle,
   Share2,
+  Smartphone,
+  Monitor,
+  Info,
 } from 'lucide-react';
 import { PlatformBadge } from './ui';
-import { Card, CardContent, CardHeader } from '@/components/ui/shadcn/card';
-import { Badge } from '@/components/ui/shadcn/badge';
 
 interface PostPreviewCardProps {
   selectedPlatforms: SocialPlatform[];
@@ -49,23 +50,26 @@ export default function PostPreviewCard({
   shortenerEnabled,
 }: PostPreviewCardProps) {
   const [viewMode, setViewMode] = useState<'video' | 'cover'>('video');
+  const [deviceView, setDeviceView] = useState<'mobile' | 'desktop'>('mobile');
   const [isPlayingVideo, setIsPlayingVideo] = useState(false);
   const cfg = PLATFORM_CONFIGS[activePlatform] || PLATFORM_CONFIGS.youtube;
 
-  // Whenever a new coverUrl is uploaded, show it over the video so the user sees it immediately
   useEffect(() => {
     if (coverUrl) {
       setIsPlayingVideo(false);
     }
   }, [coverUrl]);
 
-  const showCoverOverlay = Boolean(coverUrl) && (viewMode === 'cover' || !isPlayingVideo);
+  const showCoverOverlay =
+    Boolean(coverUrl) && (viewMode === 'cover' || !isPlayingVideo);
 
   return (
-    <Card className="border-[#E7DFD5] bg-white shadow-[0_2px_12px_rgba(30,27,24,0.05)]">
-      <CardHeader className="p-4 pb-3 border-b border-[#EFE9E1] space-y-2.5">
+    <div className="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
+      {/* Metricool Preview Header Bar */}
+      <div className="p-4 border-b border-slate-200 space-y-3 bg-slate-50/60">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-1 overflow-x-auto pb-0.5">
+          {/* Network Icon Tabs */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5">
             {(selectedPlatforms.length > 0
               ? selectedPlatforms
               : (['youtube'] as SocialPlatform[])
@@ -78,10 +82,10 @@ export default function PostPreviewCard({
                   type="button"
                   onClick={() => onSelectPlatform(plat)}
                   className={cn(
-                    'h-7 px-2.5 rounded-lg text-[11px] font-medium flex items-center gap-1.5 transition-colors border flex-shrink-0',
+                    'h-9 px-3 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all border flex-shrink-0',
                     isCurr
-                      ? 'bg-[#F5DFCE] text-[#8D451E] border-[#EACBB4] font-semibold'
-                      : 'bg-[#FAF6F1] text-[#6E655D] hover:text-[#1E1B18] border-[#E7DFD5]'
+                      ? 'bg-[#211832] text-white border-[#211832] shadow-2xs'
+                      : 'bg-white text-slate-600 hover:text-slate-900 border-slate-200'
                   )}
                 >
                   <PlatformBadge platform={plat} size="xs" />
@@ -91,7 +95,43 @@ export default function PostPreviewCard({
             })}
           </div>
 
-          <div className="inline-flex rounded-lg bg-[#F5EFE8] p-0.5 border border-[#E7DFD5]">
+          {/* Mobile / Desktop Device Toggle (Metricool style) */}
+          <div className="inline-flex rounded-xl bg-white p-1 border border-slate-200 shadow-2xs">
+            <button
+              type="button"
+              onClick={() => setDeviceView('mobile')}
+              className={cn(
+                'p-1.5 rounded-lg transition-colors',
+                deviceView === 'mobile'
+                  ? 'bg-[#211832] text-white'
+                  : 'text-slate-500 hover:text-slate-900'
+              )}
+              title="Mobile Preview"
+            >
+              <Smartphone className="w-3.5 h-3.5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setDeviceView('desktop')}
+              className={cn(
+                'p-1.5 rounded-lg transition-colors',
+                deviceView === 'desktop'
+                  ? 'bg-[#211832] text-white'
+                  : 'text-slate-500 hover:text-slate-900'
+              )}
+              title="Desktop Feed Preview"
+            >
+              <Monitor className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+
+        {/* Video vs Cover Switcher */}
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-bold text-slate-700">
+            {cfg.name} Post Preview
+          </span>
+          <div className="inline-flex rounded-xl bg-white p-0.5 border border-slate-200">
             <button
               type="button"
               onClick={() => {
@@ -99,14 +139,14 @@ export default function PostPreviewCard({
                 setIsPlayingVideo(true);
               }}
               className={cn(
-                'px-2.5 py-1 rounded-md text-[11px] font-medium flex items-center gap-1 transition-colors',
+                'px-2.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1 transition-colors',
                 viewMode === 'video' && isPlayingVideo
-                  ? 'bg-white text-[#1E1B18] shadow-xs'
-                  : 'text-[#6E655D] hover:text-[#1E1B18]'
+                  ? 'bg-[#211832] text-white'
+                  : 'text-slate-600 hover:text-slate-900'
               )}
             >
               <Play className="w-3 h-3" />
-              Video
+              <span>Video</span>
             </button>
             <button
               type="button"
@@ -115,37 +155,72 @@ export default function PostPreviewCard({
                 setIsPlayingVideo(false);
               }}
               className={cn(
-                'px-2.5 py-1 rounded-md text-[11px] font-medium flex items-center gap-1 transition-colors',
+                'px-2.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1 transition-colors',
                 viewMode === 'cover' || (coverUrl && !isPlayingVideo)
-                  ? 'bg-white text-[#1E1B18] shadow-xs'
-                  : 'text-[#6E655D] hover:text-[#1E1B18]'
+                  ? 'bg-[#211832] text-white'
+                  : 'text-slate-600 hover:text-slate-900'
               )}
             >
               <ImageIcon className="w-3 h-3" />
-              Cover
+              <span>Cover</span>
             </button>
           </div>
         </div>
-      </CardHeader>
+      </div>
 
-      <CardContent className="p-4 space-y-4">
-        {/* Responsive Authentic Mobile Device Frame */}
-        <div className="w-full max-w-[285px] sm:max-w-[300px] mx-auto bg-[#1E1B18] rounded-[28px] p-2.5 shadow-[0_14px_32px_rgba(30,27,24,0.18)] border-2 border-[#3A342E]">
-          {/* Phone Top Notch / Status Header */}
-          <div className="px-3 py-2 flex items-center justify-between bg-white rounded-t-[18px] border-b border-[#EFE9E1]">
-            <div className="flex items-center gap-1.5 min-w-0">
-              <PlatformBadge platform={activePlatform} size="xs" />
-              <span className="text-[11px] font-semibold text-[#1E1B18] truncate">
-                {cfg.name} Preview
-              </span>
+      {/* Preview Body */}
+      <div className="p-5 space-y-4 bg-slate-50/40">
+        <div
+          className={cn(
+            'mx-auto bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden transition-all',
+            deviceView === 'mobile' ? 'max-w-[310px]' : 'w-full'
+          )}
+        >
+          {/* Social Card Header (Avatar + Brand Handle) */}
+          <div className="px-4 py-3 flex items-center justify-between border-b border-slate-100">
+            <div className="flex items-center gap-2.5 min-w-0">
+              {accountAvatar ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={accountAvatar}
+                  alt={accountHandle}
+                  className="w-8 h-8 rounded-full object-cover border border-slate-200 flex-shrink-0"
+                />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-[#211832] text-[#D8FF36] flex items-center justify-center text-xs font-bold flex-shrink-0">
+                  Z
+                </div>
+              )}
+              <div className="min-w-0">
+                <p className="text-xs font-bold text-slate-900 truncate">
+                  {accountHandle}
+                </p>
+                <p className="text-[11px] text-slate-400">Just now • {cfg.shortName}</p>
+              </div>
             </div>
-            <span className="text-[10px] font-medium text-[#3A8E63] bg-[#DCEAE2] px-2 py-0.5 rounded-full flex-shrink-0">
-              {showCoverOverlay ? 'Cover' : 'Live Video'}
-            </span>
+
+            <div className="flex items-center gap-1.5 flex-shrink-0">
+              {isAiGenerated && (
+                <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[10px] font-bold">
+                  AI
+                </span>
+              )}
+              {paidPromotion && (
+                <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-900 text-[10px] font-bold">
+                  Paid
+                </span>
+              )}
+              <PlatformBadge platform={activePlatform} size="xs" />
+            </div>
           </div>
 
-          {/* 9:14 Phone Viewport */}
-          <div className="relative aspect-[9/14] w-full overflow-hidden bg-[#141210] flex items-center justify-center">
+          {/* Video / Cover Media Viewport */}
+          <div
+            className={cn(
+              'relative w-full overflow-hidden bg-slate-950 flex items-center justify-center',
+              deviceView === 'mobile' ? 'aspect-[9/14]' : 'aspect-video'
+            )}
+          >
             {showCoverOverlay && coverUrl ? (
               <div className="relative w-full h-full">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -162,12 +237,12 @@ export default function PostPreviewCard({
                       setIsPlayingVideo(true);
                     }}
                     aria-label="Play video preview"
-                    className="absolute inset-0 flex flex-col items-center justify-center bg-black/20 hover:bg-black/30 transition-colors group"
+                    className="absolute inset-0 flex flex-col items-center justify-center bg-black/25 hover:bg-black/35 transition-colors group"
                   >
-                    <span className="w-12 h-12 rounded-full bg-white/95 text-[#1E1B18] flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
+                    <span className="w-12 h-12 rounded-full bg-white/95 text-slate-900 flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
                       <Play className="w-5 h-5 fill-current ml-0.5" />
                     </span>
-                    <span className="mt-2 px-2.5 py-0.5 rounded-full bg-black/65 text-white text-[10px] font-medium">
+                    <span className="mt-2 px-3 py-1 rounded-full bg-black/70 text-white text-xs font-semibold">
                       Tap to play video
                     </span>
                   </button>
@@ -185,134 +260,127 @@ export default function PostPreviewCard({
                 className="w-full h-full object-cover"
               />
             ) : (
-              <div className="flex flex-col items-center justify-center p-6 text-center gap-2">
-                <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
-                  <Eye className="w-5 h-5 text-[#D6CBC0]" />
+              <div className="flex flex-col items-center justify-center p-6 text-center gap-2.5">
+                <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center">
+                  <Eye className="w-5 h-5 text-slate-300" />
                 </div>
-                <span className="text-[11px] text-[#D6CBC0] leading-snug">
-                  Upload a video or cover image to preview how it looks on mobile
+                <span className="text-xs font-medium text-slate-300 leading-relaxed max-w-[200px]">
+                  Upload a video or select a media file on the left to preview your post
                 </span>
               </div>
             )}
 
             {/* Mobile Reels/Shorts Right Action Rail */}
-            {(videoUrl || coverUrl) && (
-              <div className="pointer-events-none absolute right-2 bottom-3 flex flex-col items-center gap-2.5 text-white drop-shadow">
+            {(videoUrl || coverUrl) && deviceView === 'mobile' && (
+              <div className="pointer-events-none absolute right-2.5 bottom-4 flex flex-col items-center gap-3 text-white drop-shadow">
                 <div className="flex flex-col items-center">
                   <Heart className="w-4 h-4" />
-                  <span className="text-[9px]">1.2k</span>
+                  <span className="text-[10px] font-semibold">1.2k</span>
                 </div>
                 <div className="flex flex-col items-center">
                   <MessageCircle className="w-4 h-4" />
-                  <span className="text-[9px]">48</span>
+                  <span className="text-[10px] font-semibold">48</span>
                 </div>
                 <Share2 className="w-4 h-4" />
               </div>
             )}
           </div>
 
-          {/* Phone Bottom Caption & Handle Bar */}
-          <div className="p-3 rounded-b-[18px] bg-white border-t border-[#EFE9E1] space-y-1.5">
-            <div className="flex items-center justify-between gap-1.5">
-              <div className="flex items-center gap-1.5 min-w-0">
-                {accountAvatar && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={accountAvatar}
-                    alt={accountHandle}
-                    className="w-4 h-4 rounded-full object-cover flex-shrink-0"
-                  />
-                )}
-                <p className="text-[11px] font-semibold text-[#1E1B18] truncate">
-                  {accountHandle}
-                </p>
-              </div>
-
-              <div className="flex items-center gap-1 flex-shrink-0">
-                {isAiGenerated && (
-                  <Badge variant="lavender" className="text-[9px] px-1.5 py-0">
-                    AI
-                  </Badge>
-                )}
-                {paidPromotion && (
-                  <Badge variant="peach" className="text-[9px] px-1.5 py-0">
-                    Paid
-                  </Badge>
-                )}
-              </div>
-            </div>
-
+          {/* Caption, Title & First Comment Footer */}
+          <div className="p-4 bg-white space-y-2">
             {title && (
-              <p className="text-[11px] font-semibold text-[#1E1B18] line-clamp-1">
+              <p className="text-xs font-bold text-slate-900 line-clamp-2">
                 {title}
               </p>
             )}
 
-            <p className="text-[11px] text-[#4E463F] line-clamp-2 leading-snug">
-              {caption || 'Write your caption in the editor...'}
+            <p className="text-xs text-slate-600 line-clamp-3 leading-relaxed whitespace-pre-line">
+              {caption || 'Your post caption and hashtags will appear here...'}
             </p>
 
             {firstComment && (
-              <p className="text-[10px] text-[#8D451E] bg-[#F5DFCE]/60 px-2 py-1 rounded-md truncate">
-                1st Comment: {firstComment}
-              </p>
+              <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 truncate">
+                <strong className="text-slate-900">1st Comment:</strong>{' '}
+                {firstComment}
+              </div>
             )}
+
+            {/* Social Interaction Bar */}
+            <div className="pt-2.5 mt-1 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-slate-500">
+              <span className="inline-flex items-center gap-1">
+                <Heart className="w-3.5 h-3.5" /> Like
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <MessageCircle className="w-3.5 h-3.5" /> Comment
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <Share2 className="w-3.5 h-3.5" /> Share
+              </span>
+            </div>
           </div>
         </div>
 
+        {/* Metricool Light-Blue Approximation Notice Banner */}
+        <div className="p-3.5 rounded-xl bg-[#EFF6FF] border border-[#BFDBFE] flex items-start gap-2.5 text-xs text-[#1E3A8A]">
+          <Info className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+          <span>
+            Previews are an approximation of how your post will look when published.
+          </span>
+        </div>
+
         {/* Pre-Flight Verification Checklist */}
-        <div className="p-3.5 rounded-xl bg-[#FAF6F1] border border-[#E7DFD5] space-y-2">
-          <div className="flex items-center justify-between text-xs font-semibold text-[#1E1B18] pb-2 border-b border-[#E7DFD5]">
+        <div className="p-4 rounded-xl bg-white border border-slate-200 space-y-2.5">
+          <div className="flex items-center justify-between text-xs font-bold text-slate-900 pb-2 border-b border-slate-100">
             <span className="flex items-center gap-1.5">
-              <ShieldCheck className="w-3.5 h-3.5 text-[#3A8E63]" />
+              <ShieldCheck className="w-4 h-4 text-emerald-600" />
               <span>Pre-Flight Check</span>
             </span>
-            <span className="text-[11px] text-[#6E655D]">
+            <span className="text-xs font-semibold text-slate-500">
               {selectedPlatforms.length} network(s)
             </span>
           </div>
 
-          <div className="space-y-1.5 text-[11px]">
+          <div className="space-y-2 text-xs">
             <div className="flex items-center justify-between">
-              <span className="text-[#6E655D]">Video Asset</span>
+              <span className="text-slate-600 font-medium">Video Asset</span>
               <span
                 className={cn(
-                  'font-semibold flex items-center gap-1',
-                  videoUrl ? 'text-[#3A8E63]' : 'text-[#A8582B]'
+                  'font-bold flex items-center gap-1',
+                  videoUrl ? 'text-emerald-700' : 'text-rose-600'
                 )}
               >
                 {videoUrl ? (
                   <>
-                    <CheckCircle2 className="w-3 h-3" />
-                    <span>Ready</span>
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <span>Uploaded &amp; Ready</span>
                   </>
                 ) : (
-                  <span>Missing file</span>
+                  <span>Video required</span>
                 )}
               </span>
             </div>
 
             <div className="flex items-center justify-between">
-              <span className="text-[#6E655D]">Thumbnail Cover</span>
+              <span className="text-slate-600 font-medium">Thumbnail Cover</span>
               <span
                 className={cn(
-                  'font-semibold',
-                  coverUrl ? 'text-[#3A8E63]' : 'text-[#6E655D]'
+                  'font-bold',
+                  coverUrl ? 'text-emerald-700' : 'text-slate-700'
                 )}
               >
-                {coverUrl ? 'Custom Cover Attached' : 'Auto frame'}
+                {coverUrl ? 'Custom Cover Attached' : 'Auto frame (1.0s)'}
               </span>
             </div>
 
             <div className="flex items-center justify-between">
-              <span className="text-[#6E655D]">URL Shortener</span>
-              <span className="font-semibold text-[#1E1B18]">
+              <span className="text-slate-600 font-medium">URL Shortener</span>
+              <span className="font-bold text-slate-900">
                 {shortenerEnabled ? 'Active' : 'Off'}
               </span>
             </div>
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

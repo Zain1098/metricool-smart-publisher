@@ -25,8 +25,10 @@ import {
   Cloud,
   Zap,
   ExternalLink,
+  Calendar as CalendarIcon,
+  Loader2,
 } from 'lucide-react';
-import { Button, Card, Skeleton, useToast } from '@/components/ui';
+import { Skeleton, useToast } from '@/components/ui';
 
 function ComposerContent() {
   const router = useRouter();
@@ -64,7 +66,7 @@ function ComposerContent() {
     urls?: Record<string, string>;
   } | null>(null);
 
-  const [previewPlatform, setPreviewPlatform] = useState<SocialPlatform>('instagram');
+  const [previewPlatform, setPreviewPlatform] = useState<SocialPlatform>('youtube');
 
   useEffect(() => {
     fetch('/api/accounts')
@@ -127,7 +129,10 @@ function ComposerContent() {
   }, [searchParams]);
 
   useEffect(() => {
-    if (selectedPlatforms.length > 0 && !selectedPlatforms.includes(previewPlatform)) {
+    if (
+      selectedPlatforms.length > 0 &&
+      !selectedPlatforms.includes(previewPlatform)
+    ) {
       setPreviewPlatform(selectedPlatforms[0]);
     }
   }, [selectedPlatforms, previewPlatform]);
@@ -166,7 +171,9 @@ function ComposerContent() {
     d.setDate(d.getDate() + 1);
     d.setHours(18, 30, 0, 0);
     const tzOffset = d.getTimezoneOffset() * 60000;
-    const localISO = new Date(d.getTime() - tzOffset).toISOString().slice(0, 16);
+    const localISO = new Date(d.getTime() - tzOffset)
+      .toISOString()
+      .slice(0, 16);
     setScheduledAt(localISO);
     pushToast({
       type: 'success',
@@ -174,6 +181,48 @@ function ComposerContent() {
       description: 'Scheduled for tomorrow 18:30 PKT (Metricool peak engagement).',
     });
   };
+
+  // Real-time Metricool-style validation notices
+  const validationErrors: string[] = [];
+  if (selectedPlatforms.length === 0) {
+    validationErrors.push('Select at least 1 social network to publish.');
+  }
+  if (!videoUrl) {
+    if (selectedPlatforms.includes('youtube')) {
+      validationErrors.push('It is necessary to include a video on YouTube.');
+    }
+    if (selectedPlatforms.includes('instagram')) {
+      validationErrors.push(
+        'Instagram Reels require 1 video asset (MP4 or MOV).'
+      );
+    }
+    if (selectedPlatforms.includes('facebook')) {
+      validationErrors.push(
+        'Facebook Reels/Videos require 1 video asset.'
+      );
+    }
+    if (selectedPlatforms.includes('tiktok')) {
+      validationErrors.push(
+        'In TikTok it is necessary to include at least one video.'
+      );
+    }
+    if (
+      !selectedPlatforms.includes('youtube') &&
+      !selectedPlatforms.includes('instagram') &&
+      !selectedPlatforms.includes('facebook') &&
+      !selectedPlatforms.includes('tiktok')
+    ) {
+      validationErrors.push('Upload or select a video asset before publishing.');
+    }
+  }
+  if (
+    selectedPlatforms.includes('youtube') &&
+    !platformOverrides.youtube?.title?.trim() &&
+    !globalCaption.trim() &&
+    !videoFileName
+  ) {
+    validationErrors.push('The video title is mandatory on YouTube.');
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -209,7 +258,7 @@ function ComposerContent() {
     ) {
       setStatusMessage({
         type: 'error',
-        text: 'Cannot schedule in the past! Choose a future time or select "Publish Immediately Now".',
+        text: 'Cannot schedule in the past! Choose a future time or select "Publish Immediately".',
       });
       return;
     }
@@ -284,7 +333,7 @@ function ComposerContent() {
             ? 'Post dispatched immediately to selected platforms.'
             : publishMode === 'native_schedule'
             ? 'Video uploaded to cloud storage and locked for automated dispatch.'
-            : 'Post registered in your local Metricool planner queue.';
+            : 'Post registered in your Metricool planner queue.';
 
         setStatusMessage({
           type: 'success',
@@ -312,43 +361,68 @@ function ComposerContent() {
 
   const activeAccount = accounts.find((a) => a.platform === previewPlatform);
   const previewOverride = platformOverrides[previewPlatform];
+  const ytAcc = accounts.find((a) => a.platform === 'youtube');
 
   return (
-    <div className="space-y-5">
-      {/* Header Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-[#FFFFFF] border border-[#E2E8F0] shadow-card">
-        <div>
-          <h1 className="text-lg font-bold text-slate-900 tracking-tight">
-            Metricool Post Composer
+    <div className="space-y-5 pb-10">
+      {/* Metricool Top Header Bar: "Create new post" + Brand Pill */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-5 rounded-2xl bg-white border border-slate-200 shadow-xs">
+        <div className="flex flex-wrap items-center gap-3">
+          <h1 className="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight">
+            Create new post
           </h1>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Multi-network editor, frame selector, caption tailoring, and cloud scheduler
-          </p>
+
+          {/* Metricool Brand Badge Pill */}
+          <div className="h-9 px-3 rounded-xl bg-slate-100 border border-slate-200 inline-flex items-center gap-2">
+            {ytAcc?.avatarUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={ytAcc.avatarUrl}
+                alt="ZCodeDev"
+                className="w-5 h-5 rounded-full object-cover"
+              />
+            ) : (
+              <span className="w-5 h-5 rounded-full bg-[#211832] text-[#D8FF36] text-[10px] font-bold flex items-center justify-center">
+                Z
+              </span>
+            )}
+            <span className="text-xs font-bold text-slate-800">ZCodeDev</span>
+          </div>
         </div>
 
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={handleSetOptimalTime}
-          icon={<Sparkles className="w-3.5 h-3.5 text-[#00D2B4]" />}
-        >
-          Apply Best Time (18:30 PKT)
-        </Button>
+        <div className="flex flex-wrap items-center gap-2.5">
+          <button
+            type="button"
+            onClick={handleSetOptimalTime}
+            className="h-10 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-300 text-xs font-bold text-slate-800 inline-flex items-center gap-2 transition-colors"
+          >
+            <Sparkles className="w-4 h-4 text-emerald-600" />
+            <span>Apply Best Time (18:30 PKT)</span>
+          </button>
+
+          <Link
+            href="/calendar"
+            className="h-10 px-4 rounded-xl bg-white hover:bg-slate-50 border border-slate-300 text-xs font-bold text-slate-700 inline-flex items-center gap-2 transition-colors"
+          >
+            <CalendarIcon className="w-4 h-4 text-slate-500" />
+            <span>Planner Calendar</span>
+          </Link>
+        </div>
       </div>
 
-      {/* Status Alert */}
+      {/* Submission Status Alert */}
       {statusMessage && (
         <div
           className={cn(
-            'p-4 rounded-xl border flex flex-col gap-2 text-xs shadow-xs',
+            'p-4 rounded-2xl border flex flex-col gap-2.5 text-xs shadow-xs',
             statusMessage.type === 'success'
-              ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+              ? 'bg-emerald-50 border-emerald-300 text-emerald-900'
               : statusMessage.type === 'warning'
-              ? 'bg-amber-50 border-amber-200 text-amber-800'
-              : 'bg-red-50 border-red-200 text-red-800'
+              ? 'bg-amber-50 border-amber-300 text-amber-900'
+              : 'bg-rose-50 border-rose-300 text-rose-900'
           )}
         >
-          <div className="flex items-center gap-2 font-bold">
+          <div className="flex items-center gap-2 text-sm font-bold">
             {statusMessage.type === 'success' ? (
               <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
             ) : (
@@ -364,10 +438,10 @@ function ComposerContent() {
                   href={url}
                   target="_blank"
                   rel="noreferrer"
-                  className="px-2.5 py-1 rounded-md bg-[#FFFFFF] border border-slate-200 hover:border-[#00D2B4] text-slate-800 text-[11px] font-bold inline-flex items-center gap-1 shadow-xs"
+                  className="h-8 px-3 rounded-lg bg-white border border-slate-300 hover:border-[#211832] text-slate-900 text-xs font-bold inline-flex items-center gap-1.5 shadow-2xs"
                 >
                   <span>Open {plat.toUpperCase()}</span>
-                  <ExternalLink className="w-3 h-3 text-[#00D2B4]" />
+                  <ExternalLink className="w-3.5 h-3.5 text-emerald-600" />
                 </a>
               ))}
             </div>
@@ -377,12 +451,12 @@ function ComposerContent() {
 
       {/* Unlinked Network Notice */}
       {unlinkedSelected.length > 0 && (
-        <div className="px-4 py-3 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-between gap-3 text-xs">
-          <div className="flex items-center gap-2 text-amber-800">
+        <div className="px-4 py-3.5 rounded-2xl bg-amber-50 border border-amber-300 flex items-center justify-between gap-3 text-xs">
+          <div className="flex items-center gap-2.5 text-amber-900 font-medium">
             <ShieldAlert className="w-4 h-4 text-amber-600 flex-shrink-0" />
             <span>
               Unconnected network selected:{' '}
-              <strong className="text-slate-900">
+              <strong className="font-bold text-slate-900">
                 {unlinkedSelected
                   .map((p) => PLATFORM_CONFIGS[p].name)
                   .join(', ')}
@@ -391,24 +465,27 @@ function ComposerContent() {
           </div>
           <Link
             href="/connections"
-            className="text-xs font-bold text-amber-700 hover:text-amber-900 inline-flex items-center gap-1 flex-shrink-0"
+            className="h-8 px-3 rounded-lg bg-white border border-amber-300 text-xs font-bold text-amber-900 hover:bg-amber-100 inline-flex items-center gap-1.5 flex-shrink-0"
           >
             <span>Connect Now</span>
-            <ArrowRight className="w-3 h-3" />
+            <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
       )}
 
-      {/* Main Split-Pane Grid */}
+      {/* Metricool 2-Column Split Composer Layout */}
       <form
         onSubmit={handleSubmit}
-        className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start"
+        className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start"
       >
-        <div className="lg:col-span-8 space-y-4">
+        {/* Left 7 Columns: Network Bar + Media Studio + Master Editor + Presets Accordions + Validation + Footer */}
+        <div className="lg:col-span-7 xl:col-span-8 space-y-5">
           <PlatformSelector
             selectedPlatforms={selectedPlatforms}
             onTogglePlatform={handleTogglePlatform}
             connectedPlatforms={connectedPlatforms}
+            platformOverrides={platformOverrides}
+            onUpdateOverride={handleOverrideChange}
           />
 
           <VideoDropzone
@@ -452,34 +529,62 @@ function ComposerContent() {
             onUpdateOverride={handleOverrideChange}
           />
 
-          {/* Publishing Mode Card */}
-          <Card padding="sm" className="space-y-4">
+          {/* Metricool Real-Time Validation Box */}
+          {validationErrors.length > 0 ? (
+            <div className="p-4 sm:p-5 rounded-2xl bg-[#FEF2F2] border border-[#FCA5A5] space-y-2">
+              <div className="flex items-center gap-2 text-xs font-extrabold text-[#991B1B]">
+                <AlertTriangle className="w-4 h-4 text-[#DC2626] flex-shrink-0" />
+                <span>
+                  {validationErrors.length}{' '}
+                  {validationErrors.length === 1
+                    ? 'requirement pending'
+                    : 'requirements pending'}{' '}
+                  before publishing
+                </span>
+              </div>
+              <ul className="list-disc pl-5 space-y-1 text-xs font-medium text-[#7F1D1D]">
+                {validationErrors.map((err, idx) => (
+                  <li key={idx}>{err}</li>
+                ))}
+              </ul>
+            </div>
+          ) : (
+            <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-300 flex items-center gap-2.5 text-xs font-bold text-emerald-900">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+              <span>
+                All platform requirements verified — Ready to schedule or publish!
+              </span>
+            </div>
+          )}
+
+          {/* Metricool Bottom Dispatch & Scheduling Bar */}
+          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-5">
             <div>
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+              <h3 className="text-sm font-bold text-slate-900">
                 Dispatch &amp; Scheduling Strategy
               </h3>
               <p className="text-xs text-slate-500 mt-0.5">
-                Select cloud hold, immediate broadcast, or cron-managed calendar delivery
+                Choose Cloud Hold, Immediate Live Broadcast, or Planner Queue
               </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <button
                 type="button"
                 onClick={() => setPublishMode('native_schedule')}
                 className={cn(
-                  'p-3 rounded-xl border text-left transition-all space-y-1 shadow-xs',
+                  'p-4 rounded-xl border-2 text-left transition-all space-y-1.5',
                   publishMode === 'native_schedule'
-                    ? 'bg-[#E6FAF7] border-[#00D2B4] text-slate-900'
-                    : 'bg-[#FFFFFF] border-slate-200 text-slate-600 hover:bg-slate-50'
+                    ? 'bg-slate-50 border-[#211832] text-slate-900 shadow-2xs'
+                    : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50/50'
                 )}
               >
-                <div className="flex items-center gap-1.5 text-xs font-bold text-[#00A38C]">
-                  <Cloud className="w-3.5 h-3.5" />
+                <div className="flex items-center gap-2 text-xs font-bold text-slate-900">
+                  <Cloud className="w-4 h-4 text-emerald-600" />
                   <span>Cloud Hold (Recommended)</span>
                 </div>
-                <p className="text-[11px] text-slate-500 leading-snug">
-                  Video uploads to server and publishes automatically at chosen time.
+                <p className="text-xs text-slate-500 leading-relaxed">
+                  Video uploads to cloud and publishes automatically at your chosen time.
                 </p>
               </button>
 
@@ -487,18 +592,18 @@ function ComposerContent() {
                 type="button"
                 onClick={() => setPublishMode('publish_now')}
                 className={cn(
-                  'p-3 rounded-xl border text-left transition-all space-y-1 shadow-xs',
+                  'p-4 rounded-xl border-2 text-left transition-all space-y-1.5',
                   publishMode === 'publish_now'
-                    ? 'bg-[#E6FAF7] border-[#00D2B4] text-slate-900'
-                    : 'bg-[#FFFFFF] border-slate-200 text-slate-600 hover:bg-slate-50'
+                    ? 'bg-slate-50 border-[#211832] text-slate-900 shadow-2xs'
+                    : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50/50'
                 )}
               >
-                <div className="flex items-center gap-1.5 text-xs font-bold text-amber-600">
-                  <Zap className="w-3.5 h-3.5" />
+                <div className="flex items-center gap-2 text-xs font-bold text-slate-900">
+                  <Zap className="w-4 h-4 text-amber-500" />
                   <span>Publish Immediately</span>
                 </div>
-                <p className="text-[11px] text-slate-500 leading-snug">
-                  Bypasses schedule queue; broadcasts instantly to selected platforms.
+                <p className="text-xs text-slate-500 leading-relaxed">
+                  Bypasses schedule queue; broadcasts live right now to all selected platforms.
                 </p>
               </button>
 
@@ -506,66 +611,78 @@ function ComposerContent() {
                 type="button"
                 onClick={() => setPublishMode('local_queue')}
                 className={cn(
-                  'p-3 rounded-xl border text-left transition-all space-y-1 shadow-xs',
+                  'p-4 rounded-xl border-2 text-left transition-all space-y-1.5',
                   publishMode === 'local_queue'
-                    ? 'bg-[#E6FAF7] border-[#00D2B4] text-slate-900'
-                    : 'bg-[#FFFFFF] border-slate-200 text-slate-600 hover:bg-slate-50'
+                    ? 'bg-slate-50 border-[#211832] text-slate-900 shadow-2xs'
+                    : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50/50'
                 )}
               >
-                <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-600">
-                  <Clock className="w-3.5 h-3.5" />
+                <div className="flex items-center gap-2 text-xs font-bold text-slate-900">
+                  <Clock className="w-4 h-4 text-blue-600" />
                   <span>Planner Queue</span>
                 </div>
-                <p className="text-[11px] text-slate-500 leading-snug">
-                  Saves to calendar queue for cron-triggered dispatch.
+                <p className="text-xs text-slate-500 leading-relaxed">
+                  Saves post to calendar queue for scheduled cron-triggered delivery.
                 </p>
               </button>
             </div>
 
-            <div className="pt-3 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
-              {publishMode !== 'publish_now' ? (
-                <div className="flex items-center gap-2.5 w-full sm:w-auto">
-                  <Clock className="w-4 h-4 text-[#00D2B4] flex-shrink-0" />
-                  <span className="text-xs font-semibold text-slate-700 whitespace-nowrap">
-                    Schedule Time:
-                  </span>
-                  <input
-                    type="datetime-local"
-                    value={scheduledAt}
-                    onChange={(e) => setScheduledAt(e.target.value)}
-                    className="h-9 px-3 rounded-lg bg-[#FFFFFF] border border-slate-300 text-slate-900 text-xs font-mono focus:outline-none focus:border-[#00D2B4] focus:ring-2 focus:ring-[#00D2B4]/20 shadow-xs"
-                    required
-                  />
-                </div>
-              ) : (
-                <div className="text-xs font-bold text-emerald-600">
-                  Ready for immediate dispatch to {selectedPlatforms.length}{' '}
-                  network(s).
-                </div>
-              )}
+            {/* Metricool Bottom Action Footer */}
+            <div className="pt-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+                <Link
+                  href="/calendar"
+                  className="h-11 px-4 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-xs font-bold text-slate-700 inline-flex items-center justify-center transition-colors"
+                >
+                  Cancel
+                </Link>
 
-              <Button
+                {publishMode !== 'publish_now' ? (
+                  <div className="flex items-center gap-2.5 flex-1 sm:flex-initial">
+                    <div className="relative flex items-center">
+                      <input
+                        type="datetime-local"
+                        value={scheduledAt}
+                        onChange={(e) => setScheduledAt(e.target.value)}
+                        className="h-11 px-3.5 rounded-xl bg-white border border-slate-300 text-slate-900 text-xs sm:text-sm font-semibold focus:outline-none focus:border-[#211832] focus:ring-2 focus:ring-[#211832]/10 shadow-2xs"
+                        required
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <span className="px-3.5 py-2 rounded-xl bg-amber-50 border border-amber-200 text-xs font-bold text-amber-900">
+                    Ready for immediate live broadcast to {selectedPlatforms.length}{' '}
+                    network(s)
+                  </span>
+                )}
+              </div>
+
+              <button
                 type="submit"
-                variant="primary"
-                size="md"
-                loading={isSubmitting}
-                className="w-full sm:w-auto font-bold"
-                icon={<Send className="w-3.5 h-3.5" />}
+                disabled={isSubmitting}
+                className="w-full sm:w-auto h-11 px-6 rounded-xl bg-[#211832] hover:bg-[#2d2144] disabled:opacity-60 text-[#D8FF36] text-sm font-bold inline-flex items-center justify-center gap-2 shadow-sm transition-all"
               >
-                {isSubmitting
-                  ? 'Uploading...'
-                  : publishMode === 'publish_now'
-                  ? 'Publish Live Now'
-                  : publishMode === 'native_schedule'
-                  ? 'Upload & Schedule on Cloud'
-                  : 'Save to Calendar'}
-              </Button>
+                {isSubmitting ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Send className="w-4 h-4" />
+                )}
+                <span>
+                  {isSubmitting
+                    ? 'Publishing...'
+                    : publishMode === 'publish_now'
+                    ? 'Publish Live Now'
+                    : publishMode === 'native_schedule'
+                    ? 'Schedule'
+                    : 'Save to Calendar'}
+                </span>
+              </button>
             </div>
-          </Card>
+          </div>
         </div>
 
-        {/* Right 4 Columns: Sticky Preview */}
-        <div className="lg:col-span-4 lg:sticky lg:top-4">
+        {/* Right 5 Columns: Sticky Post Preview Panel */}
+        <div className="lg:col-span-5 xl:col-span-4 lg:sticky lg:top-4">
           <PostPreviewCard
             selectedPlatforms={selectedPlatforms}
             activePlatform={previewPlatform}
@@ -574,12 +691,13 @@ function ComposerContent() {
             coverUrl={coverUrl}
             title={
               previewOverride?.title ||
+              platformOverrides.youtube?.title ||
               (previewPlatform === 'youtube' ? videoFileName : undefined)
             }
             caption={previewOverride?.caption || globalCaption}
             firstComment={previewOverride?.firstComment}
             accountHandle={activeAccount?.handle || '@zcodedev'}
-            accountAvatar={activeAccount?.avatarUrl}
+            accountAvatar={activeAccount?.avatarUrl || ytAcc?.avatarUrl}
             isAiGenerated={previewOverride?.isAiGenerated}
             paidPromotion={previewOverride?.paidPromotion}
             shortenerEnabled={shortenerEnabled}
@@ -595,10 +713,10 @@ export default function ComposerPage() {
     <Suspense
       fallback={
         <div className="space-y-4">
-          <Skeleton className="h-14 w-full rounded-xl" />
-          <div className="grid grid-cols-12 gap-4">
-            <Skeleton className="col-span-8 h-[500px] rounded-xl" />
-            <Skeleton className="col-span-4 h-[500px] rounded-xl" />
+          <Skeleton className="h-16 w-full rounded-2xl" />
+          <div className="grid grid-cols-12 gap-6">
+            <Skeleton className="col-span-8 h-[600px] rounded-2xl" />
+            <Skeleton className="col-span-4 h-[600px] rounded-2xl" />
           </div>
         </div>
       }
