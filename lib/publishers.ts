@@ -1,4 +1,4 @@
-import { ConnectedAccount, ScheduledPost, SocialPlatform } from './types';
+import { ConnectedAccount, PlatformCredentials, ScheduledPost, SocialPlatform } from './types';
 import { execFile } from 'child_process';
 import path from 'path';
 import fs from 'fs';
@@ -14,6 +14,29 @@ export interface PlatformPublishResult {
 }
 
 const GRAPH_API_VERSION = 'v22.0';
+
+const mediaBufferCache = new Map<string, Promise<Buffer>>();
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function isServerlessRuntime(): boolean {
+  return Boolean(
+    process.env.NETLIFY ||
+      process.env.VERCEL ||
+      process.env.AWS_LAMBDA_FUNCTION_NAME ||
+      (process.cwd() && process.cwd().startsWith('/var/task'))
+  );
+}
+
+function hasLocalVaultAvailable(): boolean {
+  if (isServerlessRuntime()) return false;
+  const rootDir = process.cwd();
+  const legacyDir = path.join(rootDir, 'legacy-python');
+  const vaultFile = path.join(legacyDir, 'data', 'credentials.json');
+  return fs.existsSync(legacyDir) && fs.existsSync(vaultFile);
+}
 
 function resolveLocalUploadFile(urlStr: string): string {
   if (!urlStr) return '';
@@ -34,6 +57,184 @@ function resolveLocalUploadFile(urlStr: string): string {
   if (fs.existsSync(tmpPath)) return tmpPath;
 
   return publicPath;
+}
+
+async function loadMediaBytes(urlOrPath: string): Promise<Buffer> {
+  if (!urlOrPath) {
+    throw new Error('No media URL or file path provided.');
+  }
+
+  const localPath = resolveLocalUploadFile(urlOrPath);
+  if (localPath && fs.existsSync(localPath)) {
+    return fs.readFileSync(localPath);
+  }
+
+  const fullUrl = urlOrPath.startsWith('http')
+    ? urlOrPath
+    : `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}${urlOrPath}`;
+
+  let pending = mediaBufferCache.get(fullUrl);
+  if (!pending) {
+    pending = (async () => {
+      const res = await fetch(fullUrl);
+      if (!res.ok) {
+        throw new Error(`Failed to fetch media from ${fullUrl} (HTTP ${res.status})`);
+      }
+      const arr = await res.arrayBuffer();
+      return Buffer.from(arr);
+    })();
+    mediaBufferCache.set(fullUrl, pending);
+    pending.finally(() => {
+      setTimeout(() => mediaBufferCache.delete(fullUrl), 60000);
+    });
+  }
+  return pending;
+}
+
+async function refreshYouTubeAccessToken(creds?: PlatformCredentials): Promise<string | null> {
+  const clientId =
+    creds?.clientId || process.env.YOUTUBE_CLIENT_ID || process.env.GOOGLE_CLIENT_ID;
+  const clientSecret =
+    creds?.clientSecret || process.env.YOUTUBE_CLIENT_SECRET || process.env.GOOGLE_CLIENT_SECRET;
+  const refreshToken = creds?.refreshToken || process.env.YOUTUBE_REFRESH_TOKEN;
+
+  if (!clientId || !clientSecret || !refreshToken) return null;
+
+  try {
+    const res = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        client_id: clientId,
+        client_secret: clientSecret,
+        refresh_token: refreshToken,
+        grant_type: 'refresh_token',
+      }).toString(),
+    });
+    const data = await res.json();
+    if (res.ok && data.access_token) {
+      return String(data.access_token);
+    }
+  } catch {
+    // ignore
+  }
+  return null;
+}
+
+async function resolveMetaTokenAndAccount(
+  platform: 'facebook' | 'instagram',
+  creds?: PlatformCredentials
+): Promise<{ accessToken: string; accountId: string } | null> {
+  const rawToken =
+    creds?.accessToken && !creds.accessToken.startsWith('VAULT_MANAGED')
+      ? creds.accessToken
+      : process.env.META_ACCESS_TOKEN || '';
+
+  const fallbackPageId =
+    platform === 'facebook' ? creds?.accountId || '442234252298250' : '442234252298250';
+  const fallbackIgId = creds?.accountId || '17841448708660067';
+
+  if (!rawToken) return null;
+
+  try {
+    // Query the page directly to get the Page Access Token & linked Instagram Business Account
+    const pageRes = await fetch(
+      `https://graph.facebook.com/${GRAPH_API_VERSION}/${encodeURIComponent(
+        fallbackPageId
+      )}?fields=id,access_token,instagram_business_account{id}&access_token=${encodeURIComponent(
+        rawToken
+      )}`
+    );
+    const pageData = await pageRes.json();
+    if (!pageData.error && pageData.id) {
+      const pageToken = String(pageData.access_token || rawToken);
+      if (platform === 'facebook') {
+        return { accessToken: pageToken, accountId: String(pageData.id) };
+      }
+      const igId = String(pageData.instagram_business_account?.id || fallbackIgId);
+      return { accessToken: pageToken, accountId: igId };
+    }
+  } catch {
+    // fall through
+  }
+
+  return {
+    accessToken: rawToken,
+    accountId: platform === 'facebook' ? fallbackPageId : fallbackIgId,
+  };
+}
+
+async function refreshTwitterAccessToken(
+  creds?: PlatformCredentials
+): Promise<{ accessToken: string; refreshToken?: string } | null> {
+  const clientId = creds?.clientId || process.env.X_CLIENT_ID;
+  const clientSecret = creds?.clientSecret || process.env.X_CLIENT_SECRET;
+  const refreshToken = creds?.refreshToken || process.env.X_REFRESH_TOKEN;
+
+  if (!clientId || !refreshToken) return null;
+
+  try {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    };
+    if (clientSecret) {
+      headers.Authorization = `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString(
+        'base64'
+      )}`;
+    }
+    const res = await fetch('https://api.twitter.com/2/oauth2/token', {
+      method: 'POST',
+      headers,
+      body: new URLSearchParams({
+        refresh_token: refreshToken,
+        grant_type: 'refresh_token',
+        client_id: clientId,
+      }).toString(),
+    });
+    const data = await res.json();
+    if (res.ok && data.access_token) {
+      return {
+        accessToken: String(data.access_token),
+        refreshToken: data.refresh_token ? String(data.refresh_token) : refreshToken,
+      };
+    }
+  } catch {
+    // ignore
+  }
+  return null;
+}
+
+async function refreshTikTokAccessToken(
+  creds?: PlatformCredentials
+): Promise<{ accessToken: string; refreshToken?: string } | null> {
+  const clientKey = creds?.clientId || process.env.TIKTOK_CLIENT_KEY;
+  const clientSecret = creds?.clientSecret || process.env.TIKTOK_CLIENT_SECRET;
+  const refreshToken = creds?.refreshToken || process.env.TIKTOK_REFRESH_TOKEN;
+
+  if (!clientKey || !clientSecret || !refreshToken) return null;
+
+  try {
+    const res = await fetch('https://open.tiktokapis.com/v2/oauth/token/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        client_key: clientKey,
+        client_secret: clientSecret,
+        grant_type: 'refresh_token',
+        refresh_token: refreshToken,
+      }).toString(),
+    });
+    const data = await res.json();
+    if (res.ok && data.access_token) {
+      return {
+        accessToken: String(data.access_token),
+        refreshToken: data.refresh_token ? String(data.refresh_token) : refreshToken,
+      };
+    }
+  } catch {
+    // ignore
+  }
+  return null;
 }
 
 async function shortenUrlsInText(text: string): Promise<string> {
@@ -259,7 +460,10 @@ else:
 export async function publishToPlatform(
   post: ScheduledPost,
   account: ConnectedAccount | undefined,
-  options?: { useNativeSchedule?: boolean }
+  options?: {
+    useNativeSchedule?: boolean;
+    onCredentialsRefreshed?: (platform: SocialPlatform, updated: Partial<PlatformCredentials>) => void;
+  }
 ): Promise<PlatformPublishResult> {
   const platform = account?.platform;
   if (!account || !account.isConnected || !platform) {
@@ -292,9 +496,79 @@ export async function publishToPlatform(
       : post;
 
   const title = override?.title || caption.slice(0, 80) || post.mediaFileName;
-  const creds = account.credentials;
-  const hasRealToken = Boolean(creds?.accessToken && creds.accessToken.trim().length > 5);
+  const creds: PlatformCredentials = { ...(account.credentials || {}) };
   const useNativeSchedule = Boolean(options?.useNativeSchedule);
+
+  // If local Python vault is requested AND actually present on local disk, allow it
+  if (
+    hasLocalVaultAvailable() &&
+    ((creds.accessToken === 'VAULT_MANAGED_YOUTUBE_OAUTH' && platform === 'youtube') ||
+      (creds.accessToken === 'VAULT_MANAGED_META_TOKEN' &&
+        (platform === 'facebook' || platform === 'instagram')))
+  ) {
+    return await runVaultPublisher(platform, effectivePost, useNativeSchedule);
+  }
+
+  // Resolve and auto-refresh platform tokens for cloud & direct API execution
+  if (platform === 'youtube') {
+    const refreshedYtToken = await refreshYouTubeAccessToken(creds);
+    if (refreshedYtToken) {
+      creds.accessToken = refreshedYtToken;
+      options?.onCredentialsRefreshed?.('youtube', { accessToken: refreshedYtToken });
+    } else if (
+      !creds.accessToken ||
+      creds.accessToken === 'VAULT_MANAGED_YOUTUBE_OAUTH'
+    ) {
+      creds.accessToken = process.env.YOUTUBE_ACCESS_TOKEN || '';
+    }
+  } else if (platform === 'facebook' || platform === 'instagram') {
+    const metaResolved = await resolveMetaTokenAndAccount(platform, creds);
+    if (metaResolved) {
+      creds.accessToken = metaResolved.accessToken;
+      creds.accountId = metaResolved.accountId;
+      options?.onCredentialsRefreshed?.(platform, {
+        accessToken: metaResolved.accessToken,
+        accountId: metaResolved.accountId,
+      });
+    }
+  } else if (platform === 'threads') {
+    if (!creds.accessToken || creds.accessToken.startsWith('VAULT_MANAGED')) {
+      creds.accessToken = process.env.THREADS_ACCESS_TOKEN || '';
+    }
+    if (!creds.accountId) {
+      creds.accountId = 'me';
+    }
+  } else if (platform === 'tiktok') {
+    if (!creds.accessToken || creds.accessToken.startsWith('VAULT_MANAGED')) {
+      creds.accessToken = process.env.TIKTOK_ACCESS_TOKEN || '';
+    }
+    if (!creds.accessToken && (creds.refreshToken || process.env.TIKTOK_REFRESH_TOKEN)) {
+      const ttRef = await refreshTikTokAccessToken(creds);
+      if (ttRef) {
+        creds.accessToken = ttRef.accessToken;
+        creds.refreshToken = ttRef.refreshToken;
+        options?.onCredentialsRefreshed?.('tiktok', ttRef);
+      }
+    }
+  } else if (platform === 'twitter') {
+    if (!creds.accessToken || creds.accessToken.startsWith('VAULT_MANAGED')) {
+      creds.accessToken = process.env.X_ACCESS_TOKEN || process.env.TWITTER_ACCESS_TOKEN || '';
+    }
+    if (!creds.accessToken && (creds.refreshToken || process.env.X_REFRESH_TOKEN)) {
+      const xRef = await refreshTwitterAccessToken(creds);
+      if (xRef) {
+        creds.accessToken = xRef.accessToken;
+        creds.refreshToken = xRef.refreshToken;
+        options?.onCredentialsRefreshed?.('twitter', xRef);
+      }
+    }
+  }
+
+  const hasRealToken = Boolean(
+    creds?.accessToken &&
+      creds.accessToken.trim().length > 5 &&
+      !creds.accessToken.startsWith('VAULT_MANAGED')
+  );
 
   if (!hasRealToken || !creds?.accessToken) {
     return {
@@ -305,18 +579,10 @@ export async function publishToPlatform(
     };
   }
 
-  if (
-    (creds.accessToken === 'VAULT_MANAGED_YOUTUBE_OAUTH' && platform === 'youtube') ||
-    (creds.accessToken === 'VAULT_MANAGED_META_TOKEN' &&
-      (platform === 'facebook' || platform === 'instagram'))
-  ) {
-    return await runVaultPublisher(platform, effectivePost, useNativeSchedule);
-  }
-
   try {
     switch (platform) {
       case 'instagram': {
-        const igUserId = creds.accountId;
+        const igUserId = creds.accountId || '17841448708660067';
         if (!igUserId) {
           throw new Error('Missing Instagram Business Account ID (ig_user_id)');
         }
@@ -371,21 +637,51 @@ export async function publishToPlatform(
         if (containerData.error) {
           throw new Error(containerData.error.message || 'Instagram container error');
         }
-        const creationId = containerData.id;
+        const creationId = String(containerData.id);
 
-        const pubRes = await fetch(
-          `https://graph.facebook.com/${GRAPH_API_VERSION}/${encodeURIComponent(igUserId)}/media_publish`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              creation_id: creationId,
-              access_token: creds.accessToken,
-            }),
+        // Poll Instagram container status until video transcoding is FINISHED
+        let igStatus = 'IN_PROGRESS';
+        for (let attempt = 0; attempt < 30; attempt++) {
+          await sleep(3000);
+          const statusRes = await fetch(
+            `https://graph.facebook.com/${GRAPH_API_VERSION}/${encodeURIComponent(
+              creationId
+            )}?fields=status_code,status&access_token=${encodeURIComponent(creds.accessToken)}`
+          );
+          const statusData = await statusRes.json();
+          igStatus = String(statusData.status_code || 'IN_PROGRESS');
+          if (igStatus === 'FINISHED' || igStatus === 'READY' || igStatus === 'PUBLISHED') {
+            break;
           }
-        );
-        const pubData = await pubRes.json();
-        if (pubData.error) {
+          if (igStatus === 'ERROR' || igStatus === 'EXPIRED') {
+            throw new Error(
+              statusData.status || `Instagram video processing failed (${igStatus})`
+            );
+          }
+        }
+
+        let pubData: any = null;
+        for (let pubAttempt = 0; pubAttempt < 3; pubAttempt++) {
+          const pubRes = await fetch(
+            `https://graph.facebook.com/${GRAPH_API_VERSION}/${encodeURIComponent(
+              igUserId
+            )}/media_publish`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                creation_id: creationId,
+                access_token: creds.accessToken,
+              }),
+            }
+          );
+          pubData = await pubRes.json();
+          if (!pubData.error) break;
+          if (pubAttempt < 2) {
+            await sleep(3000);
+          }
+        }
+        if (pubData?.error) {
           throw new Error(pubData.error.message || 'Instagram publish error');
         }
 
@@ -413,7 +709,7 @@ export async function publishToPlatform(
       }
 
       case 'facebook': {
-        const pageId = creds.accountId;
+        const pageId = creds.accountId || '442234252298250';
         if (!pageId) {
           throw new Error('Missing Facebook Page ID (page_id)');
         }
@@ -501,19 +797,49 @@ export async function publishToPlatform(
         if (thContainer.error) {
           throw new Error(thContainer.error.message || 'Threads container error');
         }
-        const thPubRes = await fetch(
-          `https://graph.threads.net/v1.0/${encodeURIComponent(threadsUserId)}/threads_publish`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              creation_id: thContainer.id,
-              access_token: creds.accessToken,
-            }),
+        const creationId = String(thContainer.id);
+
+        // Poll Threads video container status until status === 'FINISHED'
+        let thStatus = 'IN_PROGRESS';
+        for (let attempt = 0; attempt < 30; attempt++) {
+          await sleep(3000);
+          const statusRes = await fetch(
+            `https://graph.threads.net/v1.0/${encodeURIComponent(
+              creationId
+            )}?fields=status,error_message&access_token=${encodeURIComponent(creds.accessToken)}`
+          );
+          const statusData = await statusRes.json();
+          thStatus = String(statusData.status || 'IN_PROGRESS');
+          if (thStatus === 'FINISHED' || thStatus === 'PUBLISHED') {
+            break;
           }
-        );
-        const thPub = await thPubRes.json();
-        if (thPub.error) {
+          if (thStatus === 'ERROR' || thStatus === 'EXPIRED') {
+            throw new Error(
+              statusData.error_message || `Threads video processing failed (${thStatus})`
+            );
+          }
+        }
+
+        let thPub: any = null;
+        for (let pubAttempt = 0; pubAttempt < 3; pubAttempt++) {
+          const thPubRes = await fetch(
+            `https://graph.threads.net/v1.0/${encodeURIComponent(threadsUserId)}/threads_publish`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                creation_id: creationId,
+                access_token: creds.accessToken,
+              }),
+            }
+          );
+          thPub = await thPubRes.json();
+          if (!thPub.error) break;
+          if (pubAttempt < 2) {
+            await sleep(3000);
+          }
+        }
+        if (thPub?.error) {
           throw new Error(thPub.error.message || 'Threads publish error');
         }
         return {
@@ -526,49 +852,141 @@ export async function publishToPlatform(
       }
 
       case 'tiktok': {
+        const videoBytes = await loadMediaBytes(post.mediaUrl);
+        const fileSize = videoBytes.byteLength;
+        const maxSingleChunk = 64 * 1024 * 1024;
+        const chunkSize = fileSize <= maxSingleChunk ? fileSize : 10 * 1024 * 1024;
+        const totalChunkCount =
+          fileSize <= maxSingleChunk ? 1 : Math.max(1, Math.floor(fileSize / chunkSize));
+
         const privacyMap: Record<string, string> = {
           public: 'PUBLIC_TO_EVERYONE',
           friends: 'MUTUAL_FOLLOW_FRIENDS',
           private: 'SELF_ONLY',
           unlisted: 'SELF_ONLY',
         };
-        const ttRes = await fetch('https://open.tiktokapis.com/v2/post/publish/video/init/', {
+        const desiredPrivacy = privacyMap[override?.privacy || 'public'] || 'PUBLIC_TO_EVERYONE';
+
+        const buildInitPayload = (privacyLevel: string, allowBrandToggle: boolean) => ({
+          post_info: {
+            title: caption.slice(0, 2200),
+            privacy_level: privacyLevel,
+            disable_duet: override?.allowDuet === false,
+            disable_stitch: override?.allowStitch === false,
+            disable_comment: override?.allowComments === false,
+            video_cover_timestamp_ms: override?.thumbOffsetMs ?? post.thumbOffsetMs ?? 1000,
+            brand_content_toggle: allowBrandToggle
+              ? Boolean(override?.commercialContent && override?.commercialBrandedContent)
+              : false,
+            brand_organic_toggle: allowBrandToggle
+              ? Boolean(override?.commercialContent && override?.commercialYourBrand !== false)
+              : false,
+            is_aigc: Boolean(override?.isAiGenerated || override?.isCreatedWithAi),
+          },
+          source_info: {
+            source: 'FILE_UPLOAD',
+            video_size: fileSize,
+            chunk_size: chunkSize,
+            total_chunk_count: totalChunkCount,
+          },
+        });
+
+        let activeTikTokToken = creds.accessToken;
+        let ttRes = await fetch('https://open.tiktokapis.com/v2/post/publish/video/init/', {
           method: 'POST',
           headers: {
-            Authorization: `Bearer ${creds.accessToken}`,
+            Authorization: `Bearer ${activeTikTokToken}`,
             'Content-Type': 'application/json; charset=UTF-8',
           },
-          body: JSON.stringify({
-            post_info: {
-              title: caption.slice(0, 2200),
-              privacy_level: privacyMap[override?.privacy || 'public'] || 'PUBLIC_TO_EVERYONE',
-              disable_duet: override?.allowDuet === false,
-              disable_stitch: override?.allowStitch === false,
-              disable_comment: override?.allowComments === false,
-              video_cover_timestamp_ms: override?.thumbOffsetMs ?? post.thumbOffsetMs ?? 1000,
-              brand_content_toggle: Boolean(
-                override?.commercialContent && override?.commercialBrandedContent
-              ),
-              brand_organic_toggle: Boolean(
-                override?.commercialContent && override?.commercialYourBrand !== false
-              ),
-              is_aigc: Boolean(override?.isAiGenerated || override?.isCreatedWithAi),
-              is_ai_generated: Boolean(override?.isAiGenerated || override?.isCreatedWithAi),
-              auto_add_music: Boolean(override?.autoAddMusic),
-            },
-            source_info: {
-              source: 'PULL_FROM_URL',
-              video_url: post.mediaUrl.startsWith('http')
-                ? post.mediaUrl
-                : `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}${post.mediaUrl}`,
-            },
-          }),
+          body: JSON.stringify(buildInitPayload(desiredPrivacy, true)),
         });
-        const ttData = await ttRes.json();
-        if (ttData.error && ttData.error.code !== 'ok') {
-          throw new Error(ttData.error.message || 'TikTok API error');
+        let ttData = await ttRes.json();
+
+        // Auto-refresh TikTok token if expired
+        if (
+          ttData?.error?.code === 'access_token_invalid' &&
+          (creds.refreshToken || process.env.TIKTOK_REFRESH_TOKEN)
+        ) {
+          const ttRef = await refreshTikTokAccessToken(creds);
+          if (ttRef) {
+            activeTikTokToken = ttRef.accessToken;
+            options?.onCredentialsRefreshed?.('tiktok', ttRef);
+            ttRes = await fetch('https://open.tiktokapis.com/v2/post/publish/video/init/', {
+              method: 'POST',
+              headers: {
+                Authorization: `Bearer ${activeTikTokToken}`,
+                'Content-Type': 'application/json; charset=UTF-8',
+              },
+              body: JSON.stringify(buildInitPayload(desiredPrivacy, true)),
+            });
+            ttData = await ttRes.json();
+          }
         }
+
+        // Sandbox / unaudited TikTok client fallback to SELF_ONLY
+        if (
+          ttData?.error &&
+          ttData.error.code !== 'ok' &&
+          (ttData.error.code === 'unaudited_client_can_only_post_to_private_accounts' ||
+            String(ttData.error.message || '').toLowerCase().includes('private') ||
+            String(ttData.error.code || '').toLowerCase().includes('privacy'))
+        ) {
+          ttRes = await fetch('https://open.tiktokapis.com/v2/post/publish/video/init/', {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${activeTikTokToken}`,
+              'Content-Type': 'application/json; charset=UTF-8',
+            },
+            body: JSON.stringify(buildInitPayload('SELF_ONLY', false)),
+          });
+          ttData = await ttRes.json();
+        }
+
+        if (ttData.error && ttData.error.code !== 'ok') {
+          throw new Error(ttData.error.message || `TikTok API error (${ttData.error.code})`);
+        }
+
         const pubId = ttData?.data?.publish_id || post.id;
+        const uploadUrl = ttData?.data?.upload_url;
+        if (!uploadUrl) {
+          throw new Error('TikTok did not return a direct binary upload_url.');
+        }
+
+        if (totalChunkCount === 1) {
+          const putRes = await fetch(uploadUrl, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'video/mp4',
+              'Content-Range': `bytes 0-${fileSize - 1}/${fileSize}`,
+              'Content-Length': String(fileSize),
+            },
+            body: new Uint8Array(videoBytes),
+          });
+          if (!putRes.ok && putRes.status !== 201 && putRes.status !== 204) {
+            const errTxt = await putRes.text();
+            throw new Error(`TikTok binary upload failed (${putRes.status}): ${errTxt}`);
+          }
+        } else {
+          for (let i = 0; i < totalChunkCount; i++) {
+            const start = i * chunkSize;
+            const end = i === totalChunkCount - 1 ? fileSize : (i + 1) * chunkSize;
+            const chunkBuf = videoBytes.subarray(start, end);
+            const putRes = await fetch(uploadUrl, {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'video/mp4',
+                'Content-Range': `bytes ${start}-${end - 1}/${fileSize}`,
+                'Content-Length': String(chunkBuf.byteLength),
+              },
+              body: new Uint8Array(chunkBuf),
+            });
+            if (!putRes.ok && putRes.status !== 201 && putRes.status !== 206) {
+              const errTxt = await putRes.text();
+              throw new Error(`TikTok chunk ${i + 1} upload failed (${putRes.status}): ${errTxt}`);
+            }
+          }
+        }
+
         return {
           platform,
           success: true,
@@ -589,14 +1007,34 @@ export async function publishToPlatform(
         if (override?.xReplySettings && override.xReplySettings !== 'everyone') {
           xPayload.reply_settings = override.xReplySettings;
         }
-        const xRes = await fetch('https://api.twitter.com/2/tweets', {
+
+        let activeXToken = creds.accessToken;
+        let xRes = await fetch('https://api.twitter.com/2/tweets', {
           method: 'POST',
           headers: {
-            Authorization: `Bearer ${creds.accessToken}`,
+            Authorization: `Bearer ${activeXToken}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify(xPayload),
         });
+
+        // Auto-refresh X OAuth 2.0 token on 401 Unauthorized
+        if (xRes.status === 401) {
+          const xRef = await refreshTwitterAccessToken(creds);
+          if (xRef) {
+            activeXToken = xRef.accessToken;
+            options?.onCredentialsRefreshed?.('twitter', xRef);
+            xRes = await fetch('https://api.twitter.com/2/tweets', {
+              method: 'POST',
+              headers: {
+                Authorization: `Bearer ${activeXToken}`,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(xPayload),
+            });
+          }
+        }
+
         const xData = await xRes.json();
         if (!xRes.ok || xData.errors) {
           throw new Error(xData.detail || xData.errors?.[0]?.message || 'X API v2 error');
@@ -605,7 +1043,7 @@ export async function publishToPlatform(
           await fetch('https://api.twitter.com/2/tweets', {
             method: 'POST',
             headers: {
-              Authorization: `Bearer ${creds.accessToken}`,
+              Authorization: `Bearer ${activeXToken}`,
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
@@ -698,16 +1136,11 @@ export async function publishToPlatform(
       }
 
       case 'youtube': {
-        if (creds.accessToken === 'VAULT_MANAGED_YOUTUBE_OAUTH') {
+        if (hasLocalVaultAvailable() && creds.accessToken === 'VAULT_MANAGED_YOUTUBE_OAUTH') {
           return await runVaultPublisher('youtube', effectivePost, useNativeSchedule);
         }
 
-        const localVideoPath = resolveLocalUploadFile(post.mediaUrl);
-        if (!localVideoPath || !fs.existsSync(localVideoPath)) {
-          throw new Error(`Video file not found on server for YouTube upload: ${post.mediaUrl}`);
-        }
-
-        const videoBytes = fs.readFileSync(localVideoPath);
+        const videoBytes = await loadMediaBytes(post.mediaUrl);
         const schedTimeMs = new Date(post.scheduledAt).getTime();
         const isFutureSchedule = useNativeSchedule && schedTimeMs > Date.now() + 2 * 60 * 1000;
         const rawPrivacy = (override?.privacy || 'public').toLowerCase();
@@ -793,7 +1226,7 @@ export async function publishToPlatform(
             'Content-Type': 'video/mp4',
             'Content-Length': String(videoBytes.byteLength),
           },
-          body: videoBytes,
+          body: new Uint8Array(videoBytes),
         });
 
         const ytData = await uploadRes.json();
@@ -807,20 +1240,27 @@ export async function publishToPlatform(
 
         // Optional custom thumbnail upload
         const coverUrl = override?.coverUrl || post.coverUrl || '';
-        const localThumbPath = resolveLocalUploadFile(coverUrl);
-        if (localThumbPath && fs.existsSync(localThumbPath)) {
-          const thumbBytes = fs.readFileSync(localThumbPath);
-          await fetch(
-            `https://www.googleapis.com/upload/youtube/v3/thumbnails/set?videoId=${encodeURIComponent(videoId)}`,
-            {
-              method: 'POST',
-              headers: {
-                Authorization: `Bearer ${creds.accessToken}`,
-                'Content-Type': localThumbPath.endsWith('.png') ? 'image/png' : 'image/jpeg',
-              },
-              body: thumbBytes,
-            }
-          ).catch(() => {});
+        if (coverUrl) {
+          try {
+            const thumbBytes = await loadMediaBytes(coverUrl);
+            await fetch(
+              `https://www.googleapis.com/upload/youtube/v3/thumbnails/set?videoId=${encodeURIComponent(
+                videoId
+              )}`,
+              {
+                method: 'POST',
+                headers: {
+                  Authorization: `Bearer ${creds.accessToken}`,
+                  'Content-Type': coverUrl.toLowerCase().endsWith('.png')
+                    ? 'image/png'
+                    : 'image/jpeg',
+                },
+                body: new Uint8Array(thumbBytes),
+              }
+            );
+          } catch {
+            // ignore optional thumbnail error
+          }
         }
 
         // Optional playlist insertion

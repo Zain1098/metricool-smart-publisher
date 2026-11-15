@@ -543,15 +543,29 @@ class GlobalStore {
       }
     }
 
-    // 2. Direct Native Platform Fallback
+    // 2. Direct Native Platform Fallback (Concurrent across all selected platforms)
     const errors: string[] = [];
     let anyNativeScheduled = false;
 
-    for (const plat of post.targetPlatforms) {
-      const rawAcc = this.accounts.find((a) => a.platform === plat);
-      const res = await publishToPlatform(post, rawAcc, {
-        useNativeSchedule: options?.useNativeSchedule,
-      });
+    const results = await Promise.all(
+      post.targetPlatforms.map(async (plat) => {
+        const rawAcc = this.accounts.find((a) => a.platform === plat);
+        const res = await publishToPlatform(post, rawAcc, {
+          useNativeSchedule: options?.useNativeSchedule,
+          onCredentialsRefreshed: (refreshedPlat, updatedCreds) => {
+            this.toggleAccountConnection(refreshedPlat, true, {
+              tokenStatus: 'valid',
+              credentials: updatedCreds,
+            });
+          },
+        });
+        return { plat, res };
+      })
+    );
+
+    const jobRecords: Promise<unknown>[] = [];
+
+    for (const { plat, res } of results) {
       if (res.success && res.remoteUrl) {
         post.publishedUrls[plat] = res.remoteUrl;
         if (res.remoteStatus === 'SCHEDULED_ON_PLATFORM') {
@@ -566,14 +580,16 @@ class GlobalStore {
       }
 
       if (isSupabaseConfigured()) {
-        recordPublishingJob({
-          postId: post.id,
-          platform: plat,
-          adapter: 'native_direct',
-          status: res.success ? 'completed' : 'failed',
-          remoteUrl: res.remoteUrl,
-          errorMessage: res.error,
-        }).catch(() => {});
+        jobRecords.push(
+          recordPublishingJob({
+            postId: post.id,
+            platform: plat,
+            adapter: 'native_direct',
+            status: res.success ? 'completed' : 'failed',
+            remoteUrl: res.remoteUrl,
+            errorMessage: res.error,
+          }).catch(() => {})
+        );
       }
     }
 
@@ -589,17 +605,23 @@ class GlobalStore {
     this.saveToFile();
 
     if (isSupabaseConfigured()) {
-      upsertPostInSupabase(post).catch(() => {});
-      recordAuditLog({
-        action: post.status === 'published' || post.status === 'scheduled_on_platform' ? 'POST_PUBLISHED' : 'POST_FAILED',
-        entityType: 'post',
-        entityId: post.id,
-        metadata: {
-          publishedUrls: post.publishedUrls,
-          errors,
-          status: post.status,
-        },
-      }).catch(() => {});
+      await Promise.allSettled([
+        ...jobRecords,
+        upsertPostInSupabase(post),
+        recordAuditLog({
+          action:
+            post.status === 'published' || post.status === 'scheduled_on_platform'
+              ? 'POST_PUBLISHED'
+              : 'POST_FAILED',
+          entityType: 'post',
+          entityId: post.id,
+          metadata: {
+            publishedUrls: post.publishedUrls,
+            errors,
+            status: post.status,
+          },
+        }),
+      ]);
     }
 
     return { post, publishedUrls: post.publishedUrls, errors };

@@ -68,6 +68,13 @@ async function refreshYouTubeLive(): Promise<{
     postsCount: videos,
     tokenStatus: 'valid',
     tokenStatusNote: `Live synced ${new Date().toLocaleTimeString()}`,
+    credentials: {
+      accountId: item.id || acc?.credentials?.accountId,
+      accessToken,
+      refreshToken: refreshToken || acc?.credentials?.refreshToken,
+      clientId: clientId || acc?.credentials?.clientId,
+      clientSecret: clientSecret || acc?.credentials?.clientSecret,
+    },
   });
 
   return { subscribers, views, videos };
@@ -76,27 +83,42 @@ async function refreshYouTubeLive(): Promise<{
 async function refreshMetaLive(): Promise<void> {
   const fbAcc = store.getRawAccount('facebook');
   const igAcc = store.getRawAccount('instagram');
-  const token =
-    fbAcc?.credentials?.accessToken ||
-    igAcc?.credentials?.accessToken ||
+  const rawToken =
+    (fbAcc?.credentials?.accessToken && !fbAcc.credentials.accessToken.startsWith('VAULT_MANAGED')
+      ? fbAcc.credentials.accessToken
+      : undefined) ||
+    (igAcc?.credentials?.accessToken && !igAcc.credentials.accessToken.startsWith('VAULT_MANAGED')
+      ? igAcc.credentials.accessToken
+      : undefined) ||
     process.env.META_ACCESS_TOKEN;
 
-  if (!token) return;
+  if (!rawToken) return;
 
   const pages = await fetchJsonWithTimeout(
-    `https://graph.facebook.com/${GRAPH_VERSION}/me/accounts?fields=id,name,followers_count,fan_count,instagram_business_account{id,username,followers_count,media_count}&access_token=${encodeURIComponent(token)}`
+    `https://graph.facebook.com/${GRAPH_VERSION}/me/accounts?fields=id,name,access_token,followers_count,fan_count,instagram_business_account{id,username,followers_count,media_count}&access_token=${encodeURIComponent(rawToken)}`
   );
-  const page = pages?.data?.[0];
-  if (!page) return;
+  let page = pages?.data?.[0];
 
-  if (page.id) {
-    store.toggleAccountConnection('facebook', true, {
-      accountName: page.name || fbAcc?.accountName,
-      followersCount: Number(page.followers_count || page.fan_count || fbAcc?.followersCount || 0),
-      tokenStatus: 'valid',
-      tokenStatusNote: `Live synced ${new Date().toLocaleTimeString()}`,
-    });
+  if (!page) {
+    const knownPageId = fbAcc?.credentials?.accountId || '442234252298250';
+    page = await fetchJsonWithTimeout(
+      `https://graph.facebook.com/${GRAPH_VERSION}/${encodeURIComponent(knownPageId)}?fields=id,name,access_token,followers_count,fan_count,instagram_business_account{id,username,followers_count,media_count}&access_token=${encodeURIComponent(rawToken)}`
+    );
   }
+  if (!page?.id) return;
+
+  const pageToken = String(page.access_token || rawToken);
+
+  store.toggleAccountConnection('facebook', true, {
+    accountName: page.name || fbAcc?.accountName,
+    followersCount: Number(page.followers_count || page.fan_count || fbAcc?.followersCount || 0),
+    tokenStatus: 'valid',
+    tokenStatusNote: `Live synced ${new Date().toLocaleTimeString()}`,
+    credentials: {
+      accountId: String(page.id),
+      accessToken: pageToken,
+    },
+  });
 
   if (page.instagram_business_account?.id) {
     const ig = page.instagram_business_account;
@@ -107,6 +129,10 @@ async function refreshMetaLive(): Promise<void> {
       postsCount: Number(ig.media_count || igAcc?.postsCount || 0),
       tokenStatus: 'valid',
       tokenStatusNote: `Live synced ${new Date().toLocaleTimeString()}`,
+      credentials: {
+        accountId: String(ig.id),
+        accessToken: pageToken,
+      },
     });
   }
 }
@@ -135,13 +161,51 @@ async function refreshTikTokLive(): Promise<void> {
 
 async function refreshTwitterLive(): Promise<void> {
   const acc = store.getRawAccount('twitter');
-  const token = acc?.credentials?.accessToken || process.env.TWITTER_ACCESS_TOKEN;
-  if (!token) return;
+  let token =
+    acc?.credentials?.accessToken || process.env.X_ACCESS_TOKEN || process.env.TWITTER_ACCESS_TOKEN;
+  let refreshToken = acc?.credentials?.refreshToken || process.env.X_REFRESH_TOKEN;
+  const clientId = acc?.credentials?.clientId || process.env.X_CLIENT_ID;
+  const clientSecret = acc?.credentials?.clientSecret || process.env.X_CLIENT_SECRET;
 
-  const res = await fetchJsonWithTimeout(
-    'https://api.twitter.com/2/users/me?user.fields=public_metrics,name,username',
-    { headers: { Authorization: `Bearer ${token}` } }
-  );
+  if (!token && !refreshToken) return;
+
+  let res = token
+    ? await fetchJsonWithTimeout(
+        'https://api.twitter.com/2/users/me?user.fields=public_metrics,name,username',
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
+    : null;
+
+  if (!res?.data && refreshToken && clientId) {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    };
+    if (clientSecret) {
+      headers.Authorization = `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString(
+        'base64'
+      )}`;
+    }
+    const tokenRes = await fetchJsonWithTimeout('https://api.twitter.com/2/oauth2/token', {
+      method: 'POST',
+      headers,
+      body: new URLSearchParams({
+        refresh_token: refreshToken,
+        grant_type: 'refresh_token',
+        client_id: clientId,
+      }).toString(),
+    });
+    if (tokenRes?.access_token) {
+      token = String(tokenRes.access_token);
+      if (tokenRes.refresh_token) {
+        refreshToken = String(tokenRes.refresh_token);
+      }
+      res = await fetchJsonWithTimeout(
+        'https://api.twitter.com/2/users/me?user.fields=public_metrics,name,username',
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+    }
+  }
+
   const u = res?.data;
   if (!u?.public_metrics) return;
 
@@ -152,6 +216,13 @@ async function refreshTwitterLive(): Promise<void> {
     postsCount: Number(u.public_metrics.tweet_count || 0),
     tokenStatus: 'valid',
     tokenStatusNote: `Live synced ${new Date().toLocaleTimeString()}`,
+    credentials: {
+      accountId: String(u.id || acc?.credentials?.accountId || ''),
+      accessToken: token,
+      refreshToken,
+      clientId,
+      clientSecret,
+    },
   });
 }
 

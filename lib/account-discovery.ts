@@ -103,7 +103,23 @@ export async function discoverMetaAccountsViaGraphApi(
 
   const pages = Array.isArray(pagesData.data) ? pagesData.data : [];
 
-  // Fallback: if token is already a direct Page token or /me/accounts is empty, query /me directly
+  // Fallback: if /me/accounts is empty (e.g. New Pages Experience), query the known Page ID or /me directly
+  if (pages.length === 0) {
+    const knownPageId =
+      store.getRawAccount('facebook')?.credentials?.accountId || '442234252298250';
+    const pageDirectRes = await fetch(
+      `https://graph.facebook.com/${GRAPH_VERSION}/${encodeURIComponent(
+        knownPageId
+      )}?fields=id,name,username,access_token,followers_count,fan_count,picture{url},instagram_business_account{id,username,name,profile_picture_url,followers_count,media_count}&access_token=${encodeURIComponent(
+        activeToken
+      )}`
+    );
+    const pageDirectData = await pageDirectRes.json();
+    if (!pageDirectData.error && pageDirectData.id) {
+      pages.push(pageDirectData);
+    }
+  }
+
   if (pages.length === 0) {
     const directRes = await fetch(
       `https://graph.facebook.com/${GRAPH_VERSION}/me?fields=id,name,picture{url},instagram_business_account{id,username,name,profile_picture_url,followers_count,media_count}&access_token=${encodeURIComponent(

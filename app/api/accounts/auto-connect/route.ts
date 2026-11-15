@@ -7,11 +7,13 @@ import {
   runPythonScript,
   verifyAndDiscoverPlatformToken,
 } from '@/lib/account-discovery';
+import { refreshAllConnectedPlatformsLive } from '@/lib/analytics-live';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
   try {
+    await store.ensureSynced();
     const body = (await req.json()) as {
       type:
         | 'youtube_browser_oauth'
@@ -268,9 +270,10 @@ print("JSON_RESULT:" + json.dumps({
       }
 
       // Cloud fallback when Python vault is not on serverless container
+      await refreshAllConnectedPlatformsLive();
       return NextResponse.json({
         success: true,
-        message: 'Connected ZCodeDev accounts synced!',
+        message: 'All connected ZCodeDev cloud APIs verified & refreshed!',
         accounts: store.getAccounts(),
       });
     }
