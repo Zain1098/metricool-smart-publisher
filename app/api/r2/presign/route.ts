@@ -1,5 +1,10 @@
 import { NextResponse } from 'next/server';
 import { createPresignedUploadUrl, isR2Configured } from '@/lib/r2';
+import {
+  ALLOWED_R2_FOLDERS,
+  isAllowedMediaFile,
+  safeErrorMessage,
+} from '@/lib/validation';
 
 export const dynamic = 'force-dynamic';
 
@@ -26,21 +31,32 @@ export async function POST(req: Request) {
       );
     }
 
-    // Max upload size limit: 500MB
-    const MAX_SIZE = 500 * 1024 * 1024;
-    if (fileSizeBytes > MAX_SIZE) {
+    if (!isAllowedMediaFile(String(fileName), String(mimeType))) {
       return NextResponse.json(
-        { success: false, error: 'File size exceeds maximum limit of 500MB.' },
+        { success: false, error: 'Unsupported media file type or MIME type.' },
         { status: 400 }
       );
     }
 
+    const sizeNum = Number(fileSizeBytes);
+    const MAX_SIZE = 500 * 1024 * 1024;
+    if (!Number.isFinite(sizeNum) || sizeNum <= 0 || sizeNum > MAX_SIZE) {
+      return NextResponse.json(
+        { success: false, error: 'File size must be between 1 byte and 500MB.' },
+        { status: 400 }
+      );
+    }
+
+    const safeFolder = ALLOWED_R2_FOLDERS.has(String(folder || 'original'))
+      ? (folder as 'original' | 'thumbnails' | 'processed')
+      : 'original';
+
     const presigned = await createPresignedUploadUrl({
-      fileName,
-      fileSizeBytes: Number(fileSizeBytes),
-      mimeType,
-      checksumSha256,
-      folder: folder || 'original',
+      fileName: String(fileName),
+      fileSizeBytes: sizeNum,
+      mimeType: String(mimeType),
+      checksumSha256: typeof checksumSha256 === 'string' ? checksumSha256 : undefined,
+      folder: safeFolder,
     });
 
     return NextResponse.json({
@@ -49,7 +65,9 @@ export async function POST(req: Request) {
       ...presigned,
     });
   } catch (err: unknown) {
-    const errorMsg = err instanceof Error ? err.message : 'Presigned URL generation error';
-    return NextResponse.json({ success: false, error: errorMsg }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: safeErrorMessage(err, 'Presigned URL generation error') },
+      { status: 500 }
+    );
   }
 }

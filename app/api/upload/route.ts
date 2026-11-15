@@ -2,8 +2,14 @@ import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
+import { Readable } from 'stream';
+import { isAllowedMediaFile, safeErrorMessage } from '@/lib/validation';
 
 export const dynamic = 'force-dynamic';
+
+const MAX_LOCAL_UPLOAD_BYTES = 100 * 1024 * 1024; // 100 MB
+const MAX_THUMBNAIL_BYTES = 5 * 1024 * 1024; // 5 MB
+const MAX_CHUNKS = 200;
 
 function getUploadsDir(): string {
   const isServerless = Boolean(
@@ -101,14 +107,15 @@ export async function GET(req: Request) {
         });
       }
 
-      const buffer = fs.readFileSync(filePath);
-      return new NextResponse(buffer, {
+      const nodeStream = fs.createReadStream(filePath);
+      const webStream = Readable.toWeb(nodeStream) as ReadableStream;
+      return new NextResponse(webStream, {
         status: 200,
         headers: {
           'Accept-Ranges': 'bytes',
           'Content-Length': String(fileSize),
           'Content-Type': contentType,
-          'Cache-Control': 'public, max-age=3600',
+          'Cache-Control': 'private, max-age=3600',
         },
       });
     }
@@ -147,12 +154,33 @@ export async function POST(req: Request) {
     const uploadsDir = getUploadsDir();
     const isChunkUpload = req.headers.get('x-upload-chunk') === 'true';
 
-    // 1. Chunked binary upload (handles arbitrarily large MP4/MOV files without hitting 6MB/formData limits)
+    // 1. Chunked binary upload (handles large MP4/MOV files with strict validation)
     if (isChunkUpload) {
       const rawFileId = req.headers.get('x-file-id') || `video_${Date.now()}.mp4`;
       const safeFileId = path.basename(rawFileId).replace(/[^a-zA-Z0-9._-]/g, '_');
+      if (!isAllowedMediaFile(safeFileId)) {
+        return NextResponse.json(
+          { success: false, error: 'Unsupported media file extension.' },
+          { status: 400 }
+        );
+      }
+
       const chunkIndex = parseInt(req.headers.get('x-chunk-index') || '0', 10);
       const totalChunks = parseInt(req.headers.get('x-total-chunks') || '1', 10);
+      if (
+        !Number.isInteger(chunkIndex) ||
+        !Number.isInteger(totalChunks) ||
+        chunkIndex < 0 ||
+        totalChunks < 1 ||
+        totalChunks > MAX_CHUNKS ||
+        chunkIndex >= totalChunks
+      ) {
+        return NextResponse.json(
+          { success: false, error: 'Invalid chunk index or total chunks.' },
+          { status: 400 }
+        );
+      }
+
       const originalName = decodeURIComponent(
         req.headers.get('x-original-name') || safeFileId
       );
@@ -160,6 +188,17 @@ export async function POST(req: Request) {
       const arrayBuffer = await req.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
       const destinationPath = path.join(uploadsDir, safeFileId);
+
+      const currentSize =
+        chunkIndex > 0 && fs.existsSync(destinationPath)
+          ? fs.statSync(destinationPath).size
+          : 0;
+      if (currentSize + buffer.length > MAX_LOCAL_UPLOAD_BYTES) {
+        return NextResponse.json(
+          { success: false, error: 'Upload exceeds 100MB local fallback limit.' },
+          { status: 413 }
+        );
+      }
 
       if (chunkIndex === 0) {
         fs.writeFileSync(destinationPath, buffer);
@@ -207,6 +246,12 @@ export async function POST(req: Request) {
       }
       const ext = matches[1] === 'png' ? 'png' : 'jpg';
       const buffer = Buffer.from(matches[2], 'base64');
+      if (buffer.length > MAX_THUMBNAIL_BYTES) {
+        return NextResponse.json(
+          { success: false, error: 'Thumbnail exceeds 5MB limit' },
+          { status: 413 }
+        );
+      }
       const uniqueFileName = `thumb_${Date.now()}.${ext}`;
       const destinationPath = path.join(uploadsDir, uniqueFileName);
       fs.writeFileSync(destinationPath, buffer);
@@ -230,6 +275,20 @@ export async function POST(req: Request) {
       );
     }
 
+    if (!isAllowedMediaFile(file.name, file.type || undefined)) {
+      return NextResponse.json(
+        { success: false, error: 'Unsupported file type or MIME type.' },
+        { status: 400 }
+      );
+    }
+
+    if (file.size > MAX_LOCAL_UPLOAD_BYTES) {
+      return NextResponse.json(
+        { success: false, error: 'File exceeds 100MB local fallback limit.' },
+        { status: 413 }
+      );
+    }
+
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
@@ -249,9 +308,8 @@ export async function POST(req: Request) {
       sizeMb,
     });
   } catch (err: unknown) {
-    const errorMsg = err instanceof Error ? err.message : 'Upload failed';
     return NextResponse.json(
-      { success: false, error: errorMsg },
+      { success: false, error: safeErrorMessage(err, 'Upload failed') },
       { status: 500 }
     );
   }

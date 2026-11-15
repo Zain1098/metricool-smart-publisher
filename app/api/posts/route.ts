@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { store } from '@/lib/store';
 import { PublishMode } from '@/lib/types';
+import { isSafeMediaUrl, safeErrorMessage } from '@/lib/validation';
 
 export async function GET() {
   const posts = store.getPosts();
@@ -27,6 +28,16 @@ export async function POST(req: Request) {
     if (!body.targetPlatforms || body.targetPlatforms.length === 0) {
       return NextResponse.json(
         { success: false, error: 'Select at least one social media platform.' },
+        { status: 400 }
+      );
+    }
+
+    if (
+      (body.mediaUrl && !isSafeMediaUrl(String(body.mediaUrl))) ||
+      (body.coverUrl && !isSafeMediaUrl(String(body.coverUrl)))
+    ) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid mediaUrl or coverUrl.' },
         { status: 400 }
       );
     }
@@ -71,7 +82,9 @@ export async function POST(req: Request) {
       post: createdPost,
     });
   } catch (err: unknown) {
-    const errorMsg = err instanceof Error ? err.message : 'Unknown server error';
-    return NextResponse.json({ success: false, error: errorMsg }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: safeErrorMessage(err, 'Unknown server error') },
+      { status: 500 }
+    );
   }
 }

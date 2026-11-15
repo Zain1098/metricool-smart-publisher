@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { store } from '@/lib/store';
 import { recordAuditLog, recordPublishingJob, upsertPostInSupabase } from '@/lib/supabase';
+import { timingSafeEqualStrings } from '@/lib/auth';
+import { safeErrorMessage } from '@/lib/validation';
 import crypto from 'crypto';
 
 export const dynamic = 'force-dynamic';
@@ -8,22 +10,22 @@ export const dynamic = 'force-dynamic';
 function verifyWebhookSecret(req: Request, rawBody: string): boolean {
   const secret = process.env.POSTIZ_WEBHOOK_SECRET;
   if (!secret) {
-    // In local dev without secret, allow webhook delivery
-    return true;
+    return false;
   }
 
   const signature = req.headers.get('x-postiz-signature') || req.headers.get('x-signature');
   if (signature) {
     const expected = crypto.createHmac('sha256', secret).update(rawBody).digest('hex');
-    return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected));
+    const sigBuf = Buffer.from(signature);
+    const expBuf = Buffer.from(expected);
+    if (sigBuf.length !== expBuf.length) {
+      return false;
+    }
+    return crypto.timingSafeEqual(sigBuf, expBuf);
   }
 
-  const authHeader = req.headers.get('authorization');
-  if (authHeader === `Bearer ${secret}`) {
-    return true;
-  }
-
-  return false;
+  const authHeader = req.headers.get('authorization') || '';
+  return timingSafeEqualStrings(authHeader, `Bearer ${secret}`);
 }
 
 export async function POST(req: Request) {

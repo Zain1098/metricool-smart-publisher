@@ -69,3 +69,4 @@ usage.json
 tsconfig.tsbuildinfo
 *.exe
 *.png
+AUDIT.md

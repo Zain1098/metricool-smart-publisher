@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { store } from '@/lib/store';
+import { isSafeMediaUrl, safeErrorMessage } from '@/lib/validation';
 
 export async function GET(
   req: Request,
@@ -62,14 +63,38 @@ export async function PATCH(
 ) {
   try {
     const { id } = params;
-    const body = await req.json();
-    const updated = store.updatePost(id, body);
+    const body = (await req.json()) as Record<string, unknown>;
+
+    if (body.coverUrl && !isSafeMediaUrl(String(body.coverUrl))) {
+      return NextResponse.json({ success: false, error: 'Invalid coverUrl' }, { status: 400 });
+    }
+
+    const allowedPatch: Record<string, unknown> = {};
+    const allowedKeys = [
+      'globalCaption',
+      'scheduledAt',
+      'targetPlatforms',
+      'platformOverrides',
+      'shortenerEnabled',
+      'publishMode',
+      'coverUrl',
+      'thumbOffsetMs',
+    ];
+    for (const key of allowedKeys) {
+      if (key in body) {
+        allowedPatch[key] = body[key];
+      }
+    }
+
+    const updated = store.updatePost(id, allowedPatch);
     if (!updated) {
       return NextResponse.json({ success: false, error: 'Post not found' }, { status: 404 });
     }
     return NextResponse.json({ success: true, post: updated });
   } catch (err: unknown) {
-    const errorMsg = err instanceof Error ? err.message : 'Unknown server error';
-    return NextResponse.json({ success: false, error: errorMsg }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: safeErrorMessage(err, 'Unknown server error') },
+      { status: 500 }
+    );
   }
 }

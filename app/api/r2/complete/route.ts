@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { insertVideoAsset, recordAuditLog } from '@/lib/supabase';
+import { isAllowedMediaFile, isSafeMediaUrl, safeErrorMessage } from '@/lib/validation';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,18 +28,43 @@ export async function POST(req: Request) {
       );
     }
 
+    if (
+      typeof r2StorageKey !== 'string' ||
+      r2StorageKey.includes('..') ||
+      !/^(original|thumbnails|processed)\//.test(r2StorageKey)
+    ) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid r2StorageKey' },
+        { status: 400 }
+      );
+    }
+
+    if (!isAllowedMediaFile(String(fileName), mimeType ? String(mimeType) : undefined)) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid media file type' },
+        { status: 400 }
+      );
+    }
+
+    if (!isSafeMediaUrl(String(publicUrl)) || (thumbnailUrl && !isSafeMediaUrl(String(thumbnailUrl)))) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid media URL' },
+        { status: 400 }
+      );
+    }
+
     const assetId = await insertVideoAsset({
-      fileName,
+      fileName: String(fileName),
       fileSizeBytes: Number(fileSizeBytes || 0),
-      mimeType: mimeType || 'video/mp4',
+      mimeType: String(mimeType || 'video/mp4'),
       durationSec: Number(durationSec || 0),
-      aspectRatio: aspectRatio || '9:16',
-      checksumSha256: checksumSha256 || undefined,
+      aspectRatio: String(aspectRatio || '9:16'),
+      checksumSha256: typeof checksumSha256 === 'string' ? checksumSha256 : undefined,
       r2StorageKey,
       r2ThumbnailKey,
       r2ProcessedKey,
-      publicUrl,
-      thumbnailUrl,
+      publicUrl: String(publicUrl),
+      thumbnailUrl: thumbnailUrl ? String(thumbnailUrl) : undefined,
       status: 'ready',
     });
 
@@ -56,7 +82,9 @@ export async function POST(req: Request) {
       storageKey: r2StorageKey,
     });
   } catch (err: unknown) {
-    const errorMsg = err instanceof Error ? err.message : 'Error finalizing video asset in database';
-    return NextResponse.json({ success: false, error: errorMsg }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: safeErrorMessage(err, 'Error finalizing video asset in database') },
+      { status: 500 }
+    );
   }
 }
