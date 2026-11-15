@@ -6,6 +6,7 @@ import { verifyAndDiscoverPlatformToken } from '@/lib/account-discovery';
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
+  await store.ensureSynced();
   const accounts = store.getAccounts();
   return NextResponse.json({ success: true, accounts });
 }

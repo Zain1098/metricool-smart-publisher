@@ -4,6 +4,7 @@ import { PublishMode } from '@/lib/types';
 import { isSafeMediaUrl, safeErrorMessage } from '@/lib/validation';
 
 export async function GET() {
+  await store.ensureSynced();
   const posts = store.getPosts();
   return NextResponse.json({
     success: true,

@@ -262,6 +262,7 @@ function buildAnalyticsResponse() {
 }
 
 export async function GET() {
+  await store.ensureSynced();
   const resp = buildAnalyticsResponse();
 
   if (isSupabaseConfigured() && resp.accounts) {

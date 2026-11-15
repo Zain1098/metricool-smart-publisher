@@ -174,6 +174,7 @@ class GlobalStore {
   private settings: BrandSettings = { ...DEFAULT_SETTINGS };
   private filePath: string;
   private isSupabaseSyncing = false;
+  private initialSyncPromise: Promise<void> | null = null;
 
   constructor() {
     const isServerless = Boolean(
@@ -186,7 +187,14 @@ class GlobalStore {
       ? path.join(os.tmpdir(), 'metricool-store.json')
       : path.join(process.cwd(), 'data', 'store.json');
     this.loadFromFile();
-    this.syncWithSupabase();
+    this.initialSyncPromise = this.syncWithSupabase();
+  }
+
+  async ensureSynced(): Promise<void> {
+    if (this.initialSyncPromise) {
+      await this.initialSyncPromise;
+      this.initialSyncPromise = null;
+    }
   }
 
   async syncWithSupabase(): Promise<void> {
