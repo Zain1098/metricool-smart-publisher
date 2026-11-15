@@ -256,13 +256,20 @@ export default function CalendarView({
     if (!confirm('Remove this post from your schedule?')) return;
     setIsDeleting(true);
     try {
-      await fetch(`/api/posts/${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/posts/${id}`, { method: 'DELETE' });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'Delete failed');
+      }
       setActiveModalPost(null);
       pushToast({ type: 'success', title: 'Post removed from calendar' });
       if (onPostDeleted) onPostDeleted();
       else router.refresh();
-    } catch {
-      pushToast({ type: 'error', title: 'Delete failed' });
+    } catch (err: unknown) {
+      pushToast({
+        type: 'error',
+        title: err instanceof Error ? err.message : 'Delete failed',
+      });
     } finally {
       setIsDeleting(false);
     }

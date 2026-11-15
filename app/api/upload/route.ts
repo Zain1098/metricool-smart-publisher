@@ -81,16 +81,25 @@ export async function GET(req: Request) {
 
       if (range) {
         const parts = range.replace(/bytes=/, '').split('-');
-        const start = parseInt(parts[0], 10) || 0;
+        const start = parseInt(parts[0], 10);
+        const safeStart = Number.isFinite(start) ? start : 0;
         const maxChunk = 4 * 1024 * 1024; // 4MB max per range response
         const requestedEnd = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
-        const end = Math.min(requestedEnd, start + maxChunk - 1, fileSize - 1);
-        const chunkLength = Math.max(0, end - start + 1);
+        const safeReqEnd = Number.isFinite(requestedEnd) ? requestedEnd : fileSize - 1;
+        const end = Math.min(safeReqEnd, safeStart + maxChunk - 1, fileSize - 1);
 
+        if (safeStart < 0 || safeStart >= fileSize || end < safeStart) {
+          return new NextResponse(null, {
+            status: 416,
+            headers: { 'Content-Range': `bytes */${fileSize}` },
+          });
+        }
+
+        const chunkLength = end - safeStart + 1;
         const buf = Buffer.alloc(chunkLength);
         const fd = fs.openSync(filePath, 'r');
         try {
-          fs.readSync(fd, buf, 0, chunkLength, start);
+          fs.readSync(fd, buf, 0, chunkLength, safeStart);
         } finally {
           fs.closeSync(fd);
         }
@@ -98,7 +107,7 @@ export async function GET(req: Request) {
         return new NextResponse(buf, {
           status: 206,
           headers: {
-            'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+            'Content-Range': `bytes ${safeStart}-${end}/${fileSize}`,
             'Accept-Ranges': 'bytes',
             'Content-Length': String(chunkLength),
             'Content-Type': contentType,

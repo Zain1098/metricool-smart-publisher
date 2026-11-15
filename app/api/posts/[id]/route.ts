@@ -1,11 +1,30 @@
 import { NextResponse } from 'next/server';
 import { store } from '@/lib/store';
+import { PublishMode, SocialPlatform } from '@/lib/types';
 import { isSafeMediaUrl, safeErrorMessage } from '@/lib/validation';
+
+const VALID_PLATFORMS = new Set<SocialPlatform>([
+  'youtube',
+  'instagram',
+  'facebook',
+  'tiktok',
+  'twitter',
+  'linkedin',
+  'threads',
+  'pinterest',
+]);
+
+const VALID_PUBLISH_MODES = new Set<PublishMode>([
+  'native_schedule',
+  'publish_now',
+  'local_queue',
+]);
 
 export async function GET(
   req: Request,
   { params }: { params: { id: string } }
 ) {
+  await store.ensureSynced();
   const { id } = params;
   const post = store.getPosts().find((p) => p.id === id);
   if (!post) {
@@ -19,6 +38,7 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
+    await store.ensureSynced();
     const { id } = params;
     const body = await req.json().catch(() => ({}));
     const useNativeSchedule = Boolean(body?.useNativeSchedule);
@@ -49,6 +69,7 @@ export async function DELETE(
   req: Request,
   { params }: { params: { id: string } }
 ) {
+  await store.ensureSynced();
   const { id } = params;
   const deleted = store.deletePost(id);
   if (!deleted) {
@@ -62,11 +83,38 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   try {
+    await store.ensureSynced();
     const { id } = params;
-    const body = (await req.json()) as Record<string, unknown>;
+    const body = (await req.json().catch(() => null)) as Record<string, unknown> | null;
+    if (!body || typeof body !== 'object') {
+      return NextResponse.json({ success: false, error: 'Invalid JSON body' }, { status: 400 });
+    }
 
     if (body.coverUrl && !isSafeMediaUrl(String(body.coverUrl))) {
       return NextResponse.json({ success: false, error: 'Invalid coverUrl' }, { status: 400 });
+    }
+
+    if (body.scheduledAt !== undefined) {
+      const parsed = new Date(String(body.scheduledAt));
+      if (isNaN(parsed.getTime())) {
+        return NextResponse.json({ success: false, error: 'Invalid scheduledAt date' }, { status: 400 });
+      }
+    }
+
+    if (
+      body.targetPlatforms !== undefined &&
+      (!Array.isArray(body.targetPlatforms) ||
+        body.targetPlatforms.length === 0 ||
+        !body.targetPlatforms.every((p) => typeof p === 'string' && VALID_PLATFORMS.has(p as SocialPlatform)))
+    ) {
+      return NextResponse.json({ success: false, error: 'Invalid targetPlatforms' }, { status: 400 });
+    }
+
+    if (
+      body.publishMode !== undefined &&
+      (typeof body.publishMode !== 'string' || !VALID_PUBLISH_MODES.has(body.publishMode as PublishMode))
+    ) {
+      return NextResponse.json({ success: false, error: 'Invalid publishMode' }, { status: 400 });
     }
 
     const allowedPatch: Record<string, unknown> = {};

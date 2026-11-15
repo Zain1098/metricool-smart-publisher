@@ -17,6 +17,7 @@ const PUBLIC_API_PREFIXES = [
   '/api/auth/logout',
   '/api/cron',
   '/api/webhooks/postiz',
+  '/api/mcp',
 ];
 
 export async function middleware(req: NextRequest) {

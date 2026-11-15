@@ -3,8 +3,14 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import { store } from '@/lib/store';
-import { isR2Configured, getR2BucketName, getR2PublicBaseUrl } from '@/lib/r2';
+import {
+  deleteR2VideoAsset,
+  isR2Configured,
+  getR2BucketName,
+  getR2PublicBaseUrl,
+} from '@/lib/r2';
 import { getSupabaseServerClient, isSupabaseConfigured } from '@/lib/supabase';
+import { safeErrorMessage } from '@/lib/validation';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,6 +40,7 @@ function getCandidateUploadDirs(): string[] {
 
 export async function GET() {
   try {
+    await store.ensureSynced();
     const posts = store.getPosts();
     const assetMap = new Map<string, MediaAssetItem>();
 
@@ -178,32 +185,79 @@ export async function GET() {
   }
 }
 
-export async function DELETE(req: Request) {
-  try {
-    const { searchParams } = new URL(req.url);
-    const fileName = searchParams.get('fileName');
-    if (!fileName) {
-      return NextResponse.json({ success: false, error: 'fileName is required' }, { status: 400 });
-    }
-    const safeFile = path.basename(fileName).replace(/[^a-zA-Z0-9._-]/g, '_');
+async function deleteSingleAsset(params: {
+  id?: string | null;
+  fileName?: string | null;
+}): Promise<{ ok: boolean; status: number; message?: string; error?: string }> {
+  const { id, fileName } = params;
+  const safeFile = fileName
+    ? path.basename(fileName).replace(/[^a-zA-Z0-9._-]/g, '_')
+    : '';
 
-    const posts = store.getPosts();
-    const activeRef = posts.some(
-      (p) =>
-        (p.status === 'scheduled' || p.status === 'scheduled_on_platform' || p.status === 'publishing') &&
-        (p.mediaFileName === safeFile || p.mediaUrl.includes(encodeURIComponent(safeFile)))
-    );
-    if (activeRef) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Cannot delete file while it is referenced by an active scheduled post.',
-        },
-        { status: 409 }
-      );
-    }
+  const posts = store.getPosts();
+  const activeRef = posts.some(
+    (p) =>
+      (p.status === 'scheduled' ||
+        p.status === 'scheduled_on_platform' ||
+        p.status === 'publishing') &&
+      ((safeFile && (p.mediaFileName === safeFile || p.mediaUrl.includes(encodeURIComponent(safeFile)))) ||
+        (id && p.id && `post_media_${p.id}` === id))
+  );
+  if (activeRef) {
+    return {
+      ok: false,
+      status: 409,
+      error: 'Cannot delete file while it is referenced by an active scheduled post.',
+    };
+  }
 
-    let deleted = false;
+  let deleted = false;
+
+  // 1. Try deleting from Supabase + Cloudflare R2 if configured
+  if (isSupabaseConfigured()) {
+    const client = getSupabaseServerClient();
+    if (client) {
+      let query = client
+        .from('metricool_video_assets')
+        .select('*')
+        .eq('is_deleted', false)
+        .limit(1);
+
+      if (id && !id.startsWith('local_') && !id.startsWith('post_media_')) {
+        query = query.eq('id', id);
+      } else if (fileName) {
+        query = query.eq('file_name', fileName);
+      }
+
+      const { data: rows } = await query;
+      const row = Array.isArray(rows) ? rows[0] : null;
+      if (row) {
+        if (isR2Configured() && row.r2_storage_key) {
+          const r2Res = await deleteR2VideoAsset({
+            assetId: String(row.id),
+            storageKey: String(row.r2_storage_key),
+            thumbnailKey: row.r2_thumbnail_key ? String(row.r2_thumbnail_key) : undefined,
+            processedKey: row.r2_processed_key ? String(row.r2_processed_key) : undefined,
+          });
+          if (!r2Res.success) {
+            return {
+              ok: false,
+              status: 400,
+              error: r2Res.error || 'Failed to delete from Cloudflare R2.',
+            };
+          }
+        }
+        await client
+          .from('metricool_video_assets')
+          .update({ is_deleted: true })
+          .eq('id', row.id);
+        deleted = true;
+      }
+    }
+  }
+
+  // 2. Also try deleting local upload file if present
+  if (safeFile) {
     for (const dir of getCandidateUploadDirs()) {
       const target = path.join(dir, safeFile);
       if (fs.existsSync(target)) {
@@ -211,17 +265,62 @@ export async function DELETE(req: Request) {
         deleted = true;
       }
     }
+  }
 
-    if (!deleted) {
-      return NextResponse.json(
-        { success: false, error: 'Local file not found or stored externally.' },
-        { status: 404 }
-      );
+  if (!deleted) {
+    return {
+      ok: false,
+      status: 404,
+      error: 'Asset not found or stored externally on a social post.',
+    };
+  }
+
+  return { ok: true, status: 200, message: `${fileName || id} deleted.` };
+}
+
+export async function DELETE(req: Request) {
+  try {
+    await store.ensureSynced();
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get('id');
+    const fileName = searchParams.get('fileName');
+
+    // Support bulk JSON delete body: { items: [{ id, fileName }] }
+    if (!id && !fileName) {
+      const body = (await req.json().catch(() => null)) as {
+        items?: Array<{ id?: string; fileName?: string }>;
+      } | null;
+      if (!body?.items || !Array.isArray(body.items) || body.items.length === 0) {
+        return NextResponse.json(
+          { success: false, error: 'id, fileName, or items[] is required' },
+          { status: 400 }
+        );
+      }
+
+      let deletedCount = 0;
+      const errors: string[] = [];
+      for (const item of body.items) {
+        const res = await deleteSingleAsset(item);
+        if (res.ok) deletedCount++;
+        else if (res.error) errors.push(res.error);
+      }
+      return NextResponse.json({
+        success: deletedCount > 0,
+        deletedCount,
+        errors,
+        message: `Deleted ${deletedCount} asset(s).`,
+      });
     }
 
-    return NextResponse.json({ success: true, message: `${safeFile} deleted.` });
+    const res = await deleteSingleAsset({ id, fileName });
+    if (!res.ok) {
+      return NextResponse.json({ success: false, error: res.error }, { status: res.status });
+    }
+    return NextResponse.json({ success: true, message: res.message });
   } catch (err: unknown) {
-    const errorMsg = err instanceof Error ? err.message : 'Delete error';
-    return NextResponse.json({ success: false, error: errorMsg }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: safeErrorMessage(err, 'Delete error') },
+      { status: 500 }
+    );
   }
 }

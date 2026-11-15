@@ -610,6 +610,7 @@ class GlobalStore {
     publishedIds: string[];
     failedIds: string[];
   }> {
+    await this.ensureSynced();
     const now = new Date();
     const publishedIds: string[] = [];
     const failedIds: string[] = [];

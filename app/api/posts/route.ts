@@ -1,7 +1,24 @@
 import { NextResponse } from 'next/server';
 import { store } from '@/lib/store';
-import { PublishMode } from '@/lib/types';
+import { PublishMode, SocialPlatform } from '@/lib/types';
 import { isSafeMediaUrl, safeErrorMessage } from '@/lib/validation';
+
+const VALID_PLATFORMS = new Set<SocialPlatform>([
+  'youtube',
+  'instagram',
+  'facebook',
+  'tiktok',
+  'twitter',
+  'linkedin',
+  'threads',
+  'pinterest',
+]);
+
+const VALID_PUBLISH_MODES = new Set<PublishMode>([
+  'native_schedule',
+  'publish_now',
+  'local_queue',
+]);
 
 export async function GET() {
   await store.ensureSynced();
@@ -14,7 +31,14 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
+    await store.ensureSynced();
+    const body = await req.json().catch(() => null);
+    if (!body || typeof body !== 'object') {
+      return NextResponse.json(
+        { success: false, error: 'Invalid JSON request body.' },
+        { status: 400 }
+      );
+    }
 
     if (
       !body.globalCaption &&
@@ -26,9 +50,33 @@ export async function POST(req: Request) {
       );
     }
 
-    if (!body.targetPlatforms || body.targetPlatforms.length === 0) {
+    if (
+      !Array.isArray(body.targetPlatforms) ||
+      body.targetPlatforms.length === 0 ||
+      !body.targetPlatforms.every((p: unknown) => typeof p === 'string' && VALID_PLATFORMS.has(p as SocialPlatform))
+    ) {
       return NextResponse.json(
-        { success: false, error: 'Select at least one social media platform.' },
+        { success: false, error: 'Select at least one valid social media platform.' },
+        { status: 400 }
+      );
+    }
+
+    if (body.scheduledAt !== undefined) {
+      const parsed = new Date(String(body.scheduledAt));
+      if (isNaN(parsed.getTime())) {
+        return NextResponse.json(
+          { success: false, error: 'Invalid scheduledAt date.' },
+          { status: 400 }
+        );
+      }
+    }
+
+    if (
+      body.publishMode !== undefined &&
+      !VALID_PUBLISH_MODES.has(body.publishMode as PublishMode)
+    ) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid publishMode.' },
         { status: 400 }
       );
     }

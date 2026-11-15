@@ -1,26 +1,35 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { store } from '@/lib/store';
-import { timingSafeEqualStrings } from '@/lib/auth';
+import {
+  SESSION_COOKIE_NAME,
+  timingSafeEqualStrings,
+  verifySessionToken,
+} from '@/lib/auth';
 import { safeErrorMessage } from '@/lib/validation';
 
 export const dynamic = 'force-dynamic';
 
-function verifyCronAuth(req: Request): boolean {
+async function verifyCronAuth(req: NextRequest): Promise<boolean> {
   const cronSecret = process.env.CRON_SECRET;
-  if (!cronSecret) {
-    return false;
+  const authHeader = req.headers.get('authorization') || '';
+  if (cronSecret && timingSafeEqualStrings(authHeader, `Bearer ${cronSecret}`)) {
+    return true;
   }
 
-  const authHeader = req.headers.get('authorization') || '';
-  return timingSafeEqualStrings(authHeader, `Bearer ${cronSecret}`);
+  const sessionToken = req.cookies.get(SESSION_COOKIE_NAME)?.value;
+  if (sessionToken && (await verifySessionToken(sessionToken))) {
+    return true;
+  }
+
+  return false;
 }
 
-async function handleCronTrigger(req: Request) {
-  if (!verifyCronAuth(req)) {
+async function handleCronTrigger(req: NextRequest) {
+  if (!(await verifyCronAuth(req))) {
     return NextResponse.json(
       {
         success: false,
-        error: 'Unauthorized. Valid Authorization Bearer header required.',
+        error: 'Unauthorized. Valid Authorization Bearer header or admin session required.',
       },
       { status: 401 }
     );
@@ -47,10 +56,10 @@ async function handleCronTrigger(req: Request) {
   }
 }
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   return handleCronTrigger(req);
 }
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   return handleCronTrigger(req);
 }

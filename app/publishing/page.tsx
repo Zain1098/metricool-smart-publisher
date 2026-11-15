@@ -68,6 +68,14 @@ export default function PublishingPage() {
     try {
       const res = await fetch('/api/cron');
       const data = await res.json();
+      if (!res.ok || !data.success) {
+        pushToast({
+          type: 'error',
+          title: 'Cron execution failed',
+          description: data.error || `HTTP ${res.status}`,
+        });
+        return;
+      }
       pushToast({
         type: 'success',
         title: 'Scheduler queue processed',
@@ -108,11 +116,18 @@ export default function PublishingPage() {
   const handleDelete = async (id: string) => {
     if (!confirm('Delete this post from publishing queue and history?')) return;
     try {
-      await fetch(`/api/posts/${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/posts/${id}`, { method: 'DELETE' });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'Could not delete post');
+      }
       pushToast({ type: 'success', title: 'Post deleted' });
       loadPosts();
-    } catch {
-      pushToast({ type: 'error', title: 'Could not delete post' });
+    } catch (err: unknown) {
+      pushToast({
+        type: 'error',
+        title: err instanceof Error ? err.message : 'Could not delete post',
+      });
     }
   };
 

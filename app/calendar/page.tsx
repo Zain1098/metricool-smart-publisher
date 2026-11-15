@@ -70,23 +70,30 @@ export default function CalendarPage() {
   const handleDelete = async (id: string) => {
     if (!confirm('Remove this post from queue?')) return;
     try {
-      await fetch(`/api/posts/${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/posts/${id}`, { method: 'DELETE' });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'Could not delete post');
+      }
       pushToast({ type: 'success', title: 'Post removed from queue' });
       fetchPosts();
-    } catch {
-      pushToast({ type: 'error', title: 'Could not delete post' });
+    } catch (err: unknown) {
+      pushToast({
+        type: 'error',
+        title: err instanceof Error ? err.message : 'Could not delete post',
+      });
     }
   };
 
   return (
     <div className="space-y-5">
       {/* Header Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-[#FFFFFF] border border-[#E2E8F0] shadow-card">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-card border border-studio-border shadow-card">
         <div>
-          <h1 className="text-lg font-bold text-slate-900 tracking-tight">
+          <h1 className="text-lg font-bold text-ink-primary tracking-tight">
             Planning &amp; Content Calendar
           </h1>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <p className="text-xs text-ink-muted mt-0.5">
             Organize monthly, weekly, and daily posts with Metricool best-hours recommendations
           </p>
         </div>
@@ -134,7 +141,7 @@ export default function CalendarPage() {
 
         {posts.length === 0 ? (
           <EmptyState
-            icon={<CalendarIcon className="w-5 h-5 text-slate-400" />}
+            icon={<CalendarIcon className="w-5 h-5 text-ink-muted" />}
             title="Your planning calendar is empty"
             description="Upload a video and schedule it for peak engagement time (18:30 PKT) or save a draft."
             action={
@@ -150,7 +157,7 @@ export default function CalendarPage() {
             }
           />
         ) : (
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-studio-border">
             {posts.map((post) => {
               const dateStr = new Date(post.scheduledAt).toLocaleString(
                 'en-US',
@@ -166,10 +173,10 @@ export default function CalendarPage() {
               return (
                 <div
                   key={post.id}
-                  className="py-3.5 first:pt-0 last:pb-0 flex flex-col md:flex-row md:items-center justify-between gap-3 hover:bg-slate-50/60 p-2 rounded-lg transition-colors"
+                  className="py-3.5 first:pt-0 last:pb-0 flex flex-col md:flex-row md:items-center justify-between gap-3 hover:bg-studio-subtle/60 p-2 rounded-lg transition-colors"
                 >
                   <div className="flex items-center gap-3.5 min-w-0">
-                    <div className="w-14 h-10 rounded-lg bg-slate-900 overflow-hidden flex-shrink-0 border border-slate-200">
+                    <div className="w-14 h-10 rounded-lg bg-studio-subtle overflow-hidden flex-shrink-0 border border-studio-border">
                       {post.coverUrl ? (
                         <img
                           src={post.coverUrl}
@@ -187,11 +194,11 @@ export default function CalendarPage() {
                     </div>
 
                     <div className="min-w-0">
-                      <p className="text-[13px] font-bold text-slate-800 line-clamp-1">
+                      <p className="text-[13px] font-bold text-ink-primary line-clamp-1">
                         {post.globalCaption || post.mediaFileName}
                       </p>
-                      <div className="flex items-center gap-2 text-[11px] text-slate-400 font-mono mt-0.5">
-                        <span className="font-semibold text-slate-600">{dateStr}</span>
+                      <div className="flex items-center gap-2 text-[11px] text-ink-muted font-mono mt-0.5">
+                        <span className="font-semibold text-ink-secondary">{dateStr}</span>
                         <span>•</span>
                         <span className="truncate">{post.mediaFileName}</span>
                       </div>
