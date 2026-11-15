@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { store } from '@/lib/store';
 import { timingSafeEqualStrings } from '@/lib/auth';
+import { getPublicOrigin, verifyOAuthAccessToken } from '@/lib/mcp-oauth';
 import { isSafeMediaUrl, safeErrorMessage } from '@/lib/validation';
 import { PublishMode, SocialPlatform } from '@/lib/types';
 import { GET as listMediaGet } from '@/app/api/media/route';
@@ -25,18 +26,41 @@ const VALID_PUBLISH_MODES = new Set<PublishMode>([
 ]);
 
 function verifyMcpBearer(req: NextRequest): { ok: boolean; reason?: string } {
-  const expectedKey = process.env.MCP_API_KEY;
-  if (!expectedKey || expectedKey.length < 16) {
-    return {
-      ok: false,
-      reason: 'MCP_API_KEY is not configured in server environment variables (minimum 16 chars).',
-    };
-  }
   const auth = req.headers.get('authorization') || '';
-  if (!timingSafeEqualStrings(auth, `Bearer ${expectedKey}`)) {
-    return { ok: false, reason: 'Invalid or missing Bearer MCP_API_KEY.' };
+  if (!auth.startsWith('Bearer ')) {
+    return { ok: false, reason: 'Missing Bearer token.' };
   }
-  return { ok: true };
+  const token = auth.slice('Bearer '.length).trim();
+
+  // 1. Check static MCP_API_KEY (for Cursor / Claude / custom clients)
+  const expectedKey = process.env.MCP_API_KEY;
+  if (expectedKey && expectedKey.length >= 16 && timingSafeEqualStrings(token, expectedKey)) {
+    return { ok: true };
+  }
+
+  // 2. Check OAuth 2.1 signed access token (for ChatGPT Connectors)
+  if (verifyOAuthAccessToken(token)) {
+    return { ok: true };
+  }
+
+  return { ok: false, reason: 'Invalid or expired Bearer token.' };
+}
+
+function unauthorizedMcpResponse(req: NextRequest, message: string) {
+  const origin = getPublicOrigin(req);
+  return NextResponse.json(
+    { jsonrpc: '2.0', id: null, error: { code: -32001, message } },
+    {
+      status: 401,
+      headers: {
+        'Content-Type': 'application/json',
+        'WWW-Authenticate': `Bearer resource_metadata="${origin}/.well-known/oauth-protected-resource"`,
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Authorization, Content-Type, Mcp-Session-Id',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      },
+    }
+  );
 }
 
 function jsonRpcResult(id: unknown, result: unknown) {
@@ -352,7 +376,7 @@ export async function OPTIONS() {
 export async function GET(req: NextRequest) {
   const auth = verifyMcpBearer(req);
   if (!auth.ok) {
-    return NextResponse.json({ success: false, error: auth.reason }, { status: 401 });
+    return unauthorizedMcpResponse(req, auth.reason || 'Unauthorized');
   }
   return NextResponse.json({
     name: 'zcodedev-studio-mcp',
@@ -366,7 +390,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const auth = verifyMcpBearer(req);
   if (!auth.ok) {
-    return jsonRpcError(null, -32001, auth.reason || 'Unauthorized', 401);
+    return unauthorizedMcpResponse(req, auth.reason || 'Unauthorized');
   }
 
   let body: Record<string, unknown>;

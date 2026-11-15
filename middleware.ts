@@ -18,6 +18,7 @@ const PUBLIC_API_PREFIXES = [
   '/api/cron',
   '/api/webhooks/postiz',
   '/api/mcp',
+  '/.well-known/',
 ];
 
 export async function middleware(req: NextRequest) {
