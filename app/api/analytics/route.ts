@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { store } from '@/lib/store';
 import realYtSnapshot from '@/lib/real_youtube_analytics.json';
 import { isSupabaseConfigured, saveAnalyticsSnapshot } from '@/lib/supabase';
+import { refreshAllConnectedPlatformsLive } from '@/lib/analytics-live';
 import { execFile } from 'child_process';
 import path from 'path';
 import fs from 'fs';
@@ -241,8 +242,74 @@ function buildAnalyticsResponse() {
     },
   ];
 
+  const overallEngagementRate =
+    totalChannelViews > 0
+      ? Number((((totalVideoLikes + totalVideoComments) / totalChannelViews) * 100).toFixed(2))
+      : 0;
+
+  const platformBreakdown = accounts.map((acc) => {
+    const views = acc.isConnected ? acc.viewsCount || 0 : 0;
+    const followers = acc.isConnected ? acc.followersCount || 0 : 0;
+    const postsCount = acc.isConnected ? acc.postsCount || 0 : 0;
+    const sharePct =
+      totalChannelViews > 0
+        ? Number(((views / totalChannelViews) * 100).toFixed(1))
+        : 0;
+    return {
+      id: acc.id,
+      platform: acc.platform,
+      accountName: acc.accountName,
+      handle: acc.handle,
+      isConnected: acc.isConnected,
+      tokenStatus: acc.tokenStatus || 'unverified',
+      followers,
+      views,
+      postsCount,
+      sharePct,
+    };
+  });
+
+  // Compute best posting hours (PKT UTC+5) from video publish timestamps
+  const hourBuckets = new Map<number, { count: number; totalViews: number }>();
+  for (const v of videos) {
+    if (!v.publishedAt) continue;
+    const d = new Date(v.publishedAt);
+    if (Number.isNaN(d.getTime())) continue;
+    const pktHour = (d.getUTCHours() + 5) % 24;
+    const prev = hourBuckets.get(pktHour) || { count: 0, totalViews: 0 };
+    hourBuckets.set(pktHour, {
+      count: prev.count + 1,
+      totalViews: prev.totalViews + v.views,
+    });
+  }
+  const bestPostingHours = Array.from(hourBuckets.entries())
+    .map(([hour, stat]) => ({
+      hourLabel: `${String(hour).padStart(2, '0')}:00 PKT`,
+      videosCount: stat.count,
+      avgViews: Math.round(stat.totalViews / Math.max(1, stat.count)),
+      totalViews: stat.totalViews,
+    }))
+    .sort((a, b) => b.avgViews - a.avgViews)
+    .slice(0, 5);
+
+  const topVideo = videos.length > 0 ? [...videos].sort((a, b) => b.views - a.views)[0] : null;
+  const connectedCount = accounts.filter((a) => a.isConnected).length;
+  const aiExecutiveInsights = [
+    topVideo
+      ? `Top video "${topVideo.title}" drove ${topVideo.views.toLocaleString()} views (${topVideo.engagementRate}% engagement).`
+      : 'Upload and sync videos to unlock top-video performance insights.',
+    bestPostingHours[0]
+      ? `Peak publishing window is ${bestPostingHours[0].hourLabel} averaging ${bestPostingHours[0].avgViews.toLocaleString()} views/video.`
+      : 'Collect more timestamped posts to compute peak posting hours.',
+    `${connectedCount}/${accounts.length} social channels are connected with ${overallEngagementRate}% overall engagement rate.`,
+    topicInsights[0]
+      ? `Best performing content pillar: ${topicInsights[0].topic} (${topicInsights[0].avgViews.toLocaleString()} avg views).`
+      : 'Tag posts by topic to compare content pillars.',
+  ];
+
   return {
     success: true,
+    generatedAt: new Date().toISOString(),
     summary: {
       totalFollowers,
       totalChannelViews,
@@ -251,10 +318,14 @@ function buildAnalyticsResponse() {
       totalVideoComments,
       avgViewsPerVideo,
       topVideoViews,
+      overallEngagementRate,
       publishedPostsCount,
       scheduledPostsCount,
     },
     accounts,
+    platformBreakdown,
+    bestPostingHours,
+    aiExecutiveInsights,
     videos,
     timeline,
     topicInsights,
@@ -285,6 +356,9 @@ export async function GET() {
 }
 
 export async function POST() {
+  await store.ensureSynced();
+  await refreshAllConnectedPlatformsLive().catch(() => {});
+
   const isServerless = Boolean(
     process.env.NETLIFY ||
       process.env.VERCEL ||
