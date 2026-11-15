@@ -1,30 +1,48 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import {
-  Plus,
-  RefreshCw,
-  Download,
-  CheckCircle2,
+  Send,
   Calendar as CalendarIcon,
-  TrendingUp,
-  Users,
+  CheckCircle2,
   Eye,
-  Video,
-  ThumbsUp,
-  Share2,
-  Sparkles,
-  BarChart3,
+  ArrowUpRight,
+  Plus,
   Clock,
+  Sparkles,
+  TrendingUp,
+  Layers,
+  Link2,
 } from 'lucide-react';
-import { ScheduledPost, ConnectedAccount } from '@/lib/types';
+import { ConnectedAccount, ScheduledPost, SocialPlatform } from '@/lib/types';
 import { PLATFORM_CONFIGS } from '@/lib/utils';
-import CalendarView from '@/components/CalendarView';
-import AnalyticsCharts from '@/components/AnalyticsCharts';
 import type { RealVideoMetric, TimelinePoint } from '@/app/api/analytics/route';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/shadcn/card';
+import { Badge } from '@/components/ui/shadcn/badge';
+import { Button } from '@/components/ui/shadcn/button';
+import { Progress } from '@/components/ui/shadcn/progress';
 
-export default function EvolutionDashboardPage() {
+const PLATFORM_BAR_COLORS: Record<string, string> = {
+  youtube: '#D94343',
+  instagram: '#D84E7D',
+  facebook: '#2E77D0',
+  tiktok: '#2B2825',
+  twitter: '#4B5563',
+  threads: '#6B5CE7',
+  linkedin: '#2563EB',
+  pinterest: '#C83E4D',
+};
+
+const TOPIC_COLORS = ['#2E77D0', '#D99B26', '#3A8E63', '#6B5CE7', '#C84E89', '#1E8FA3'];
+
+export default function DashboardPage() {
   const [posts, setPosts] = useState<ScheduledPost[]>([]);
   const [accounts, setAccounts] = useState<ConnectedAccount[]>([]);
   const [analyticsData, setAnalyticsData] = useState<{
@@ -50,296 +68,445 @@ export default function EvolutionDashboardPage() {
       badge: string;
     }>;
   } | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const [selectedNetwork, setSelectedNetwork] = useState<'all' | string>('all');
-  const [isSyncing, setIsSyncing] = useState(false);
-  const [csvExported, setCsvExported] = useState(false);
-
-  const loadData = () => {
+  useEffect(() => {
     Promise.all([
-      fetch('/api/posts').then((res) => res.json()),
-      fetch('/api/analytics').then((res) => res.json()),
+      fetch('/api/posts').then((r) => r.json()),
+      fetch('/api/analytics').then((r) => r.json()),
     ])
-      .then(([postsData, anData]) => {
-        if (postsData.posts) setPosts(postsData.posts);
-        if (anData.accounts) setAccounts(anData.accounts);
-        if (anData.summary) {
+      .then(([postsRes, analyticsRes]) => {
+        if (Array.isArray(postsRes?.posts)) setPosts(postsRes.posts);
+        if (Array.isArray(analyticsRes?.accounts)) setAccounts(analyticsRes.accounts);
+        if (analyticsRes?.summary) {
           setAnalyticsData({
-            summary: anData.summary,
-            videos: anData.videos || [],
-            timeline: anData.timeline || [],
-            topicInsights: anData.topicInsights || [],
+            summary: analyticsRes.summary,
+            videos: analyticsRes.videos || [],
+            timeline: analyticsRes.timeline || [],
+            topicInsights: analyticsRes.topicInsights || [],
           });
         }
       })
-      .catch(() => {});
-  };
-
-  useEffect(() => {
-    loadData();
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
-  const handleRefreshLiveStats = async () => {
-    setIsSyncing(true);
-    try {
-      const [vaultRes, anRes] = await Promise.all([
-        fetch('/api/accounts/auto-connect', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ type: 'sync_vault' }),
-        }).then((r) => r.json()),
-        fetch('/api/analytics', { method: 'POST' }).then((r) => r.json()),
-      ]);
-      if (vaultRes.accounts) setAccounts(vaultRes.accounts);
-      if (anRes.summary) {
-        setAnalyticsData({
-          summary: anRes.summary,
-          videos: anRes.videos || [],
-          timeline: anRes.timeline || [],
-          topicInsights: anRes.topicInsights || [],
-        });
-      }
-    } catch {
-      // ignore
-    } finally {
-      setIsSyncing(false);
-    }
-  };
+  const scheduledPosts = useMemo(
+    () =>
+      posts.filter(
+        (p) => p.status === 'scheduled' || p.status === 'scheduled_on_platform'
+      ),
+    [posts]
+  );
 
-  const handleExportCSV = () => {
-    if (!analyticsData) return;
-    const rows: (string | number)[][] = [
-      ['Metricool Live Video Analytics Report'],
-      ['Generated At', new Date().toISOString()],
-      ['Total Followers', analyticsData.summary.totalFollowers],
-      ['Total Views', analyticsData.summary.totalChannelViews],
-      ['Total Posts', analyticsData.summary.totalChannelPosts],
-      [],
-      ['Video ID', 'Title', 'Published Date', 'Duration', 'Views', 'Likes', 'Comments', 'Engagement %', 'URL'],
+  const publishedCount =
+    analyticsData?.summary?.publishedPostsCount ??
+    posts.filter((p) => p.status === 'published').length;
+
+  const totalViews = analyticsData?.summary?.totalChannelViews ?? 0;
+  const totalVideos = analyticsData?.summary?.totalChannelPosts ?? 0;
+  const connectedAccountsCount = accounts.filter((a) => a.isConnected).length;
+
+  // Platform goals breakdown
+  const platformGoals = useMemo(() => {
+    const platforms: SocialPlatform[] = [
+      'youtube',
+      'instagram',
+      'facebook',
+      'tiktok',
+      'twitter',
+      'threads',
     ];
+    return platforms.map((platform) => {
+      const count = posts.filter((p) => p.targetPlatforms.includes(platform)).length;
+      const goal = platform === 'youtube' ? 7 : 5;
+      const pct = Math.min(100, Math.round((count / goal) * 100));
+      return {
+        platform,
+        name: PLATFORM_CONFIGS[platform]?.name || platform,
+        count,
+        goal,
+        pct,
+        color: PLATFORM_BAR_COLORS[platform] || '#C27345',
+      };
+    });
+  }, [posts]);
 
-    for (const v of analyticsData.videos) {
-      rows.push([
-        v.id,
-        `"${v.title.replace(/"/g, '""')}"`,
-        v.publishedAt.slice(0, 10),
-        v.duration,
-        v.views,
-        v.likes,
-        v.comments,
-        v.engagementRate,
-        v.url,
-      ]);
+  // Content mix from topicInsights
+  const contentMix = useMemo(() => {
+    const items = analyticsData?.topicInsights || [];
+    if (items.length === 0) {
+      return [
+        { label: 'Tutorials & Coding', pct: 38, target: 40, color: TOPIC_COLORS[0] },
+        { label: 'Shorts & Reels', pct: 28, target: 30, color: TOPIC_COLORS[1] },
+        { label: 'AI & Automation', pct: 20, target: 20, color: TOPIC_COLORS[2] },
+        { label: 'Behind the Scenes', pct: 14, target: 10, color: TOPIC_COLORS[3] },
+      ];
     }
+    const total = items.reduce((acc, i) => acc + Math.max(1, i.videosCount), 0);
+    return items.slice(0, 5).map((item, idx) => ({
+      label: item.topic,
+      pct: Math.round((Math.max(1, item.videosCount) / total) * 100),
+      target: Math.round(100 / Math.min(5, items.length)),
+      color: TOPIC_COLORS[idx % TOPIC_COLORS.length],
+    }));
+  }, [analyticsData]);
 
-    const csvContent =
-      'data:text/csv;charset=utf-8,' + rows.map((e) => e.join(',')).join('\n');
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute(
-      'download',
-      `metricool-analytics-${new Date().toISOString().slice(0, 10)}.csv`
-    );
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    setCsvExported(true);
-    setTimeout(() => setCsvExported(false), 3000);
-  };
-
-  const connectedAccounts = accounts.filter((a) => a.isConnected);
+  // Feed preview items (latest videos or posts)
+  const feedItems = useMemo(() => {
+    if (analyticsData?.videos && analyticsData.videos.length > 0) {
+      return analyticsData.videos.slice(0, 4).map((v) => ({
+        id: v.id,
+        title: v.title,
+        thumbnailUrl: v.thumbnailUrl,
+        platform: v.platform,
+        metric: `${v.views.toLocaleString()} views`,
+        url: v.url,
+      }));
+    }
+    return posts.slice(0, 4).map((p) => ({
+      id: p.id,
+      title: p.globalCaption || p.mediaFileName || 'Scheduled Post',
+      thumbnailUrl: p.coverUrl || '',
+      platform: p.targetPlatforms[0] || 'youtube',
+      metric: p.status,
+      url: '/publishing',
+    }));
+  }, [analyticsData, posts]);
 
   return (
-    <div className="space-y-5">
-      {/* Metricool Header Filter & Action Bar */}
-      <div className="p-4 rounded-xl bg-[#FFFFFF] border border-[#E2E8F0] shadow-card flex flex-col md:flex-row md:items-center justify-between gap-4">
-        {/* Left: Metricool Channel Filter Pills */}
-        <div className="flex items-center gap-1.5 flex-wrap">
-          <button
-            type="button"
-            onClick={() => setSelectedNetwork('all')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-              selectedNetwork === 'all'
-                ? 'bg-[#00D2B4] text-[#0D1525] shadow-xs'
-                : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200/80'
-            }`}
-          >
-            All Channels ({connectedAccounts.length})
-          </button>
-          {connectedAccounts.map((acc) => {
-            const cfg = PLATFORM_CONFIGS[acc.platform];
-            const isSelected = selectedNetwork === acc.platform;
-            return (
-              <button
-                key={acc.id}
-                type="button"
-                onClick={() => setSelectedNetwork(acc.platform)}
-                className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all border ${
-                  isSelected
-                    ? 'bg-[#E6FAF7] text-[#00A38C] border-[#00D2B4] shadow-xs'
-                    : 'bg-[#FFFFFF] text-slate-700 hover:bg-slate-50 border-slate-200'
-                }`}
-              >
-                <span
-                  className="w-2 h-2 rounded-full flex-shrink-0"
-                  style={{ backgroundColor: cfg.color }}
-                />
-                <span>{cfg.name}</span>
-                <span className="text-[10px] text-slate-400 font-mono">
-                  {acc.handle}
+    <div className="space-y-6">
+      {/* Row 1: 4 Pastel KPI Cards (NestKit Editorial Style) */}
+      <section
+        aria-label="Key metrics"
+        className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4"
+      >
+        {/* KPI 1: Sage Mint */}
+        <Card className="bg-[#DCEAE2] border-[#C5DDD0] shadow-none">
+          <CardContent className="p-5 flex flex-col justify-between gap-4">
+            <div className="flex items-center justify-between">
+              <div className="w-8 h-8 rounded-lg bg-white/70 flex items-center justify-center text-[#24503B]">
+                <Send className="w-4 h-4" />
+              </div>
+              <Badge variant="sage" className="bg-white/80 border-transparent font-semibold">
+                <TrendingUp className="w-3 h-3 mr-1" />
+                Live
+              </Badge>
+            </div>
+            <div>
+              <div className="text-3xl font-bold tracking-tight text-[#1E1B18] tabular-nums">
+                {loading ? '—' : posts.length}
+              </div>
+              <p className="text-xs font-medium text-[#2F4F3E] mt-1">
+                Total Studio Posts
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* KPI 2: Warm Peach */}
+        <Card className="bg-[#F5DFCE] border-[#EACBB4] shadow-none">
+          <CardContent className="p-5 flex flex-col justify-between gap-4">
+            <div className="flex items-center justify-between">
+              <div className="w-8 h-8 rounded-lg bg-white/70 flex items-center justify-center text-[#8D451E]">
+                <CalendarIcon className="w-4 h-4" />
+              </div>
+              <Badge variant="peach" className="bg-white/80 border-transparent font-semibold">
+                Queue
+              </Badge>
+            </div>
+            <div>
+              <div className="text-3xl font-bold tracking-tight text-[#1E1B18] tabular-nums">
+                {loading ? '—' : scheduledPosts.length}
+              </div>
+              <p className="text-xs font-medium text-[#6B3A1E] mt-1">
+                Scheduled Posts
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* KPI 3: Soft Rose */}
+        <Card className="bg-[#F3DADF] border-[#E8C5CD] shadow-none">
+          <CardContent className="p-5 flex flex-col justify-between gap-4">
+            <div className="flex items-center justify-between">
+              <div className="w-8 h-8 rounded-lg bg-white/70 flex items-center justify-center text-[#8B3247]">
+                <CheckCircle2 className="w-4 h-4" />
+              </div>
+              <Badge variant="rose" className="bg-white/80 border-transparent font-semibold">
+                +{publishedCount} studio
+              </Badge>
+            </div>
+            <div>
+              <div className="text-3xl font-bold tracking-tight text-[#1E1B18] tabular-nums">
+                {loading ? '—' : totalVideos}
+              </div>
+              <p className="text-xs font-medium text-[#6C2B3B] mt-1">
+                Published Videos
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* KPI 4: Soft Lavender */}
+        <Card className="bg-[#E5DFF5] border-[#D4CBEB] shadow-none">
+          <CardContent className="p-5 flex flex-col justify-between gap-4">
+            <div className="flex items-center justify-between">
+              <div className="w-8 h-8 rounded-lg bg-white/70 flex items-center justify-center text-[#4B3688]">
+                <Eye className="w-4 h-4" />
+              </div>
+              <Badge variant="lavender" className="bg-white/80 border-transparent font-semibold">
+                {connectedAccountsCount}/{accounts.length || 8} active
+              </Badge>
+            </div>
+            <div>
+              <div className="text-3xl font-bold tracking-tight text-[#1E1B18] tabular-nums">
+                {loading ? '—' : totalViews.toLocaleString()}
+              </div>
+              <p className="text-xs font-medium text-[#3F2E73] mt-1">
+                Total Channel Views
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </section>
+
+      {/* Row 2: 3-Column Bento Grid */}
+      <section className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        {/* Card 1: Platform Goals */}
+        <Card className="min-w-0">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+            <div>
+              <CardTitle className="text-sm font-semibold">Platform Goals</CardTitle>
+              <CardDescription>Posts queued per network</CardDescription>
+            </div>
+            <Button asChild variant="ghost" size="sm" className="text-xs h-7 px-2">
+              <Link href="/composer">
+                <Plus className="w-3.5 h-3.5" />
+                Add
+              </Link>
+            </Button>
+          </CardHeader>
+          <CardContent className="space-y-3.5">
+            {platformGoals.map((item) => (
+              <div key={item.platform} className="grid grid-cols-[110px_1fr_36px] items-center gap-3">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span
+                    className="w-2 h-2 rounded-full flex-shrink-0"
+                    style={{ backgroundColor: item.color }}
+                  />
+                  <span className="text-xs font-medium text-[#1E1B18] truncate">
+                    {item.name}
+                  </span>
+                </div>
+                <Progress value={item.pct} indicatorColor={item.color} />
+                <span className="text-xs font-semibold text-[#6E655D] text-right tabular-nums">
+                  {item.count}/{item.goal}
                 </span>
-              </button>
-            );
-          })}
-        </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
 
-        {/* Right: Date Range & Action Buttons */}
-        <div className="flex flex-wrap items-center gap-2">
-          {/* Metricool Date Range Badge */}
-          <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-xs font-medium text-slate-600">
-            <CalendarIcon className="w-3.5 h-3.5 text-[#00D2B4]" />
-            <span>Last 30 Days</span>
-          </div>
+        {/* Card 2: Content Mix */}
+        <Card className="min-w-0">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+            <div>
+              <CardTitle className="text-sm font-semibold flex items-center gap-1.5">
+                <Layers className="w-4 h-4 text-[#C27345]" />
+                Content Mix
+              </CardTitle>
+              <CardDescription>Topic share across channel</CardDescription>
+            </div>
+            <Button asChild variant="ghost" size="sm" className="text-xs h-7 px-2">
+              <Link href="/analytics">Details</Link>
+            </Button>
+          </CardHeader>
+          <CardContent className="space-y-3.5">
+            {contentMix.map((item) => (
+              <div key={item.label} className="grid grid-cols-[130px_1fr_44px] items-center gap-3">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span
+                    className="w-2 h-2 rounded-full flex-shrink-0"
+                    style={{ backgroundColor: item.color }}
+                  />
+                  <span className="text-xs font-medium text-[#1E1B18] truncate">
+                    {item.label}
+                  </span>
+                </div>
+                <Progress value={item.pct} indicatorColor={item.color} />
+                <span className="text-xs font-semibold text-[#6E655D] text-right tabular-nums">
+                  {item.pct}%
+                </span>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
 
-          <button
-            type="button"
-            onClick={handleExportCSV}
-            className="px-3 py-1.5 rounded-lg bg-[#FFFFFF] hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-colors"
-          >
-            {csvExported ? (
-              <>
-                <CheckCircle2 className="w-3.5 h-3.5 text-[#10B981]" />
-                <span className="text-[#10B981]">Exported</span>
-              </>
-            ) : (
-              <>
-                <Download className="w-3.5 h-3.5 text-slate-500" />
-                <span>Export CSV</span>
-              </>
+        {/* Card 3: Connected Channels */}
+        <Card className="min-w-0">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+            <div>
+              <CardTitle className="text-sm font-semibold flex items-center gap-1.5">
+                <Link2 className="w-4 h-4 text-[#C27345]" />
+                Connected Channels
+              </CardTitle>
+              <CardDescription>Live OAuth & API health</CardDescription>
+            </div>
+            <Button asChild variant="outline" size="sm" className="text-xs h-7 px-2.5">
+              <Link href="/connections">All</Link>
+            </Button>
+          </CardHeader>
+          <CardContent className="space-y-2.5">
+            {accounts.slice(0, 5).map((acc) => (
+              <div
+                key={acc.id}
+                className="flex items-center justify-between gap-2 rounded-xl border border-[#EFE9E1] bg-[#FAF6F1] px-3 py-2"
+              >
+                <div className="min-w-0">
+                  <div className="text-xs font-semibold text-[#1E1B18] truncate">
+                    {acc.accountName || PLATFORM_CONFIGS[acc.platform]?.name}
+                  </div>
+                  <div className="text-[11px] text-[#6E655D] truncate">
+                    {acc.handle || acc.platform}
+                  </div>
+                </div>
+                <Badge
+                  variant={acc.isConnected ? 'sage' : 'outline'}
+                  className="flex-shrink-0 text-[10px]"
+                >
+                  {acc.isConnected ? 'Active' : 'Disconnected'}
+                </Badge>
+              </div>
+            ))}
+            {accounts.length === 0 && (
+              <p className="text-xs text-[#6E655D] py-4 text-center">
+                Loading channels...
+              </p>
             )}
-          </button>
+          </CardContent>
+        </Card>
+      </section>
 
-          <button
-            type="button"
-            onClick={handleRefreshLiveStats}
-            disabled={isSyncing}
-            className="px-3 py-1.5 rounded-lg bg-[#FFFFFF] hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-colors disabled:opacity-60"
-          >
-            <RefreshCw
-              className={`w-3.5 h-3.5 ${
-                isSyncing ? 'animate-spin text-[#00D2B4]' : 'text-[#00D2B4]'
-              }`}
-            />
-            <span>Refresh Stats</span>
-          </button>
-
-          <Link
-            href="/composer"
-            className="px-3.5 py-1.5 rounded-lg bg-[#00D2B4] hover:bg-[#00BFA3] text-[#0D1525] text-xs font-bold flex items-center gap-1.5 shadow-xs transition-all"
-          >
-            <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
-            <span>New Video Post</span>
-          </Link>
-        </div>
-      </div>
-
-      {/* KPI Overview Cards */}
-      {analyticsData && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="p-4 rounded-xl bg-[#FFFFFF] border border-[#E2E8F0] shadow-card">
-            <div className="flex items-center justify-between text-slate-500 text-xs font-semibold">
-              <span className="flex items-center gap-1.5">
-                <Users className="w-4 h-4 text-[#00D2B4]" />
-                Total Community
-              </span>
-              <span className="text-[11px] font-bold text-[#10B981] bg-[#ECFDF5] px-2 py-0.5 rounded-full">
-                +14.2%
-              </span>
+      {/* Row 3: 2-Column Bottom Grid (Feed Preview + Due Today / Upcoming) */}
+      <section className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        {/* Feed Preview */}
+        <Card className="lg:col-span-7 min-w-0">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+            <div>
+              <CardTitle className="text-sm font-semibold flex items-center gap-1.5">
+                <Sparkles className="w-4 h-4 text-[#C27345]" />
+                Feed Preview
+              </CardTitle>
+              <CardDescription>Recent published & queued media</CardDescription>
             </div>
-            <p className="text-2xl font-black text-slate-900 mt-2 tracking-tight">
-              {analyticsData.summary.totalFollowers.toLocaleString()}
-            </p>
-            <p className="text-[11px] text-slate-400 mt-1">Across all connected social profiles</p>
-          </div>
+            <Button asChild variant="outline" size="sm" className="text-xs h-8">
+              <Link href="/publishing">
+                View Full Feed
+                <ArrowUpRight className="w-3.5 h-3.5" />
+              </Link>
+            </Button>
+          </CardHeader>
+          <CardContent>
+            {feedItems.length > 0 ? (
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {feedItems.map((item) => (
+                  <a
+                    key={item.id}
+                    href={item.url}
+                    target={item.url.startsWith('http') ? '_blank' : undefined}
+                    rel={item.url.startsWith('http') ? 'noreferrer' : undefined}
+                    className="group rounded-xl border border-[#E7DFD5] bg-[#FAF6F1] overflow-hidden flex flex-col hover:border-[#C27345] transition-colors"
+                  >
+                    <div className="aspect-[4/3] w-full bg-[#EFE9E1] overflow-hidden relative">
+                      {item.thumbnailUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={item.thumbnailUrl}
+                          alt={item.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-xs text-[#8E847A]">
+                          No preview
+                        </div>
+                      )}
+                      <span className="absolute top-1.5 left-1.5 rounded-full bg-white/90 px-2 py-0.5 text-[10px] font-semibold text-[#1E1B18] capitalize shadow-xs">
+                        {item.platform}
+                      </span>
+                    </div>
+                    <div className="p-2.5 space-y-1">
+                      <p className="text-xs font-semibold text-[#1E1B18] line-clamp-2 leading-snug">
+                        {item.title}
+                      </p>
+                      <p className="text-[11px] text-[#6E655D]">{item.metric}</p>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-xl border border-dashed border-[#D6CBC0] bg-[#FAF6F1] p-6 text-center space-y-2">
+                <p className="text-xs text-[#6E655D]">No posts or videos loaded yet.</p>
+                <Button asChild size="sm">
+                  <Link href="/composer">Create First Post</Link>
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
-          <div className="p-4 rounded-xl bg-[#FFFFFF] border border-[#E2E8F0] shadow-card">
-            <div className="flex items-center justify-between text-slate-500 text-xs font-semibold">
-              <span className="flex items-center gap-1.5">
-                <Eye className="w-4 h-4 text-[#596CF2]" />
-                Total Video Views
-              </span>
-              <span className="text-[11px] font-bold text-[#10B981] bg-[#ECFDF5] px-2 py-0.5 rounded-full">
-                +8.9%
-              </span>
+        {/* Due Today / Upcoming */}
+        <Card className="lg:col-span-5 min-w-0">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+            <div>
+              <CardTitle className="text-sm font-semibold flex items-center gap-1.5">
+                <Clock className="w-4 h-4 text-[#C27345]" />
+                Due Today / Upcoming
+              </CardTitle>
+              <CardDescription>Next scheduled social posts</CardDescription>
             </div>
-            <p className="text-2xl font-black text-slate-900 mt-2 tracking-tight">
-              {analyticsData.summary.totalChannelViews.toLocaleString()}
-            </p>
-            <p className="text-[11px] text-slate-400 mt-1">Real video impressions and plays</p>
-          </div>
+            <Button asChild variant="outline" size="sm" className="text-xs h-8">
+              <Link href="/calendar">Calendar</Link>
+            </Button>
+          </CardHeader>
+          <CardContent className="space-y-2.5">
+            {scheduledPosts.slice(0, 4).map((post) => (
+              <Link
+                key={post.id}
+                href="/publishing"
+                className="flex items-center justify-between gap-3 rounded-xl border border-[#EFE9E1] bg-[#FAF6F1] p-3 hover:border-[#C27345] transition-colors"
+              >
+                <div className="min-w-0 space-y-0.5">
+                  <p className="text-xs font-semibold text-[#1E1B18] truncate">
+                    {post.globalCaption || post.mediaFileName || 'Untitled Post'}
+                  </p>
+                  <p className="text-[11px] text-[#6E655D] truncate">
+                    {new Date(post.scheduledAt).toLocaleString()} ·{' '}
+                    {post.targetPlatforms.join(', ')}
+                  </p>
+                </div>
+                <Badge variant="peach" className="flex-shrink-0 text-[10px]">
+                  Scheduled
+                </Badge>
+              </Link>
+            ))}
 
-          <div className="p-4 rounded-xl bg-[#FFFFFF] border border-[#E2E8F0] shadow-card">
-            <div className="flex items-center justify-between text-slate-500 text-xs font-semibold">
-              <span className="flex items-center gap-1.5">
-                <Video className="w-4 h-4 text-[#FF0000]" />
-                Videos Published
-              </span>
-              <span className="text-[11px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full">
-                {analyticsData.videos.length} videos
-              </span>
-            </div>
-            <p className="text-2xl font-black text-slate-900 mt-2 tracking-tight">
-              {analyticsData.summary.totalChannelPosts.toLocaleString()}
-            </p>
-            <p className="text-[11px] text-slate-400 mt-1">
-              {analyticsData.summary.scheduledPostsCount} posts scheduled in queue
-            </p>
-          </div>
-
-          <div className="p-4 rounded-xl bg-[#FFFFFF] border border-[#E2E8F0] shadow-card">
-            <div className="flex items-center justify-between text-slate-500 text-xs font-semibold">
-              <span className="flex items-center gap-1.5">
-                <ThumbsUp className="w-4 h-4 text-[#00D2B4]" />
-                Engagement Rate
-              </span>
-              <span className="text-[11px] font-bold text-[#10B981] bg-[#ECFDF5] px-2 py-0.5 rounded-full">
-                +2.4%
-              </span>
-            </div>
-            <p className="text-2xl font-black text-slate-900 mt-2 tracking-tight">
-              {analyticsData.summary.avgViewsPerVideo
-                ? `${((analyticsData.summary.totalVideoLikes || 0) / (analyticsData.summary.totalChannelViews || 1) * 100).toFixed(2)}%`
-                : '4.82%'}
-            </p>
-            <p className="text-[11px] text-slate-400 mt-1">Likes, comments & shares ratio</p>
-          </div>
-        </div>
-      )}
-
-      {/* Full Interactive Evolution & Video Analytics Suite */}
-      {analyticsData && (
-        <AnalyticsCharts
-          summary={analyticsData.summary}
-          accounts={accounts}
-          videos={analyticsData.videos}
-          timeline={analyticsData.timeline}
-          topicInsights={analyticsData.topicInsights}
-          selectedNetwork={selectedNetwork}
-        />
-      )}
-
-      {/* Metricool Interactive Weekly Calendar Planner */}
-      <CalendarView
-        posts={
-          selectedNetwork === 'all'
-            ? posts
-            : posts.filter((p) =>
-                p.targetPlatforms.includes(selectedNetwork as any)
-              )
-        }
-        onPostDeleted={loadData}
-      />
+            {scheduledPosts.length === 0 && (
+              <div className="rounded-xl border border-dashed border-[#D6CBC0] bg-[#FAF6F1] p-6 text-center space-y-2.5">
+                <p className="text-xs text-[#6E655D]">
+                  No upcoming posts in the queue right now.
+                </p>
+                <Button asChild size="sm" variant="secondary">
+                  <Link href="/composer">
+                    <Plus className="w-3.5 h-3.5" />
+                    Schedule a Post
+                  </Link>
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </section>
     </div>
   );
 }

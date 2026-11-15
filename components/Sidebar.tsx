@@ -1,222 +1,183 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { Suspense, useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import {
-  Globe,
-  Share2,
-  Plus,
-  CheckCircle2,
-  BarChart2,
-  Layers,
-  ArrowRight,
-  TrendingUp,
+  LayoutDashboard,
+  CalendarDays,
+  Send,
+  PenSquare,
+  FolderOpen,
+  BarChart3,
+  Link2,
+  Settings,
+  Sparkles,
 } from 'lucide-react';
-import { ConnectedAccount } from '@/lib/types';
-import { cn, PLATFORM_CONFIGS } from '@/lib/utils';
+import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/shadcn/badge';
+import { Separator } from '@/components/ui/shadcn/separator';
+import { ConnectedAccount, ScheduledPost } from '@/lib/types';
 
-export const SOCIAL_CHANNELS = [
-  { id: 'all', label: 'Summary', icon: BarChart2, color: '#00D2B4' },
-  { id: 'website', label: 'Website & Blog', icon: Globe, color: '#596CF2' },
-  { id: 'facebook', label: 'Facebook', icon: null, color: '#1877F2' },
-  { id: 'instagram', label: 'Instagram', icon: null, color: '#E4405F' },
-  { id: 'twitter', label: 'Twitter / X', icon: null, color: '#0F1419' },
-  { id: 'linkedin', label: 'LinkedIn', icon: null, color: '#0A66C2' },
-  { id: 'tiktok', label: 'TikTok', icon: null, color: '#000000' },
-  { id: 'youtube', label: 'YouTube', icon: null, color: '#FF0000' },
-  { id: 'pinterest', label: 'Pinterest', icon: null, color: '#BD081C' },
-  { id: 'twitch', label: 'Twitch', icon: null, color: '#9146FF' },
+const PRIMARY_NAV = [
+  { href: '/', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/publishing', label: 'Content Scheduler', icon: Send, badgeKey: 'posts' as const },
+  { href: '/calendar', label: 'Calendar', icon: CalendarDays },
+  { href: '/composer', label: 'Composer', icon: PenSquare },
+  { href: '/media', label: 'Media Library', icon: FolderOpen },
+  { href: '/analytics', label: 'Analytics', icon: BarChart3 },
+  { href: '/connections', label: 'Connections', icon: Link2, badgeKey: 'accounts' as const },
 ];
 
-function SidebarContent() {
+export default function Sidebar() {
   const pathname = usePathname();
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const currentNetwork = searchParams.get('network') || 'all';
-
-  const [accounts, setAccounts] = useState<ConnectedAccount[]>([]);
   const [brandName, setBrandName] = useState('ZCodeDev');
+  const [postsCount, setPostsCount] = useState<number | null>(null);
+  const [connectedCount, setConnectedCount] = useState<number | null>(null);
+  const [totalAccounts, setTotalAccounts] = useState<number>(8);
 
   useEffect(() => {
-    fetch('/api/accounts')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.accounts) setAccounts(data.accounts);
+    fetch('/api/settings')
+      .then((r) => r.json())
+      .then((d) => {
+        if (d?.settings?.brandName) setBrandName(d.settings.brandName);
       })
       .catch(() => {});
 
-    fetch('/api/settings')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data?.settings?.brandName) setBrandName(data.settings.brandName);
+    fetch('/api/posts')
+      .then((r) => r.json())
+      .then((d) => {
+        if (Array.isArray(d?.posts)) setPostsCount((d.posts as ScheduledPost[]).length);
+      })
+      .catch(() => {});
+
+    fetch('/api/accounts')
+      .then((r) => r.json())
+      .then((d) => {
+        if (Array.isArray(d?.accounts)) {
+          const list = d.accounts as ConnectedAccount[];
+          setTotalAccounts(list.length);
+          setConnectedCount(list.filter((a) => a.isConnected).length);
+        }
       })
       .catch(() => {});
   }, [pathname]);
 
-  const connectedMap = new Map(
-    accounts.map((acc) => [acc.platform, acc.isConnected])
-  );
-
-  const handleSelectNetwork = (channelId: string) => {
-    // If on analytics or home, switch network parameter
-    if (pathname === '/' || pathname === '/analytics') {
-      const params = new URLSearchParams(searchParams.toString());
-      if (channelId === 'all') {
-        params.delete('network');
-      } else {
-        params.set('network', channelId);
-      }
-      router.push(`${pathname}?${params.toString()}`);
-    } else {
-      // Navigate to analytics with selected channel
-      if (channelId === 'all') {
-        router.push('/analytics');
-      } else {
-        router.push(`/analytics?network=${channelId}`);
-      }
-    }
-  };
-
-  const isAnalyticsContext = pathname === '/' || pathname === '/analytics';
-
   return (
-    <aside className="hidden lg:flex w-[230px] flex-shrink-0 bg-[#FFFFFF] border-r border-[#E2E8F0] flex-col justify-between select-none">
-      {/* Top Channel Navigation Rail */}
-      <div className="p-3 space-y-4 overflow-y-auto flex-1">
-        <div>
-          <div className="px-2.5 py-1.5 flex items-center justify-between">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-              Channels & Networks
-            </span>
-            <span className="text-[10px] font-semibold text-[#00D2B4] bg-[#00D2B4]/10 px-1.5 py-0.5 rounded">
-              Active
-            </span>
-          </div>
+    <>
+      <aside className="hidden lg:flex w-[240px] flex-shrink-0 bg-[#F6F1EB] border-r border-[#E7DFD5] flex-col justify-between select-none">
+        {/* Brand + Main Nav */}
+        <div className="p-4 space-y-5 overflow-y-auto flex-1">
+          <Link href="/" className="flex items-center gap-3 px-2 py-1 group">
+            <div className="w-9 h-9 rounded-xl bg-[#EFE9E1] border border-[#E2D9CE] flex items-center justify-center shadow-xs group-hover:bg-[#F5DFCE] transition-colors">
+              <Sparkles className="w-4 h-4 text-[#C27345]" />
+            </div>
+            <div className="min-w-0">
+              <div className="text-[15px] font-bold tracking-tight text-[#1E1B18] truncate">
+                {brandName}
+              </div>
+              <div className="text-[11px] font-medium text-[#6E655D] truncate">
+                Social Planner Pro
+              </div>
+            </div>
+          </Link>
 
-          <div className="mt-1.5 space-y-0.5">
-            {SOCIAL_CHANNELS.map((ch) => {
-              const isSelected = isAnalyticsContext && currentNetwork === ch.id;
-              const isConnected = ch.id === 'all' || ch.id === 'website' || connectedMap.get(ch.id as any);
-              const Icon = ch.icon;
+          <nav className="space-y-1" aria-label="Main navigation">
+            {PRIMARY_NAV.map((item) => {
+              const Icon = item.icon;
+              const isActive =
+                item.href === '/'
+                  ? pathname === '/'
+                  : pathname.startsWith(item.href);
+
+              let badgeText: string | null = null;
+              if (item.badgeKey === 'posts' && postsCount !== null) {
+                badgeText = String(postsCount);
+              } else if (item.badgeKey === 'accounts' && connectedCount !== null) {
+                badgeText = `${connectedCount}/${totalAccounts}`;
+              }
 
               return (
-                <button
-                  key={ch.id}
-                  type="button"
-                  onClick={() => handleSelectNetwork(ch.id)}
+                <Link
+                  key={item.href}
+                  href={item.href}
                   className={cn(
-                    'w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-xs font-medium transition-all group text-left',
-                    isSelected
-                      ? 'bg-[#E6FAF7] text-[#00A38C] font-semibold shadow-xs'
-                      : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                    'flex items-center justify-between gap-2.5 px-3 py-2.5 rounded-xl text-[13px] font-medium transition-all',
+                    isActive
+                      ? 'bg-[#F5DFCE] text-[#8D451E] font-semibold shadow-xs border border-[#EACBB4]/70'
+                      : 'text-[#4E463F] hover:bg-[#EFE9E1] hover:text-[#1E1B18] border border-transparent'
                   )}
                 >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    {Icon ? (
-                      <div
-                        className="w-5 h-5 rounded flex items-center justify-center flex-shrink-0 text-white"
-                        style={{ backgroundColor: ch.color }}
-                      >
-                        <Icon className="w-3.5 h-3.5 stroke-[2.5]" />
-                      </div>
-                    ) : (
-                      <div
-                        className="w-5 h-5 rounded flex items-center justify-center flex-shrink-0 text-white text-[10px] font-bold shadow-xs"
-                        style={{ backgroundColor: ch.color }}
-                      >
-                        {ch.label.charAt(0)}
-                      </div>
-                    )}
-                    <span className="truncate">{ch.label}</span>
-                  </div>
-
-                  <div className="flex items-center gap-1">
-                    {isConnected && ch.id !== 'all' && (
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#10B981]" title="Connected" />
-                    )}
-                    {isSelected && (
-                      <span className="w-1 h-3.5 bg-[#00D2B4] rounded-full ml-1" />
-                    )}
-                  </div>
-                </button>
+                  <span className="flex items-center gap-2.5 min-w-0">
+                    <Icon
+                      className={cn(
+                        'w-4 h-4 flex-shrink-0',
+                        isActive ? 'text-[#C27345]' : 'text-[#7C7268]'
+                      )}
+                    />
+                    <span className="truncate">{item.label}</span>
+                  </span>
+                  {badgeText && (
+                    <Badge
+                      variant={isActive ? 'peach' : 'outline'}
+                      className="px-2 py-0 text-[10px] font-semibold tabular-nums"
+                    >
+                      {badgeText}
+                    </Badge>
+                  )}
+                </Link>
               );
             })}
-          </div>
+          </nav>
         </div>
 
-        {/* Workspace Quick Links */}
-        <div className="pt-2 border-t border-slate-100">
-          <div className="px-2.5 py-1">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-              Workspace
-            </span>
-          </div>
-          <div className="mt-1 space-y-0.5">
-            <Link
-              href="/calendar"
-              className={cn(
-                'flex items-center justify-between px-2.5 py-2 rounded-lg text-xs font-medium transition-colors',
-                pathname === '/calendar'
-                  ? 'bg-[#E6FAF7] text-[#00A38C] font-semibold'
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-              )}
-            >
-              <span>Content Calendar</span>
-            </Link>
-            <Link
-              href="/composer"
-              className={cn(
-                'flex items-center justify-between px-2.5 py-2 rounded-lg text-xs font-medium transition-colors',
-                pathname === '/composer'
-                  ? 'bg-[#E6FAF7] text-[#00A38C] font-semibold'
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-              )}
-            >
-              <span>Post Composer</span>
-            </Link>
-            <Link
-              href="/publishing"
-              className={cn(
-                'flex items-center justify-between px-2.5 py-2 rounded-lg text-xs font-medium transition-colors',
-                pathname === '/publishing'
-                  ? 'bg-[#E6FAF7] text-[#00A38C] font-semibold'
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-              )}
-            >
-              <span>Publishing Queue</span>
-            </Link>
+        {/* Bottom Utility Section */}
+        <div className="p-4 pt-2 space-y-3">
+          <Separator />
+          <Link
+            href="/settings"
+            className={cn(
+              'flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] font-medium transition-colors',
+              pathname.startsWith('/settings')
+                ? 'bg-[#F5DFCE] text-[#8D451E] font-semibold'
+                : 'text-[#4E463F] hover:bg-[#EFE9E1] hover:text-[#1E1B18]'
+            )}
+          >
+            <Settings className="w-4 h-4 text-[#7C7268]" />
+            <span>Settings</span>
+          </Link>
+
+          <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white border border-[#E7DFD5] text-[11px] font-medium text-[#4E463F]">
+            <span className="w-2 h-2 rounded-full bg-[#3A8E63] flex-shrink-0" />
+            <span className="truncate">Synced & Protected</span>
           </div>
         </div>
-      </div>
+      </aside>
 
-      {/* Bottom Connect Platform Callout */}
-      <div className="p-3 border-t border-[#E2E8F0] bg-slate-50/50">
-        <Link
-          href="/connections"
-          className="flex items-center justify-between p-2.5 rounded-lg bg-[#FFFFFF] border border-[#E2E8F0] hover:border-[#00D2B4] text-slate-700 text-xs font-medium shadow-xs transition-all group"
-        >
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-md bg-[#00D2B4]/15 text-[#00A38C] flex items-center justify-center">
-              <Share2 className="w-3.5 h-3.5" />
-            </div>
-            <span className="font-semibold text-slate-800">Add Network</span>
-          </div>
-          <Plus className="w-4 h-4 text-slate-400 group-hover:text-[#00D2B4] transition-colors" />
-        </Link>
-      </div>
-    </aside>
-  );
-}
-
-export default function Sidebar() {
-  return (
-    <Suspense
-      fallback={
-        <aside className="hidden lg:flex w-[240px] flex-shrink-0 bg-[#FFFFFF] border-r border-[#E2E8F0]" />
-      }
-    >
-      <SidebarContent />
-    </Suspense>
+      {/* Mobile Bottom Navigation */}
+      <nav
+        aria-label="Mobile navigation"
+        className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#F6F1EB]/95 backdrop-blur border-t border-[#E7DFD5] px-2 py-1.5 flex items-center justify-around"
+      >
+        {PRIMARY_NAV.slice(0, 5).map((item) => {
+          const Icon = item.icon;
+          const isActive =
+            item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={cn(
+                'flex flex-col items-center gap-0.5 px-2.5 py-1 rounded-lg text-[10px] font-medium',
+                isActive ? 'text-[#8D451E] bg-[#F5DFCE]' : 'text-[#6E655D]'
+              )}
+            >
+              <Icon className="w-4 h-4" />
+              <span>{item.label.split(' ')[0]}</span>
+            </Link>
+          );
+        })}
+      </nav>
+    </>
   );
 }

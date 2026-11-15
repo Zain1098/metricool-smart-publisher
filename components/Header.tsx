@@ -1,267 +1,153 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import {
-  RefreshCw,
-  Clock,
-  Menu,
-  X,
   Plus,
-  ChevronDown,
+  RefreshCw,
+  Search,
+  LogOut,
+  Check,
   Sparkles,
-  CheckCircle2,
-  Bell,
 } from 'lucide-react';
-import { ConnectedAccount } from '@/lib/types';
-import { cn } from '@/lib/utils';
-import { NAV_ITEMS, getNavItemForPath } from './navigation';
-import { useToast } from './ui/Toast';
+import { Button } from '@/components/ui/shadcn/button';
+import { Input } from '@/components/ui/shadcn/input';
+
+const PAGE_TITLES: Record<string, string> = {
+  '/': 'Dashboard',
+  '/publishing': 'Content Scheduler',
+  '/calendar': 'Calendar',
+  '/composer': 'Composer',
+  '/media': 'Media Library',
+  '/analytics': 'Analytics',
+  '/connections': 'Connections',
+  '/settings': 'Settings',
+};
 
 export default function Header() {
   const pathname = usePathname();
-  const { pushToast } = useToast();
-  const [isSyncing, setIsSyncing] = useState(false);
+  const router = useRouter();
   const [brandName, setBrandName] = useState('ZCodeDev');
-  const [timezone, setTimezone] = useState('Asia/Karachi');
-  const [accounts, setAccounts] = useState<ConnectedAccount[]>([]);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [brandDropdownOpen, setBrandDropdownOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncDone, setSyncDone] = useState(false);
 
   useEffect(() => {
     fetch('/api/settings')
       .then((res) => res.json())
       .then((data) => {
-        if (data.settings) {
-          if (data.settings.brandName) setBrandName(data.settings.brandName);
-          if (data.settings.timezone) setTimezone(data.settings.timezone);
-        }
+        if (data?.settings?.brandName) setBrandName(data.settings.brandName);
       })
       .catch(() => {});
-
-    fetch('/api/accounts')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.accounts) setAccounts(data.accounts);
-      })
-      .catch(() => {});
-
-    setMobileMenuOpen(false);
   }, [pathname]);
+
+  const pageTitle = PAGE_TITLES[pathname] || 'Studio';
 
   const handleSync = async () => {
     setIsSyncing(true);
+    setSyncDone(false);
     try {
-      const [cronRes, verifyRes] = await Promise.all([
-        fetch('/api/cron').then((r) => r.json()),
+      await Promise.all([
         fetch('/api/accounts/auto-connect', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ type: 'sync_vault' }),
-        }).then((r) => r.json()),
+        }),
+        fetch('/api/analytics', { method: 'POST' }),
       ]);
-      if (verifyRes.accounts) setAccounts(verifyRes.accounts);
-      pushToast({
-        type: 'success',
-        title: 'Channels & Scheduler Synced',
-        description:
-          verifyRes.message ||
-          cronRes.message ||
-          'Connected channels and scheduler queues successfully refreshed.',
-      });
+      setSyncDone(true);
+      setTimeout(() => setSyncDone(false), 2500);
+      router.refresh();
     } catch {
-      pushToast({
-        type: 'info',
-        title: 'Sync completed',
-      });
+      // ignore
     } finally {
       setIsSyncing(false);
     }
   };
 
-  const connectedAccounts = accounts.filter((a) => a.isConnected);
+  const handleLogout = async () => {
+    await fetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
+    router.push('/login');
+    router.refresh();
+  };
 
-  // Top navigation tabs as in Metricool
-  const topNavTabs = [
-    { href: '/', label: 'Analytics' },
-    { href: '/calendar', label: 'Planning' },
-    { href: '/composer', label: 'Composer' },
-    { href: '/publishing', label: 'Inbox & Queue' },
-    { href: '/media', label: 'Media Library' },
-    { href: '/connections', label: 'Connections' },
-    { href: '/settings', label: 'Settings' },
-  ];
-
-  const isCurrentActive = (href: string) => {
-    if (href === '/') return pathname === '/' || pathname === '/analytics';
-    return pathname.startsWith(href);
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/publishing?q=${encodeURIComponent(searchQuery.trim())}`);
+    }
   };
 
   return (
-    <>
-      <header className="h-[56px] px-4 sm:px-6 bg-[#0D1525] border-b border-[#1C273C] flex items-center justify-between gap-4 flex-shrink-0 z-30 select-none">
-        {/* Left: Metricool Brand Logo + Brand Selector */}
-        <div className="flex items-center gap-4 lg:gap-6 min-w-0">
-          <Link href="/" className="flex items-center gap-2 flex-shrink-0 group">
-            {/* Metricool Authentic Stylized Emblem */}
-            <div className="w-8 h-8 rounded-full bg-[#00D2B4] flex items-center justify-center text-[#0D1525] font-black text-lg tracking-tighter shadow-sm group-hover:scale-105 transition-transform">
-              <span>m</span>
-            </div>
-            <div className="flex items-center">
-              <span className="text-white font-bold text-[17px] tracking-tight">metricool</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-[#00D2B4] ml-0.5 mb-2.5" />
-            </div>
-          </Link>
-
-          {/* Brand / Client Selector Dropdown */}
-          <div className="relative hidden md:block">
-            <button
-              type="button"
-              onClick={() => setBrandDropdownOpen((p) => !p)}
-              className="flex items-center gap-2 h-8 px-2.5 rounded-md bg-[#172236] hover:bg-[#1E2C44] border border-[#25354F] text-slate-200 text-xs font-medium transition-colors"
-            >
-              <div className="w-4 h-4 rounded-full bg-[#00D2B4]/20 text-[#00D2B4] flex items-center justify-center text-[10px] font-bold">
-                {brandName.charAt(0).toUpperCase()}
-              </div>
-              <span className="truncate max-w-[120px]">{brandName}</span>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
-            </button>
-
-            {brandDropdownOpen && (
-              <div className="absolute top-10 left-0 w-56 rounded-lg bg-[#121A2B] border border-[#25354F] shadow-xl py-1 z-50">
-                <div className="px-3 py-1.5 border-b border-[#25354F]/60">
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Active Workspace</p>
-                  <p className="text-xs font-bold text-white mt-0.5">{brandName} Studio</p>
-                </div>
-                <div className="p-1">
-                  <div className="px-2.5 py-1.5 rounded text-xs text-[#00D2B4] font-medium bg-[#00D2B4]/10 flex items-center justify-between">
-                    <span>{brandName}</span>
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                  </div>
-                  <Link
-                    href="/settings"
-                    onClick={() => setBrandDropdownOpen(false)}
-                    className="block px-2.5 py-1.5 rounded text-xs text-slate-300 hover:bg-[#1C273C] hover:text-white transition-colors mt-1"
-                  >
-                    Manage Brands & Settings
-                  </Link>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Horizontal Top Navigation Tabs (Metricool Standard) */}
-          <nav className="hidden lg:flex items-center gap-1 h-[56px] ml-2">
-            {topNavTabs.map((tab) => {
-              const active = isCurrentActive(tab.href);
-              return (
-                <Link
-                  key={tab.href}
-                  href={tab.href}
-                  className={cn(
-                    'relative h-[56px] px-3.5 flex items-center text-[13px] font-medium transition-colors',
-                    active
-                      ? 'text-white font-semibold'
-                      : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.03]'
-                  )}
-                >
-                  {tab.label}
-                  {active && (
-                    <span className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#00D2B4] rounded-t-full shadow-[0_0_8px_rgba(0,210,180,0.5)]" />
-                  )}
-                </Link>
-              );
-            })}
-          </nav>
+    <header className="h-[68px] flex-shrink-0 bg-[#FAF6F1] border-b border-[#E7DFD5] px-4 md:px-7 flex items-center justify-between gap-4">
+      {/* Left: Page Title & Greeting */}
+      <div className="min-w-0 flex items-center gap-3">
+        <div className="lg:hidden w-8 h-8 rounded-lg bg-[#F5DFCE] border border-[#EACBB4] flex items-center justify-center">
+          <Sparkles className="w-4 h-4 text-[#C27345]" />
         </div>
-
-        {/* Right Controls: Sync, Timezone, Pro Badge, and Create Post */}
-        <div className="flex items-center gap-2.5 flex-shrink-0">
-          {/* Connected Channels Counter */}
-          <Link
-            href="/connections"
-            className="hidden sm:flex items-center gap-1.5 h-8 px-2.5 rounded-full bg-[#172236] hover:bg-[#1E2C44] border border-[#25354F] text-[11px] text-slate-300 transition-colors"
-            title="Connected social profiles"
-          >
-            <span className="w-2 h-2 rounded-full bg-[#00D2B4]" />
-            <span>
-              <strong className="text-white font-semibold">{connectedAccounts.length}</strong> / 8 Channels
-            </span>
-          </Link>
-
-          {/* Timezone pill */}
-          <div className="hidden xl:flex items-center gap-1.5 h-8 px-2.5 rounded-full bg-[#172236] border border-[#25354F] text-[11px] text-slate-400 font-mono">
-            <Clock className="w-3.5 h-3.5 text-[#00D2B4]" />
-            <span>{timezone.split('/')[1] || timezone}</span>
-          </div>
-
-          {/* Live Sync button */}
-          <button
-            type="button"
-            onClick={handleSync}
-            disabled={isSyncing}
-            className="h-8 px-2.5 sm:px-3 rounded-lg bg-[#172236] hover:bg-[#1E2C44] border border-[#25354F] text-slate-200 text-xs font-medium flex items-center gap-1.5 transition-colors disabled:opacity-60"
-            title="Refresh channel statistics & queue"
-          >
-            <RefreshCw
-              className={cn(
-                'w-3.5 h-3.5',
-                isSyncing ? 'animate-spin text-[#00D2B4]' : 'text-[#00D2B4]'
-              )}
-            />
-            <span className="hidden md:inline">
-              {isSyncing ? 'Syncing...' : 'Sync Data'}
-            </span>
-          </button>
-
-          {/* Metricool Primary Action: Create Post */}
-          <Link
-            href="/composer"
-            className="h-8 px-3.5 rounded-lg bg-[#00D2B4] hover:bg-[#00BFA3] text-[#0D1525] text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all hover:shadow"
-          >
-            <Plus className="w-4 h-4 stroke-[2.5]" />
-            <span>Create Post</span>
-          </Link>
-
-          {/* Mobile drawer toggle */}
-          <button
-            type="button"
-            onClick={() => setMobileMenuOpen((prev) => !prev)}
-            className="lg:hidden h-8 w-8 rounded-lg bg-[#172236] hover:bg-[#1E2C44] border border-[#25354F] text-slate-200 flex items-center justify-center flex-shrink-0"
-            aria-label="Toggle navigation"
-          >
-            {mobileMenuOpen ? <X className="w-4 h-4 text-[#00D2B4]" /> : <Menu className="w-4 h-4" />}
-          </button>
+        <div className="min-w-0">
+          <h1 className="text-lg md:text-xl font-bold tracking-tight text-[#1E1B18] leading-tight truncate">
+            {pageTitle}
+          </h1>
+          <p className="text-xs text-[#6E655D] truncate">
+            Welcome back, <span className="font-medium text-[#4E463F]">{brandName}</span>
+          </p>
         </div>
-      </header>
+      </div>
 
-      {/* Mobile Drawer Menu */}
-      {mobileMenuOpen && (
-        <div className="lg:hidden fixed inset-x-0 top-[56px] bottom-0 z-40 bg-[#0D1525]/95 backdrop-blur-md p-4 overflow-y-auto border-b border-[#1C273C]">
-          <div className="space-y-1">
-            {topNavTabs.map((tab) => {
-              const active = isCurrentActive(tab.href);
-              return (
-                <Link
-                  key={tab.href}
-                  href={tab.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={cn(
-                    'flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors',
-                    active
-                      ? 'bg-[#00D2B4]/15 text-[#00D2B4] font-semibold'
-                      : 'text-slate-300 hover:bg-white/[0.05]'
-                  )}
-                >
-                  <span>{tab.label}</span>
-                  {active && <span className="w-1.5 h-1.5 rounded-full bg-[#00D2B4]" />}
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-      )}
-    </>
+      {/* Center: Global Search */}
+      <form
+        onSubmit={handleSearchSubmit}
+        className="hidden md:flex flex-1 max-w-md relative"
+      >
+        <Search className="w-4 h-4 text-[#8E847A] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+        <Input
+          type="search"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search posts, campaigns, channels..."
+          className="pl-9 bg-[#F3EDE5] border-[#E2D9CE] focus:bg-white h-9 text-xs"
+        />
+      </form>
+
+      {/* Right: Actions */}
+      <div className="flex items-center gap-2 flex-shrink-0">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={handleSync}
+          disabled={isSyncing}
+          className="hidden sm:inline-flex text-xs"
+        >
+          {syncDone ? (
+            <Check className="w-3.5 h-3.5 text-[#3A8E63]" />
+          ) : (
+            <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
+          )}
+          <span>{syncDone ? 'Synced' : isSyncing ? 'Syncing...' : 'Sync'}</span>
+        </Button>
+
+        <Button asChild size="sm" className="font-semibold">
+          <Link href="/composer">
+            <Plus className="w-4 h-4" />
+            <span>New Post</span>
+          </Link>
+        </Button>
+
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          onClick={handleLogout}
+          title="Sign out"
+          aria-label="Sign out"
+          className="text-[#6E655D] hover:text-[#1E1B18]"
+        >
+          <LogOut className="w-4 h-4" />
+        </Button>
+      </div>
+    </header>
   );
 }
