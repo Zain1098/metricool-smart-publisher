@@ -1,78 +1,117 @@
-# Metricool Smart Social Publisher 🚀
-### Autonomous Multi-Platform Social Media Scheduler & Video Autopilot (Next.js + Vercel Ready)
+# Metricool Smart Social Publisher
 
-**Metricool Smart Social Publisher** is a modern full-stack web platform designed to schedule and publish vertical short-form videos across **YouTube Shorts**, **Instagram Reels**, **TikTok**, **Facebook Reels**, **X (Twitter)**, and **LinkedIn** with platform-specific tailoring (titles, captions, hashtags, and privacy settings) and an interactive visual calendar.
+### Multi-Platform Social Media Scheduler & Video Publishing Studio (Next.js + Supabase + R2)
 
----
-
-## 🌟 Key Features
-
-1. **Multi-Channel Video Composer:**
-   - Single video upload (MP4, MOV, WebM) with automatic aspect ratio, duration, and file size detection.
-   - Master caption and global hashtags auto-sync across all selected networks.
-   - Tailored tab-by-tab overrides:
-     - **YouTube Shorts:** Video title (100 char limit), Description (5000 char limit), Shorts toggle, Visibility (Public, Unlisted, Private).
-     - **Instagram Reels:** Caption (2200 char limit), Reels toggle, First Comment (for hashtags & links).
-     - **TikTok:** Caption (2200 char limit), Allow Duet / Allow Stitch toggles.
-     - **Facebook Reels:** Caption & Reels toggle.
-     - **X (Twitter):** 280 character counter with progress indicator.
-     - **LinkedIn:** Caption & Post visibility.
-   - Live Phone Simulation Mockup for real-time visual preview.
-
-2. **Visual Interactive Calendar:**
-   - 7-day and monthly timeline view.
-   - **Algorithmic Best Time to Post Heatmap** (Peak audience activity indicators).
-   - Instant 1-click slot scheduling.
-
-3. **1-Click OAuth Social Connections:**
-   - Metricool-style connection dashboard.
-   - End-users simply click "Connect Account" without entering raw developer API keys.
-
-4. **Performance & Growth Analytics:**
-   - Unified audience reach, views, likes, shares, and engagement rates across all networks.
-   - Cross-platform audience share breakdown.
-
-5. **20 Free Posts Tier:**
-   - Free monthly post limit tracker with progress bar, exactly like Metricool's free plan.
+**Metricool Smart Social Publisher** is a full-stack web platform for scheduling and publishing short-form videos and posts across **YouTube Shorts**, **Instagram Reels**, **TikTok**, **Facebook Reels**, **X (Twitter)**, **Threads**, **LinkedIn**, and **Pinterest** with platform-specific tailoring, a media library, publishing queue, analytics, and an interactive visual calendar.
 
 ---
 
-## 🛠️ Tech Stack
+## Key Features
+
+1. **Multi-Channel Video Composer (`/composer`):**
+   - Video upload (MP4, MOV, WebM) with aspect ratio, duration, and file size detection.
+   - Master caption and global hashtags that sync across selected networks.
+   - Platform-specific overrides (YouTube Shorts title/description/visibility, Instagram Reels first comment, TikTok Duet/Stitch toggles, X 280-char counter, LinkedIn visibility) with live mobile preview.
+
+2. **Visual Interactive Calendar (`/calendar`):**
+   - Weekly and monthly timeline views with Best Time to Post heatmap and 1-click slot scheduling.
+
+3. **Media Library & Publishing Queue (`/media`, `/publishing`):**
+   - Manage uploaded video assets (local or Cloudflare R2 presigned/multipart uploads) and track scheduled, queued, published, and failed jobs.
+
+4. **Social Connections (`/connections`):**
+   - Unified connection dashboard supporting Postiz-proxied channels or direct platform OAuth credentials.
+
+5. **Performance & Growth Analytics (`/analytics`):**
+   - Cross-platform audience reach, views, likes, comments, and growth snapshots.
+
+---
+
+## Tech Stack
 
 - **Framework:** Next.js 14 (App Router) + React 18 + TypeScript
 - **Styling:** Tailwind CSS + Lucide Icons
-- **Storage & State:** Dual Mode (Built-in Local JSON / Serverless Memory + Plug & Play Supabase & Cloudflare R2 / AWS S3)
-- **Deployment:** Vercel (with `vercel.json` and Vercel Cron trigger)
+- **Storage & State (Dual Mode):**
+  - **Local Mode (Default):** Works out-of-the-box with local JSON storage (`data/store.json`) and local uploads — no external database required to try it locally.
+  - **Production Mode:** PostgreSQL via **Supabase** + **Cloudflare R2** (S3-compatible) media storage + **Postiz** publishing engine.
+- **Deployment:** Vercel (`vercel.json` with Cron) or Netlify (`netlify.toml`)
 
 ---
 
-## 🚀 Quick Start (Local Development)
+## Quick Start (Local Development)
+
+### Prerequisites
+- **Node.js** 18+ (20+ recommended)
+- **npm**
+
+### 1. Clone & Install
+```bash
+git clone <your-repo-url>
+cd metricool-smart-publisher
+npm install
+```
+
+### 2. Configure Environment Variables
+Copy the example template to `.env.local`:
 
 ```bash
-# 1. Install dependencies
-npm install
+# macOS / Linux
+cp .env.example .env.local
 
-# 2. Run local development server
+# Windows (PowerShell / CMD)
+copy .env.example .env.local
+```
+
+> **Tip:** To run locally in demo/local mode, you can leave the external keys blank in `.env.local` and the app will automatically fall back to local storage.
+
+### 3. Run Development Server
+```bash
 npm run dev
+```
 
-# 3. Open in browser
-http://localhost:3000
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+---
+
+## Production Setup (Supabase + Cloudflare R2 + Postiz)
+
+1. **Database (Supabase):**
+   - Create a Supabase project and run the SQL migration in [`supabase/migrations/20261111000001_metricool_schema.sql`](supabase/migrations/20261111000001_metricool_schema.sql).
+   - Set `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` in your environment variables.
+2. **Media Storage (Cloudflare R2):**
+   - Configure `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME`, and `NEXT_PUBLIC_R2_PUBLIC_URL`.
+3. **Publishing Engine (Postiz — Optional):**
+   - See [`docs/POSTIZ_DEPLOYMENT_GUIDE.md`](docs/POSTIZ_DEPLOYMENT_GUIDE.md) for self-hosting Postiz with Docker Compose (`docs/docker-compose.postiz.yml`).
+   - Set `POSTIZ_API_URL`, `POSTIZ_API_KEY`, and `POSTIZ_WEBHOOK_SECRET`.
+4. **Cron Secret:**
+   - Generate a strong random string for `CRON_SECRET` to protect `/api/cron`.
+
+---
+
+## Deploy to Vercel
+
+1. Fork or push this repository to your GitHub account.
+2. Go to [Vercel Dashboard](https://vercel.com/new) and import your repository.
+3. Framework Preset will automatically detect **Next.js**.
+4. Add your environment variables from `.env.example` in Vercel Project Settings.
+5. Click **Deploy**.
+6. `vercel.json` configures Vercel Cron to trigger `/api/cron` every minute for scheduled posts.
+
+---
+
+## Build & Verification
+
+```bash
+# Production build & typecheck
+npm run build
+
+# Lint check
+npm run lint
 ```
 
 ---
 
-## 🌐 Deploy to Vercel in 1 Click
-
-1. Push this repository to your GitHub account (`Zain1098`).
-2. Go to [Vercel Dashboard](https://vercel.com/new).
-3. Import this repository.
-4. Framework Preset will automatically detect **Next.js**.
-5. Click **Deploy**!
-6. Vercel Cron will automatically trigger `/api/cron` every minute to check and publish scheduled posts.
-
----
-
-## 📁 Repository Structure
+## Repository Structure
 
 ```text
 ├── app/
@@ -80,13 +119,19 @@ http://localhost:3000
 │   ├── page.tsx               # Overview Dashboard
 │   ├── composer/page.tsx      # Multi-Channel Video Composer & Editor
 │   ├── calendar/page.tsx      # Interactive Visual Scheduler
+│   ├── media/page.tsx         # Media Asset Library
+│   ├── publishing/page.tsx    # Publishing Queue & Job Logs
 │   ├── analytics/page.tsx     # Performance & Growth Analytics
-│   ├── connections/page.tsx   # 1-Click Social Media OAuth Connections
+│   ├── connections/page.tsx   # Social Media Connections
 │   ├── settings/page.tsx      # Brand settings & timezone configuration
-│   └── api/                   # REST API routes (posts, accounts, analytics, cron)
+│   ├── login/page.tsx         # Authentication page
+│   └── api/                   # REST API routes (posts, accounts, media, r2, postiz, cron)
 ├── components/                # Modular UI components
-├── lib/                       # Types, utilities, and Dual-Mode data store
-├── legacy-python/             # Preserved Python scripts from previous version
+├── lib/                       # Types, utilities, R2/Postiz/Supabase adapters & dual-mode store
+├── supabase/migrations/       # PostgreSQL schema migrations
+├── docs/                      # Postiz deployment guide & verification reports
+├── legacy-python/             # Archived Python implementation
 ├── vercel.json                # Vercel deployment & cron job definition
-└── .env.example               # Production environment variable template
+├── netlify.toml               # Netlify deployment configuration
+└── .env.example               # Environment variable template
 ```
