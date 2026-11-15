@@ -70,3 +70,4 @@ tsconfig.tsbuildinfo
 *.exe
 *.png
 AUDIT.md
+deploy-*.zip
