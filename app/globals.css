@@ -27,6 +27,17 @@
   border-color: #E7DFD5;
 }
 
+input:not([type="checkbox"]):not([type="radio"]),
+textarea,
+select {
+  color: #1E1B18;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #958B81;
+}
+
 html,
 body {
   color: #1E1B18;

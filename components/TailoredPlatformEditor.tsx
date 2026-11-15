@@ -219,7 +219,7 @@ export default function TailoredPlatformEditor({
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-[11px] text-slate-400 font-mono">
+            <span className="text-[11px] text-[#6E655D] font-mono">
               {(override.caption ?? globalCaption).length}/{cfg.charLimit} chars
             </span>
             <button
@@ -260,7 +260,7 @@ export default function TailoredPlatformEditor({
                     : `${cfg.name} AI-Generated Content Disclosure`}
                 </span>
               </div>
-              <p className="text-[10px] text-slate-400 leading-snug">
+              <p className="text-[10px] text-[#6E655D] leading-snug">
                 {plat === 'youtube'
                   ? 'Sends official status.containsSyntheticMedia=true to YouTube Data API v3.'
                   : plat === 'instagram' || plat === 'facebook'
@@ -291,7 +291,7 @@ export default function TailoredPlatformEditor({
                 <Shield className="w-3.5 h-3.5 text-status-success flex-shrink-0" />
                 <span>Paid Promotion / Branded Content Disclosure</span>
               </div>
-              <p className="text-[10px] text-slate-400 leading-snug">
+              <p className="text-[10px] text-[#6E655D] leading-snug">
                 Discloses sponsorship, brand partnership, or commercial product placement on {cfg.name}.
               </p>
             </div>
@@ -302,7 +302,7 @@ export default function TailoredPlatformEditor({
         {cfg.fields.hasTitle && (
           <div className="space-y-1">
             <div className="flex items-center justify-between">
-              <label className="text-[11px] font-bold text-slate-200 flex items-center gap-1.5">
+              <label className="text-[11px] font-bold text-[#4E463F] flex items-center gap-1.5">
                 <FileText className="w-3.5 h-3.5 text-accent-soft" />
                 <span>
                   {plat === 'youtube'
@@ -310,7 +310,7 @@ export default function TailoredPlatformEditor({
                     : `${cfg.name} Video / Post Title`}
                 </span>
               </label>
-              <span className="text-[10px] font-mono text-slate-400">
+              <span className="text-[10px] font-mono text-[#6E655D]">
                 {override.title?.length || 0}/100
               </span>
             </div>
@@ -322,7 +322,7 @@ export default function TailoredPlatformEditor({
               }
               placeholder={`Enter ${cfg.name} title (or click "Generate with AI" above)...`}
               maxLength={100}
-              className="w-full px-3 py-2 rounded-lg bg-studio-surface border border-studio-border text-slate-100 text-xs focus:outline-none focus:border-accent/60"
+              className="w-full px-3 py-2 rounded-lg bg-studio-surface border border-studio-border text-[#1E1B18] text-xs focus:outline-none focus:border-accent/60"
             />
           </div>
         )}
@@ -330,12 +330,12 @@ export default function TailoredPlatformEditor({
         {/* Platform Specific Caption / Description */}
         <div className="space-y-1">
           <div className="flex items-center justify-between">
-            <label className="text-[11px] font-bold text-slate-200">
+            <label className="text-[11px] font-bold text-[#4E463F]">
               {plat === 'youtube'
                 ? 'YouTube Video Description & Hashtags'
                 : `${cfg.name} Custom Caption & Hashtags`}
             </label>
-            <span className="text-[10px] text-slate-400">
+            <span className="text-[10px] text-[#6E655D]">
               Customizes text for {cfg.name} only
             </span>
           </div>
@@ -346,7 +346,7 @@ export default function TailoredPlatformEditor({
             }
             rows={3}
             placeholder={`Write custom caption/description for ${cfg.name}...`}
-            className="w-full p-2.5 rounded-lg bg-studio-surface border border-studio-border text-slate-100 text-xs focus:outline-none focus:border-accent/60 resize-y"
+            className="w-full p-2.5 rounded-lg bg-studio-surface border border-studio-border text-[#1E1B18] text-xs focus:outline-none focus:border-accent/60 resize-y"
           />
         </div>
 
@@ -360,7 +360,7 @@ export default function TailoredPlatformEditor({
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
               <div>
-                <label className="text-[10px] font-semibold text-slate-400 block mb-1">
+                <label className="text-[10px] font-semibold text-[#6E655D] block mb-1">
                   Format Type
                 </label>
                 <select
@@ -379,7 +379,7 @@ export default function TailoredPlatformEditor({
               </div>
 
               <div>
-                <label className="text-[10px] font-semibold text-slate-400 block mb-1">
+                <label className="text-[10px] font-semibold text-[#6E655D] block mb-1">
                   Privacy Visibility
                 </label>
                 <select
@@ -401,7 +401,7 @@ export default function TailoredPlatformEditor({
               </div>
 
               <div>
-                <label className="text-[10px] font-semibold text-slate-400 block mb-1">
+                <label className="text-[10px] font-semibold text-[#6E655D] block mb-1">
                   YouTube Category
                 </label>
                 <select
@@ -420,7 +420,7 @@ export default function TailoredPlatformEditor({
               </div>
 
               <div>
-                <label className="text-[10px] font-semibold text-slate-400 block mb-1">
+                <label className="text-[10px] font-semibold text-[#6E655D] block mb-1">
                   Audience (COPPA Compliance)
                 </label>
                 <select
@@ -438,7 +438,7 @@ export default function TailoredPlatformEditor({
               </div>
 
               <div>
-                <label className="text-[10px] font-semibold text-slate-400 block mb-1">
+                <label className="text-[10px] font-semibold text-[#6E655D] block mb-1">
                   Video License
                 </label>
                 <select
@@ -458,7 +458,7 @@ export default function TailoredPlatformEditor({
               </div>
 
               <div>
-                <label className="text-[10px] font-semibold text-slate-400 flex items-center gap-1 mb-1">
+                <label className="text-[10px] font-semibold text-[#6E655D] flex items-center gap-1 mb-1">
                   <Globe className="w-2.5 h-2.5 text-status-success" />
                   <span>Audio &amp; Title Language</span>
                 </label>
@@ -480,7 +480,7 @@ export default function TailoredPlatformEditor({
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               <div>
-                <label className="text-[10px] font-semibold text-slate-400 flex items-center gap-1 mb-1">
+                <label className="text-[10px] font-semibold text-[#6E655D] flex items-center gap-1 mb-1">
                   <Tag className="w-2.5 h-2.5 text-status-success" />
                   <span>YouTube Search Tags (comma-separated, up to 35)</span>
                 </label>
@@ -503,7 +503,7 @@ export default function TailoredPlatformEditor({
               </div>
 
               <div>
-                <label className="text-[10px] font-semibold text-slate-400 flex items-center gap-1 mb-1">
+                <label className="text-[10px] font-semibold text-[#6E655D] flex items-center gap-1 mb-1">
                   <ListPlus className="w-2.5 h-2.5 text-accent-soft" />
                   <span>Auto-Add to YouTube Playlist ID (Optional)</span>
                 </label>
@@ -520,7 +520,7 @@ export default function TailoredPlatformEditor({
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
-              <label className="flex items-center gap-2 p-2 rounded bg-studio-subtle border border-studio-border cursor-pointer text-xs text-slate-200">
+              <label className="flex items-center gap-2 p-2 rounded bg-studio-subtle border border-studio-border cursor-pointer text-xs text-[#4E463F]">
                 <input
                   type="checkbox"
                   checked={override.embeddable !== false}
@@ -534,7 +534,7 @@ export default function TailoredPlatformEditor({
                 <span>Allow Video Embedding</span>
               </label>
 
-              <label className="flex items-center gap-2 p-2 rounded bg-studio-subtle border border-studio-border cursor-pointer text-xs text-slate-200">
+              <label className="flex items-center gap-2 p-2 rounded bg-studio-subtle border border-studio-border cursor-pointer text-xs text-[#4E463F]">
                 <input
                   type="checkbox"
                   checked={override.notifySubscribers !== false}
@@ -548,7 +548,7 @@ export default function TailoredPlatformEditor({
                 <span>Notify Channel Subscribers</span>
               </label>
 
-              <label className="flex items-center gap-2 p-2 rounded bg-studio-subtle border border-studio-border cursor-pointer text-xs text-slate-200">
+              <label className="flex items-center gap-2 p-2 rounded bg-studio-subtle border border-studio-border cursor-pointer text-xs text-[#4E463F]">
                 <input
                   type="checkbox"
                   checked={override.publicStatsViewable !== false}
@@ -575,7 +575,7 @@ export default function TailoredPlatformEditor({
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
               <div>
-                <label className="text-[10px] font-semibold text-slate-400 block mb-1">
+                <label className="text-[10px] font-semibold text-[#6E655D] block mb-1">
                   Publication Format
                 </label>
                 <select
@@ -595,7 +595,7 @@ export default function TailoredPlatformEditor({
               </div>
 
               <div>
-                <label className="text-[10px] font-semibold text-slate-400 flex items-center gap-1 mb-1">
+                <label className="text-[10px] font-semibold text-[#6E655D] flex items-center gap-1 mb-1">
                   <Users className="w-2.5 h-2.5 text-pink-400" />
                   <span>Invite Collaborators (up to 3 @handles)</span>
                 </label>
@@ -613,7 +613,7 @@ export default function TailoredPlatformEditor({
               </div>
 
               <div>
-                <label className="text-[10px] font-semibold text-slate-400 flex items-center gap-1 mb-1">
+                <label className="text-[10px] font-semibold text-[#6E655D] flex items-center gap-1 mb-1">
                   <Music className="w-2.5 h-2.5 text-cyan-400" />
                   <span>Original Audio Rename</span>
                 </label>
@@ -629,7 +629,7 @@ export default function TailoredPlatformEditor({
               </div>
 
               <div>
-                <label className="text-[10px] font-semibold text-slate-400 flex items-center gap-1 mb-1">
+                <label className="text-[10px] font-semibold text-[#6E655D] flex items-center gap-1 mb-1">
                   <Users className="w-2.5 h-2.5 text-status-success" />
                   <span>Tag Users in Video (@usernames)</span>
                 </label>
@@ -645,7 +645,7 @@ export default function TailoredPlatformEditor({
               </div>
 
               <div>
-                <label className="text-[10px] font-semibold text-slate-400 flex items-center gap-1 mb-1">
+                <label className="text-[10px] font-semibold text-[#6E655D] flex items-center gap-1 mb-1">
                   <MapPin className="w-2.5 h-2.5 text-amber-400" />
                   <span>Location Tag</span>
                 </label>
@@ -663,7 +663,7 @@ export default function TailoredPlatformEditor({
               </div>
 
               <div>
-                <label className="text-[10px] font-semibold text-slate-400 block mb-1">
+                <label className="text-[10px] font-semibold text-[#6E655D] block mb-1">
                   Accessibility Alt Text
                 </label>
                 <input
@@ -679,7 +679,7 @@ export default function TailoredPlatformEditor({
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <label className="flex items-center gap-2 p-2 rounded bg-studio-subtle border border-studio-border cursor-pointer text-xs text-slate-200">
+              <label className="flex items-center gap-2 p-2 rounded bg-studio-subtle border border-studio-border cursor-pointer text-xs text-[#4E463F]">
                 <input
                   type="checkbox"
                   checked={override.shareToFeed !== false}
@@ -693,7 +693,7 @@ export default function TailoredPlatformEditor({
                 <span>Also Share Reel to Main Profile Grid (`share_to_feed`)</span>
               </label>
 
-              <label className="flex items-center gap-2 p-2 rounded bg-studio-subtle border border-studio-border cursor-pointer text-xs text-slate-200">
+              <label className="flex items-center gap-2 p-2 rounded bg-studio-subtle border border-studio-border cursor-pointer text-xs text-[#4E463F]">
                 <input
                   type="checkbox"
                   checked={Boolean(override.disableComments)}
@@ -720,7 +720,7 @@ export default function TailoredPlatformEditor({
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
               <div>
-                <label className="text-[10px] font-semibold text-slate-400 block mb-1">
+                <label className="text-[10px] font-semibold text-[#6E655D] block mb-1">
                   Facebook Publication Format
                 </label>
                 <select
@@ -739,7 +739,7 @@ export default function TailoredPlatformEditor({
               </div>
 
               <div>
-                <label className="text-[10px] font-semibold text-slate-400 block mb-1">
+                <label className="text-[10px] font-semibold text-[#6E655D] block mb-1">
                   Call-To-Action (CTA) Button
                 </label>
                 <select
@@ -765,7 +765,7 @@ export default function TailoredPlatformEditor({
               </div>
 
               <div>
-                <label className="text-[10px] font-semibold text-slate-400 block mb-1">
+                <label className="text-[10px] font-semibold text-[#6E655D] block mb-1">
                   CTA Destination URL (Optional)
                 </label>
                 <input
@@ -783,7 +783,7 @@ export default function TailoredPlatformEditor({
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              <label className="flex items-center gap-2 p-2 rounded bg-studio-subtle border border-studio-border cursor-pointer text-xs text-slate-200">
+              <label className="flex items-center gap-2 p-2 rounded bg-studio-subtle border border-studio-border cursor-pointer text-xs text-[#4E463F]">
                 <input
                   type="checkbox"
                   checked={override.shareToFeed !== false}
@@ -797,7 +797,7 @@ export default function TailoredPlatformEditor({
                 <span>Share Reel to Page Feed Timeline</span>
               </label>
 
-              <label className="flex items-center gap-2 p-2 rounded bg-studio-subtle border border-studio-border cursor-pointer text-xs text-slate-200">
+              <label className="flex items-center gap-2 p-2 rounded bg-studio-subtle border border-studio-border cursor-pointer text-xs text-[#4E463F]">
                 <input
                   type="checkbox"
                   checked={override.embeddable !== false}
@@ -811,7 +811,7 @@ export default function TailoredPlatformEditor({
                 <span>Allow Video Embedding</span>
               </label>
 
-              <label className="flex items-center gap-2 p-2 rounded bg-studio-subtle border border-studio-border cursor-pointer text-xs text-slate-200">
+              <label className="flex items-center gap-2 p-2 rounded bg-studio-subtle border border-studio-border cursor-pointer text-xs text-[#4E463F]">
                 <input
                   type="checkbox"
                   checked={Boolean(override.secret)}
@@ -836,7 +836,7 @@ export default function TailoredPlatformEditor({
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               <div>
-                <label className="text-[10px] font-semibold text-slate-400 block mb-1">
+                <label className="text-[10px] font-semibold text-[#6E655D] block mb-1">
                   Who Can Watch This Video (Privacy Level)
                 </label>
                 <select
@@ -858,7 +858,7 @@ export default function TailoredPlatformEditor({
               </div>
 
               <div className="grid grid-cols-3 gap-1.5 self-end">
-                <label className="flex items-center gap-1.5 p-2 rounded bg-studio-subtle border border-studio-border cursor-pointer text-[11px] text-slate-200">
+                <label className="flex items-center gap-1.5 p-2 rounded bg-studio-subtle border border-studio-border cursor-pointer text-[11px] text-[#4E463F]">
                   <input
                     type="checkbox"
                     checked={override.allowComments !== false}
@@ -872,7 +872,7 @@ export default function TailoredPlatformEditor({
                   <span>Comments</span>
                 </label>
 
-                <label className="flex items-center gap-1.5 p-2 rounded bg-studio-subtle border border-studio-border cursor-pointer text-[11px] text-slate-200">
+                <label className="flex items-center gap-1.5 p-2 rounded bg-studio-subtle border border-studio-border cursor-pointer text-[11px] text-[#4E463F]">
                   <input
                     type="checkbox"
                     checked={override.allowDuet !== false}
@@ -886,7 +886,7 @@ export default function TailoredPlatformEditor({
                   <span>Duet</span>
                 </label>
 
-                <label className="flex items-center gap-1.5 p-2 rounded bg-studio-subtle border border-studio-border cursor-pointer text-[11px] text-slate-200">
+                <label className="flex items-center gap-1.5 p-2 rounded bg-studio-subtle border border-studio-border cursor-pointer text-[11px] text-[#4E463F]">
                   <input
                     type="checkbox"
                     checked={override.allowStitch !== false}
@@ -904,7 +904,7 @@ export default function TailoredPlatformEditor({
 
             {override.commercialContent && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 p-2.5 rounded bg-studio-subtle border border-cyan-500/30">
-                <label className="flex items-center gap-2 cursor-pointer text-xs text-slate-200">
+                <label className="flex items-center gap-2 cursor-pointer text-xs text-[#4E463F]">
                   <input
                     type="checkbox"
                     checked={override.commercialYourBrand !== false}
@@ -917,7 +917,7 @@ export default function TailoredPlatformEditor({
                   />
                   <span>Your Brand (Promoting your own business)</span>
                 </label>
-                <label className="flex items-center gap-2 cursor-pointer text-xs text-slate-200">
+                <label className="flex items-center gap-2 cursor-pointer text-xs text-[#4E463F]">
                   <input
                     type="checkbox"
                     checked={Boolean(override.commercialBrandedContent)}
@@ -934,7 +934,7 @@ export default function TailoredPlatformEditor({
             )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <label className="flex items-center gap-2 p-2 rounded bg-studio-subtle border border-studio-border cursor-pointer text-xs text-slate-200">
+              <label className="flex items-center gap-2 p-2 rounded bg-studio-subtle border border-studio-border cursor-pointer text-xs text-[#4E463F]">
                 <input
                   type="checkbox"
                   checked={Boolean(override.autoAddMusic)}
@@ -948,7 +948,7 @@ export default function TailoredPlatformEditor({
                 <span>Auto-Sync Trending Sound (`auto_add_music`)</span>
               </label>
 
-              <label className="flex items-center gap-2 p-2 rounded bg-studio-subtle border border-studio-border cursor-pointer text-xs text-slate-200">
+              <label className="flex items-center gap-2 p-2 rounded bg-studio-subtle border border-studio-border cursor-pointer text-xs text-[#4E463F]">
                 <input
                   type="checkbox"
                   checked={override.highQualityUpload !== false}
@@ -969,7 +969,7 @@ export default function TailoredPlatformEditor({
         {plat === 'twitter' && (
           <div className="p-3 rounded-lg bg-studio-surface border border-studio-border grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             <div>
-              <label className="text-[10px] font-semibold text-slate-400 block mb-1">
+              <label className="text-[10px] font-semibold text-[#6E655D] block mb-1">
                 Who Can Reply on X (`reply_settings`)
               </label>
               <select
@@ -992,7 +992,7 @@ export default function TailoredPlatformEditor({
               </select>
             </div>
 
-            <label className="flex items-center gap-2 p-2 rounded bg-studio-subtle border border-studio-border cursor-pointer text-xs text-slate-200 self-end">
+            <label className="flex items-center gap-2 p-2 rounded bg-studio-subtle border border-studio-border cursor-pointer text-xs text-[#4E463F] self-end">
               <input
                 type="checkbox"
                 checked={Boolean(override.sensitiveContent)}
@@ -1012,7 +1012,7 @@ export default function TailoredPlatformEditor({
         {plat === 'linkedin' && (
           <div className="p-3 rounded-lg bg-studio-surface border border-studio-border grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             <div>
-              <label className="text-[10px] font-semibold text-slate-400 flex items-center gap-1 mb-1">
+              <label className="text-[10px] font-semibold text-[#6E655D] flex items-center gap-1 mb-1">
                 <Eye className="w-3 h-3 text-blue-400" />
                 <span>LinkedIn Network Visibility</span>
               </label>
@@ -1031,7 +1031,7 @@ export default function TailoredPlatformEditor({
             </div>
 
             <div>
-              <label className="text-[10px] font-semibold text-slate-400 block mb-1">
+              <label className="text-[10px] font-semibold text-[#6E655D] block mb-1">
                 Project / Article Resource Link (Optional)
               </label>
               <input
@@ -1053,7 +1053,7 @@ export default function TailoredPlatformEditor({
         {plat === 'threads' && (
           <div className="p-3 rounded-lg bg-studio-surface border border-studio-border grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             <div>
-              <label className="text-[10px] font-semibold text-slate-400 block mb-1">
+              <label className="text-[10px] font-semibold text-[#6E655D] block mb-1">
                 Who Can Reply on Threads (`reply_control`)
               </label>
               <select
@@ -1075,7 +1075,7 @@ export default function TailoredPlatformEditor({
             </div>
 
             <div>
-              <label className="text-[10px] font-semibold text-slate-400 flex items-center gap-1 mb-1">
+              <label className="text-[10px] font-semibold text-[#6E655D] flex items-center gap-1 mb-1">
                 <Hash className="w-3 h-3 text-purple-400" />
                 <span>Threads Topic Tag</span>
               </label>
@@ -1096,7 +1096,7 @@ export default function TailoredPlatformEditor({
         {plat === 'pinterest' && (
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 p-3 rounded-lg bg-studio-surface border border-studio-border">
             <div>
-              <label className="text-[10px] font-semibold text-slate-400 block mb-1">
+              <label className="text-[10px] font-semibold text-[#6E655D] block mb-1">
                 Pinterest Board ID / Name
               </label>
               <input
@@ -1110,7 +1110,7 @@ export default function TailoredPlatformEditor({
               />
             </div>
             <div>
-              <label className="text-[10px] font-semibold text-slate-400 block mb-1">
+              <label className="text-[10px] font-semibold text-[#6E655D] block mb-1">
                 Destination Link URL
               </label>
               <input
@@ -1126,7 +1126,7 @@ export default function TailoredPlatformEditor({
               />
             </div>
             <div>
-              <label className="text-[10px] font-semibold text-slate-400 block mb-1">
+              <label className="text-[10px] font-semibold text-[#6E655D] block mb-1">
                 Pin Alt Text (SEO)
               </label>
               <input
@@ -1145,7 +1145,7 @@ export default function TailoredPlatformEditor({
         {/* Auto First Comment / Follow-Up Reply */}
         {cfg.fields.hasFirstComment && (
           <div className="space-y-1">
-            <label className="text-[11px] font-bold text-slate-200 flex items-center gap-1.5">
+            <label className="text-[11px] font-bold text-[#4E463F] flex items-center gap-1.5">
               <MessageSquare className="w-3.5 h-3.5 text-status-success" />
               <span>
                 Auto First Comment / Follow-up Reply on {cfg.name}
@@ -1158,7 +1158,7 @@ export default function TailoredPlatformEditor({
                 onUpdateOverride(plat, { firstComment: e.target.value })
               }
               placeholder={`Optional first comment to post automatically on ${cfg.name} right after publishing...`}
-              className="w-full px-3 py-1.5 rounded-lg bg-studio-surface border border-studio-border text-slate-100 text-xs focus:outline-none focus:border-accent/60"
+              className="w-full px-3 py-1.5 rounded-lg bg-studio-surface border border-studio-border text-[#1E1B18] text-xs focus:outline-none focus:border-accent/60"
             />
           </div>
         )}
@@ -1182,7 +1182,7 @@ export default function TailoredPlatformEditor({
                   Live Engine
                 </span>
               </h3>
-              <p className="text-[10px] text-slate-300">
+              <p className="text-[10px] text-[#4E463F]">
                 Enter your video topic (or use your uploaded video filename) to auto-generate titles, captions, hashtags, YouTube SEO tags &amp; first comments for all platforms.
               </p>
             </div>
@@ -1222,7 +1222,7 @@ export default function TailoredPlatformEditor({
                 ? `Video topic (default: "${videoFileName}") — e.g. Python AI Agent Tutorial in 60s...`
                 : 'Type your video topic or idea (e.g. Build an AI Agent with Python & Next.js)...'
             }
-            className="flex-1 px-3 py-2 rounded-lg bg-white border border-slate-300 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#00D2B4] focus:ring-1 focus:ring-[#00D2B4]"
+            className="flex-1 px-3 py-2 rounded-lg bg-white border border-slate-300 text-xs text-slate-900 placeholder:text-[#6E655D] focus:outline-none focus:border-[#00D2B4] focus:ring-1 focus:ring-[#00D2B4]"
           />
 
           <button
@@ -1245,7 +1245,7 @@ export default function TailoredPlatformEditor({
             type="button"
             onClick={() => runAiAssistant('improve_caption')}
             disabled={aiLoading !== null}
-            className="px-2.5 py-1 rounded-md bg-studio-subtle hover:bg-studio-hover border border-studio-borderStrong text-[10px] font-bold text-slate-200 flex items-center gap-1"
+            className="px-2.5 py-1 rounded-md bg-studio-subtle hover:bg-studio-hover border border-studio-borderStrong text-[10px] font-bold text-[#4E463F] flex items-center gap-1"
           >
             <Wand2 className="w-3 h-3 text-accent-soft" />
             <span>Rewrite &amp; Improve Hook</span>
@@ -1255,7 +1255,7 @@ export default function TailoredPlatformEditor({
             type="button"
             onClick={() => runAiAssistant('viral_hashtags')}
             disabled={aiLoading !== null}
-            className="px-2.5 py-1 rounded-md bg-studio-subtle hover:bg-studio-hover border border-studio-borderStrong text-[10px] font-bold text-slate-200 flex items-center gap-1"
+            className="px-2.5 py-1 rounded-md bg-studio-subtle hover:bg-studio-hover border border-studio-borderStrong text-[10px] font-bold text-[#4E463F] flex items-center gap-1"
           >
             <Tag className="w-3 h-3 text-status-success" />
             <span>+15 Viral Hashtags &amp; YouTube SEO Tags</span>
@@ -1265,7 +1265,7 @@ export default function TailoredPlatformEditor({
             type="button"
             onClick={() => runAiAssistant('first_comment')}
             disabled={aiLoading !== null}
-            className="px-2.5 py-1 rounded-md bg-studio-subtle hover:bg-studio-hover border border-studio-borderStrong text-[10px] font-bold text-slate-200 flex items-center gap-1"
+            className="px-2.5 py-1 rounded-md bg-studio-subtle hover:bg-studio-hover border border-studio-borderStrong text-[10px] font-bold text-[#4E463F] flex items-center gap-1"
           >
             <MessageSquare className="w-3 h-3 text-amber-400" />
             <span>Generate Engaging First Comment</span>
@@ -1291,7 +1291,7 @@ export default function TailoredPlatformEditor({
           </label>
 
           <div className="flex items-center gap-3">
-            <label className="flex items-center gap-1.5 text-[11px] text-slate-300 cursor-pointer">
+            <label className="flex items-center gap-1.5 text-[11px] text-[#4E463F] cursor-pointer">
               <input
                 type="checkbox"
                 checked={shortenerEnabled}
@@ -1301,7 +1301,7 @@ export default function TailoredPlatformEditor({
               <Link2 className="w-3 h-3 text-status-success" />
               <span>Shorten URLs</span>
             </label>
-            <span className="text-[11px] text-slate-400 font-mono">
+            <span className="text-[11px] text-[#6E655D] font-mono">
               {globalCaption.length} chars
             </span>
           </div>
@@ -1312,7 +1312,7 @@ export default function TailoredPlatformEditor({
           onChange={(e) => onGlobalCaptionChange(e.target.value)}
           placeholder="Write your master caption here or click 'Generate Full AI Pack' above..."
           rows={3}
-          className="w-full p-3 rounded-lg bg-white border border-slate-300 text-slate-900 text-xs placeholder:text-slate-500 focus:outline-none focus:border-[#00D2B4] focus:ring-1 focus:ring-[#00D2B4] resize-y"
+          className="w-full p-3 rounded-lg bg-white border border-slate-300 text-slate-900 text-xs placeholder:text-[#958B81] focus:outline-none focus:border-[#00D2B4] focus:ring-1 focus:ring-[#00D2B4] resize-y"
         />
 
         {/* Global Cross-Platform AI Disclosure & Paid Promotion Bar */}
@@ -1348,7 +1348,7 @@ export default function TailoredPlatformEditor({
               value={globalFirstComment}
               onChange={(e) => handleSyncGlobalFirstComment(e.target.value)}
               placeholder="Global First Comment (Syncs to all)..."
-              className="w-full bg-transparent text-xs text-slate-900 placeholder:text-slate-500 focus:outline-none"
+              className="w-full bg-transparent text-xs text-slate-900 placeholder:text-[#958B81] focus:outline-none"
             />
           </div>
         </div>

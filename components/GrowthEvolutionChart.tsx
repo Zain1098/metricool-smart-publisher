@@ -196,7 +196,7 @@ export default function GrowthEvolutionChart({
               </span>
               {activePoint && (
                 <>
-                  <span className="text-slate-300">•</span>
+                  <span className="text-[#4E463F]">•</span>
                   <span className="px-1.5 py-0.5 rounded bg-[#FFFFFF] border border-slate-200 font-mono text-[11px] font-bold text-slate-800 flex-shrink-0">
                     {activePoint.pt.date}
                   </span>
@@ -211,11 +211,11 @@ export default function GrowthEvolutionChart({
               <div className="flex items-center gap-3.5 text-xs font-mono tabular-nums flex-shrink-0">
                 <span className="text-slate-900 font-bold">
                   {activePoint.pt.views.toLocaleString()}{' '}
-                  <span className="text-slate-400 font-normal">views</span>
+                  <span className="text-[#6E655D] font-normal">views</span>
                 </span>
                 <span className="text-emerald-600 font-bold">
                   {activePoint.pt.likes}{' '}
-                  <span className="text-slate-400 font-normal">likes</span>
+                  <span className="text-[#6E655D] font-normal">likes</span>
                 </span>
                 <span className="text-[#596CF2] font-bold">
                   {activePoint.engagement}%

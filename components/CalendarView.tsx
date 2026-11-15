@@ -306,7 +306,7 @@ export default function CalendarView({
         <div className="flex items-center justify-between gap-1">
           <span className="inline-flex items-center gap-1 text-[10px] font-mono text-slate-500 tabular-nums font-semibold">
             {canDrag && (
-              <GripVertical className="w-2.5 h-2.5 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <GripVertical className="w-2.5 h-2.5 text-[#6E655D] opacity-0 group-hover:opacity-100 transition-opacity" />
             )}
             <Clock className="w-2.5 h-2.5 text-[#00D2B4]" />
             {timeStr}
@@ -416,7 +416,7 @@ export default function CalendarView({
               <span className="w-2 h-2 rounded-full bg-[#00D2B4]" />
               <span>Metricool Peak Window: 18:30 PKT</span>
             </span>
-            <span className="hidden sm:inline text-slate-300">•</span>
+            <span className="hidden sm:inline text-[#4E463F]">•</span>
             <span className="hidden sm:inline">
               Drag posts to any date cell to reschedule automatically
             </span>
@@ -566,7 +566,7 @@ export default function CalendarView({
                           type="button"
                           onClick={() => handleSlotClick(date)}
                           aria-label={`Schedule on ${key}`}
-                          className="p-0.5 rounded text-slate-400 hover:text-slate-800 hover:bg-slate-100"
+                          className="p-0.5 rounded text-[#6E655D] hover:text-slate-800 hover:bg-slate-100"
                         >
                           <Plus className="w-3 h-3" />
                         </button>
@@ -718,7 +718,7 @@ export default function CalendarView({
             )}
 
             <div>
-              <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+              <label className="text-[11px] font-bold uppercase tracking-wider text-[#6E655D]">
                 Caption
               </label>
               <p className="mt-1 text-xs text-slate-800 bg-slate-50 p-3 rounded-lg border border-slate-200 whitespace-pre-wrap leading-relaxed">
