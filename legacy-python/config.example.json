@@ -1,0 +1,36 @@
+{
+  "project_name": "ZCodeDev Social Publisher",
+  "version": "1.0.0",
+  "timezone": "Asia/Karachi",
+  "server": {
+    "host": "127.0.0.1",
+    "port": 8000
+  },
+  "scheduler": {
+    "poll_interval_seconds": 10,
+    "max_retry_attempts": 3
+  },
+  "security_note": "Do NOT put secrets in this file. All API tokens and OAuth secrets are encrypted in Windows Credential Locker (WinVaultKeyring).",
+  "platforms": {
+    "youtube": {
+      "name": "YouTube Shorts",
+      "required_fields": ["client_id", "client_secret", "refresh_token"],
+      "default_privacy": "private"
+    },
+    "facebook": {
+      "name": "Facebook Reels",
+      "required_fields": ["page_id", "page_access_token"],
+      "api_version": "v22.0"
+    },
+    "instagram": {
+      "name": "Instagram Reels",
+      "required_fields": ["ig_user_id", "access_token"],
+      "api_version": "v22.0"
+    },
+    "tiktok": {
+      "name": "TikTok",
+      "required_fields": ["access_token"],
+      "upload_method": "FILE_UPLOAD"
+    }
+  }
+}

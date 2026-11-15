@@ -1,0 +1,71 @@
+# Node & Next.js
+node_modules/
+.next/
+out/
+build/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Virtual environment & Python
+.venv/
+venv/
+ENV/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Databases & local persistent state
+data/*.db
+data/*.sqlite
+*.db
+*.sqlite
+
+# Logs
+logs/*.log
+*.log
+
+# Sensitive credentials and secrets
+.env
+.env*.local
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+client_secret*.json
+!legacy-python/client_secret.example.json
+client_secrets*.json
+credentials*.json
+legacy-python/client_secret.json
+legacy-python/data/credentials.json
+legacy-python/data/*.db
+legacy-python/data/*.sqlite
+*.pem
+*.key
+tokens/
+secrets/
+
+# IDE & OS files
+.vscode/
+.idea/
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Media uploads & local binaries
+data/test_videos/
+data/uploads/
+data/store.json
+public/uploads/
+cloudflared.exe
+
+# Craft Anything / temporary audit artifacts
+capture/
+craft.json
+feed.json
+inbox/
+investigation.cany/
+usage.json
+tsconfig.tsbuildinfo
+*.exe
+*.png

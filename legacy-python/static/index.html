@@ -1,0 +1,2721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZCodeDev Social Publisher PRO - Autonomous Multi-Platform Publisher</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #070a12;
+      --bg-surface: #0e1424;
+      --bg-card: rgba(16, 23, 41, 0.75);
+      --bg-card-hover: rgba(24, 34, 60, 0.85);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-accent: rgba(99, 102, 241, 0.45);
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --primary-glow: rgba(99, 102, 241, 0.35);
+      --secondary: #06b6d4;
+      --secondary-glow: rgba(6, 182, 212, 0.35);
+      --success: #10b981;
+      --success-glow: rgba(16, 185, 129, 0.3);
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --yt-color: #ff0000;
+      --ig-color: #e1306c;
+      --fb-color: #1877f2;
+      --tt-color: #00f2fe;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: radial-gradient(circle at 10% 10%, rgba(99, 102, 241, 0.15) 0%, transparent 45%),
+                  radial-gradient(circle at 90% 90%, rgba(6, 182, 212, 0.1) 0%, transparent 45%),
+                  var(--bg-dark);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* Top Navigation Bar */
+    header {
+      backdrop-filter: blur(20px);
+      background: rgba(7, 10, 18, 0.85);
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      padding: 0.85rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+    }
+
+    .brand-logo {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #6366f1, #06b6d4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 24px var(--primary-glow);
+    }
+
+    .brand-logo svg { width: 24px; height: 24px; fill: white; }
+
+    .brand h1 {
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: linear-gradient(to right, #ffffff, #cbd5e1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .brand h1 span.pro-badge {
+      font-size: 0.65rem;
+      font-weight: 800;
+      padding: 0.15rem 0.45rem;
+      border-radius: 6px;
+      background: linear-gradient(135deg, #ec4899, #8b5cf6);
+      -webkit-text-fill-color: white;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .brand .subtitle {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--secondary);
+      font-weight: 700;
+      display: block;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .platform-status-strip {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 0.35rem 0.6rem;
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+    }
+
+    .plat-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .plat-chip:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+    }
+
+    .plat-chip.connected {
+      color: white;
+      border-bottom: 2px solid var(--success);
+    }
+
+    .plat-chip .chip-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--text-dim);
+    }
+
+    .plat-chip.connected .chip-dot {
+      background: var(--success);
+      box-shadow: 0 0 6px var(--success);
+    }
+
+    .badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-color);
+      border-radius: 9999px;
+      padding: 0.4rem 0.9rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 8px var(--success);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.5; transform: scale(0.95); }
+      50% { opacity: 1; transform: scale(1.15); }
+      100% { opacity: 0.5; transform: scale(0.95); }
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.86rem;
+      padding: 0.55rem 1.15rem;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      border: none;
+      outline: none;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), #4f46e5);
+      color: white;
+      box-shadow: 0 4px 14px var(--primary-glow);
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #4f46e5, #4338ca);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px var(--primary-glow);
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+      box-shadow: 0 4px 14px var(--success-glow);
+    }
+
+    .btn-success:hover {
+      background: linear-gradient(135deg, #059669, #047857);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px var(--success-glow);
+    }
+
+    .btn-outline {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+    }
+
+    .btn-outline:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-sm {
+      padding: 0.35rem 0.75rem;
+      font-size: 0.78rem;
+      border-radius: 8px;
+    }
+
+    /* Main Container */
+    main {
+      flex: 1;
+      max-width: 1560px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 1.5rem 2rem 3rem;
+    }
+
+    /* Stats Grid */
+    .metrics-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .metric-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      backdrop-filter: blur(12px);
+      border-radius: 14px;
+      padding: 1.1rem 1.4rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .metric-card:hover {
+      border-color: var(--border-accent);
+      transform: translateY(-2px);
+    }
+
+    .metric-info h4 {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-bottom: 0.35rem;
+    }
+
+    .metric-info p {
+      font-size: 1.65rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .metric-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+    }
+
+    /* Workspace Columns */
+    .workspace-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 1100px) {
+      .workspace-grid { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      backdrop-filter: blur(14px);
+      border-radius: 18px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 0.9rem;
+    }
+
+    .card-header h2 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* Mode Switcher Tabs */
+    .mode-switcher {
+      display: flex;
+      gap: 0.5rem;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 0.3rem;
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+    }
+
+    .mode-tab {
+      flex: 1;
+      padding: 0.5rem 0.8rem;
+      text-align: center;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: none;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .mode-tab.active {
+      background: rgba(99, 102, 241, 0.2);
+      color: white;
+      border: 1px solid var(--border-accent);
+      box-shadow: 0 0 12px rgba(99, 102, 241, 0.2);
+    }
+
+    /* Dropzone */
+    .dropzone {
+      border: 2px dashed rgba(255, 255, 255, 0.12);
+      border-radius: 14px;
+      padding: 1.75rem 1rem;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.015);
+      cursor: pointer;
+      transition: all 0.25s ease;
+      position: relative;
+    }
+
+    .dropzone:hover, .dropzone.dragover {
+      border-color: var(--primary);
+      background: rgba(99, 102, 241, 0.06);
+    }
+
+    .dropzone input[type="file"] {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .dropzone-icon {
+      font-size: 2.2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    /* Batch files list */
+    .batch-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      max-height: 240px;
+      overflow-y: auto;
+      margin-top: 0.5rem;
+    }
+
+    .batch-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 0.6rem 0.85rem;
+      font-size: 0.82rem;
+    }
+
+    .batch-item .batch-item-info {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* Interactive Mobile Phone Mockup */
+    .preview-section {
+      display: none;
+      flex-direction: column;
+      gap: 0.75rem;
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 1rem;
+    }
+
+    .mockup-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .mockup-toggle-btns {
+      display: flex;
+      gap: 0.35rem;
+    }
+
+    .mockup-btn {
+      padding: 0.25rem 0.65rem;
+      border-radius: 6px;
+      font-size: 0.74rem;
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+
+    .mockup-btn.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .phone-mockup-container {
+      display: flex;
+      justify-content: center;
+      padding: 0.5rem 0;
+    }
+
+    .phone-mockup {
+      width: 250px;
+      height: 440px;
+      background: #000;
+      border-radius: 28px;
+      border: 4px solid #334155;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .phone-mockup video {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      object-fit: cover;
+      z-index: 1;
+    }
+
+    .mockup-top-bar {
+      position: relative;
+      z-index: 5;
+      padding: 0.5rem 0.75rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.6), transparent);
+      font-size: 0.7rem;
+    }
+
+    .mockup-side-actions {
+      position: absolute;
+      right: 8px;
+      bottom: 75px;
+      z-index: 5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .side-icon-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-size: 1.1rem;
+      color: white;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+    }
+
+    .side-icon-btn span { font-size: 0.6rem; font-weight: 600; }
+
+    .mockup-bottom-overlay {
+      position: relative;
+      z-index: 5;
+      padding: 0.8rem 0.75rem;
+      background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 100%);
+      font-size: 0.75rem;
+    }
+
+    .mockup-user {
+      font-weight: 700;
+      margin-bottom: 0.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .mockup-caption-text {
+      font-size: 0.72rem;
+      line-height: 1.25;
+      color: #f1f5f9;
+      max-height: 48px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+
+    /* Metadata pills */
+    .meta-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-top: 0.5rem;
+    }
+
+    .meta-pill {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      padding: 0.25rem 0.55rem;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+    }
+
+    .meta-pill.valid {
+      border-color: rgba(16, 185, 129, 0.4);
+      color: #34d399;
+    }
+
+    .meta-pill.warning {
+      border-color: rgba(245, 158, 11, 0.4);
+      color: #fbbf24;
+    }
+
+    /* Thumbnail / Cover Frame Studio */
+    .thumb-studio-card {
+      background: rgba(255, 255, 255, 0.025);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 0.85rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+      margin-top: 0.5rem;
+    }
+
+    .thumb-studio-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .thumb-scrubber-row {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+    }
+
+    .thumb-scrubber-row input[type="range"] {
+      flex: 1;
+      accent-color: var(--primary);
+      cursor: pointer;
+      height: 6px;
+      border-radius: 4px;
+    }
+
+    .thumb-actions-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .thumb-preview-box {
+      display: none;
+      align-items: center;
+      gap: 0.75rem;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 0.5rem;
+      margin-top: 0.2rem;
+    }
+
+    .thumb-preview-img {
+      width: 44px;
+      height: 72px;
+      object-fit: cover;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: #111;
+    }
+
+    /* Advanced Platform Settings Accordion */
+    .advanced-settings-box {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .advanced-settings-header {
+      padding: 0.75rem 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      user-select: none;
+      background: rgba(255, 255, 255, 0.03);
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .advanced-settings-header:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: white;
+    }
+
+    .advanced-settings-body {
+      padding: 0.85rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .platform-settings-subcard {
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      padding: 0.65rem 0.8rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .plat-settings-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      margin-bottom: 0.2rem;
+    }
+
+    .plat-setting-row {
+      display: flex;
+      align-items: center;
+    }
+
+    .setting-checkbox-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+
+    .setting-checkbox-label input[type="checkbox"] {
+      cursor: pointer;
+      accent-color: var(--primary);
+    }
+
+    /* Form Inputs */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .form-group label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .form-control {
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      color: var(--text-main);
+      padding: 0.65rem 0.9rem;
+      font-family: inherit;
+      font-size: 0.86rem;
+      transition: all 0.2s ease;
+      outline: none;
+    }
+
+    .form-control:focus {
+      border-color: var(--primary);
+      background: rgba(255, 255, 255, 0.06);
+      box-shadow: 0 0 14px var(--primary-glow);
+    }
+
+    /* Tag Pills Generator */
+    .tag-pills-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      margin-top: 0.3rem;
+    }
+
+    .tag-pill {
+      font-size: 0.73rem;
+      font-weight: 600;
+      padding: 0.2rem 0.55rem;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .tag-pill:hover {
+      background: rgba(99, 102, 241, 0.2);
+      border-color: var(--primary);
+      color: white;
+    }
+
+    /* Platform check selectors */
+    .platform-selector {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.65rem;
+    }
+
+    .plat-choice {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 0.6rem 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .plat-choice:hover {
+      border-color: rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .plat-choice.selected {
+      border-color: var(--primary);
+      background: rgba(99, 102, 241, 0.12);
+    }
+
+    .plat-choice-left {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      font-size: 0.84rem;
+      font-weight: 600;
+    }
+
+    /* Quick Time Presets */
+    .time-presets {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .preset-btn {
+      font-size: 0.74rem;
+      font-weight: 600;
+      padding: 0.25rem 0.6rem;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .preset-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+    }
+
+    .preset-btn.active {
+      background: rgba(6, 182, 212, 0.2);
+      border-color: var(--secondary);
+      color: white;
+    }
+
+    /* Action buttons grid */
+    .action-buttons-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 0.75rem;
+      margin-top: 0.5rem;
+    }
+
+    /* Queue Section */
+    .filter-tabs {
+      display: flex;
+      gap: 0.4rem;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 0.6rem;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      padding: 0.4rem 0.8rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .tab-btn:hover { color: var(--text-main); background: rgba(255, 255, 255, 0.04); }
+    .tab-btn.active { color: white; background: rgba(99, 102, 241, 0.2); }
+
+    .queue-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      max-height: 580px;
+      overflow-y: auto;
+      padding-right: 0.25rem;
+    }
+
+    .queue-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 0.9rem 1.1rem;
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .queue-card:hover {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .queue-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .queue-platform-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.2rem 0.55rem;
+      border-radius: 6px;
+    }
+
+    .status-badge {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.2rem 0.55rem;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .status-PENDING { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
+    .status-UPLOADING, .status-PROCESSING { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .status-PUBLISHED { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .status-FAILED { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+    .status-UNKNOWN_OUTCOME { background: rgba(217, 70, 239, 0.15); color: #e879f9; border: 1px solid rgba(217, 70, 239, 0.3); }
+
+    .queue-actions {
+      display: flex;
+      gap: 0.4rem;
+      align-items: center;
+    }
+
+    /* Live Log Console */
+    .log-terminal {
+      margin-top: 1.5rem;
+      background: #04070d;
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      overflow: hidden;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+    }
+
+    .terminal-header {
+      background: rgba(255, 255, 255, 0.03);
+      padding: 0.5rem 1rem;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      color: var(--text-muted);
+      font-size: 0.72rem;
+    }
+
+    .log-lines {
+      max-height: 180px;
+      overflow-y: auto;
+      padding: 0.75rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .log-line { color: #cbd5e1; word-break: break-all; }
+    .log-line.error { color: #f87171; }
+    .log-line.warn { color: #fbbf24; }
+    .log-line.info { color: #94a3b8; }
+    .log-line.success { color: #34d399; }
+
+    /* Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+      padding: 1.5rem;
+    }
+
+    .modal-content {
+      background: #0c1220;
+      border: 1px solid var(--border-accent);
+      border-radius: 20px;
+      max-width: 680px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 2rem;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.6rem;
+      cursor: pointer;
+    }
+
+    .acc-card {
+      background: rgba(255, 255, 255, 0.025);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.1rem;
+      margin-bottom: 1rem;
+    }
+
+    .acc-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.6rem;
+    }
+
+    .acc-card-title {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: #1e293b;
+      border: 1px solid var(--border-color);
+      color: white;
+      padding: 0.85rem 1.4rem;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.86rem;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .toast.success { border-color: var(--success); }
+    .toast.error { border-color: var(--danger); }
+  </style>
+</head>
+<body>
+
+  <!-- Top Header Navigation -->
+  <header>
+    <div class="brand">
+      <div class="brand-logo">
+        <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      </div>
+      <div>
+        <h1>ZCodeDev Social Publisher <span class="pro-badge">PRO</span></h1>
+        <span class="subtitle">Autonomous Multi-Platform Engine</span>
+      </div>
+    </div>
+
+    <!-- Live Platform Strip in Header -->
+    <div class="platform-status-strip">
+      <div class="plat-chip" id="chipYT" onclick="openSettingsModal()">
+        <span class="chip-dot"></span> <span>YouTube</span>
+      </div>
+      <div class="plat-chip" id="chipFB" onclick="openSettingsModal()">
+        <span class="chip-dot"></span> <span>Facebook</span>
+      </div>
+      <div class="plat-chip" id="chipIG" onclick="openSettingsModal()">
+        <span class="chip-dot"></span> <span>Instagram</span>
+      </div>
+      <div class="plat-chip" id="chipTT" onclick="openSettingsModal()">
+        <span class="chip-dot"></span> <span>TikTok</span>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <div class="badge-pill">
+        <span class="status-dot" id="schedDot"></span>
+        <span id="schedStatus">Scheduler: Checking...</span>
+      </div>
+      <div class="badge-pill">
+        <span>🕒 Karachi:</span>
+        <strong id="karachiClock">--:--:--</strong>
+      </div>
+      <button class="btn btn-outline" id="openSettingsBtn" onclick="openSettingsModal()">
+        ⚙️ Accounts & APIs
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content Layout -->
+  <main>
+    <!-- Live Metrics Counter Bar -->
+    <div class="metrics-bar">
+      <div class="metric-card">
+        <div class="metric-info">
+          <h4>Total In Queue</h4>
+          <p id="statTotal">0</p>
+        </div>
+        <div class="metric-icon" style="background: rgba(99, 102, 241, 0.15); color: #818cf8;">📊</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-info">
+          <h4>Scheduled / Pending</h4>
+          <p id="statPending">0</p>
+        </div>
+        <div class="metric-icon" style="background: rgba(59, 130, 246, 0.15); color: #60a5fa;">⏳</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-info">
+          <h4>Active Uploads</h4>
+          <p id="statUploading">0</p>
+        </div>
+        <div class="metric-icon" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24;">⚡</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-info">
+          <h4>Published</h4>
+          <p id="statPublished">0</p>
+        </div>
+        <div class="metric-icon" style="background: rgba(16, 185, 129, 0.15); color: #34d399;">🚀</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-info">
+          <h4>Needs Action / Failed</h4>
+          <p id="statFailed">0</p>
+        </div>
+        <div class="metric-icon" style="background: rgba(239, 68, 68, 0.15); color: #f87171;">⚠️</div>
+      </div>
+    </div>
+
+    <!-- 2-Column Studio Workspace -->
+    <div class="workspace-grid">
+      <!-- Left Column: Video Studio & Schedule -->
+      <section class="card">
+        <div class="card-header">
+          <h2>🎬 Video Studio & Publisher</h2>
+          <!-- Mode Switcher -->
+          <div class="mode-switcher">
+            <button class="mode-tab active" id="singleModeTab" onclick="setStudioMode('single')">Single Video</button>
+            <button class="mode-tab" id="batchModeTab" onclick="setStudioMode('batch')">🚀 Bulk / Batch (5-10)</button>
+          </div>
+        </div>
+
+        <!-- ================= SINGLE VIDEO MODE ================= -->
+        <div id="singleModeContainer">
+          <!-- Video Drag & Drop Upload Zone -->
+          <div class="dropzone" id="videoDropzone">
+            <input type="file" id="videoFileInput" accept="video/mp4,video/quicktime,video/webm">
+            <div class="dropzone-icon">📹</div>
+            <h3 id="dropzonePrompt">Select or Drop Short Video Here</h3>
+            <p>Supports MP4, MOV, WEBM (9:16 vertical shorts recommended)</p>
+          </div>
+
+          <!-- Video Phone Mockup & Preview -->
+          <div class="preview-section" id="previewSection">
+            <div class="mockup-controls">
+              <span style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted);">📱 Interactive Phone Preview</span>
+              <div class="mockup-toggle-btns">
+                <button class="mockup-btn active" onclick="setMockupPlatform('youtube', this)">YouTube</button>
+                <button class="mockup-btn" onclick="setMockupPlatform('instagram', this)">Instagram</button>
+                <button class="mockup-btn" onclick="setMockupPlatform('tiktok', this)">TikTok</button>
+              </div>
+            </div>
+
+            <div class="phone-mockup-container">
+              <div class="phone-mockup">
+                <video id="previewPlayer" controls muted loop playsinline></video>
+                <div class="mockup-top-bar">
+                  <span id="mockupTopLeft">YouTube Shorts</span>
+                  <span>🔍 ⚙️</span>
+                </div>
+                <div class="mockup-side-actions">
+                  <div class="side-icon-btn"><span>❤️</span><span style="font-size: 0.6rem;">14.2K</span></div>
+                  <div class="side-icon-btn"><span>💬</span><span style="font-size: 0.6rem;">382</span></div>
+                  <div class="side-icon-btn"><span>🔗</span><span style="font-size: 0.6rem;">Share</span></div>
+                  <div class="side-icon-btn" style="border-radius: 50%; width: 26px; height: 26px; background: #222; display: flex; align-items: center; justify-content: center;">🎵</div>
+                </div>
+                <div class="mockup-bottom-overlay">
+                  <div class="mockup-user">
+                    <span style="width: 18px; height: 18px; border-radius: 50%; background: var(--primary); display: inline-block;"></span>
+                    <span id="mockupUsername">@yourchannel</span>
+                  </div>
+                  <div class="mockup-caption-text" id="mockupCaptionPreview">Shorts caption preview...</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="meta-pills" id="metaTagsList"></div>
+            <div id="platformWarningBox" style="font-size: 0.75rem; color: var(--warning); margin-top: 0.2rem;"></div>
+
+            <!-- Thumbnail / Cover Studio Card -->
+            <div class="thumb-studio-card" id="thumbStudioCard">
+              <div class="thumb-studio-header">
+                <span>🖼️ Video Thumbnail & Cover Frame</span>
+                <span id="thumbTimeBadge" style="font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--primary);">00:00.0</span>
+              </div>
+              
+              <div class="thumb-scrubber-row">
+                <input type="range" id="coverTimeSlider" min="0" max="100" step="0.05" value="0" oninput="onCoverScrubberInput(this.value)">
+              </div>
+
+              <div class="thumb-actions-bar">
+                <button type="button" class="btn" style="padding: 0.4rem 0.75rem; font-size: 0.76rem; background: rgba(99, 102, 241, 0.15); color: var(--primary); border: 1px solid rgba(99, 102, 241, 0.3);" onclick="captureCurrentVideoFrame()">
+                  📸 Capture Current Frame
+                </button>
+                <label class="btn" style="padding: 0.4rem 0.75rem; font-size: 0.76rem; background: rgba(255, 255, 255, 0.05); color: var(--text-main); border: 1px solid var(--border-color); cursor: pointer; display: inline-flex; align-items: center; gap: 0.35rem; margin: 0;">
+                  📁 Upload Custom Cover
+                  <input type="file" id="customThumbFileInput" accept="image/jpeg,image/png,image/webp" style="display: none;" onchange="handleCustomThumbUpload(event)">
+                </label>
+                <button type="button" class="btn" id="clearThumbBtn" style="padding: 0.4rem 0.65rem; font-size: 0.76rem; background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.25); display: none;" onclick="clearSelectedThumbnail()">
+                  ✕ Clear
+                </button>
+              </div>
+
+              <div class="thumb-preview-box" id="thumbPreviewBox">
+                <img id="thumbPreviewImg" class="thumb-preview-img" alt="Cover preview">
+                <div style="flex: 1; font-size: 0.74rem;">
+                  <div style="font-weight: 700; color: var(--text-main);" id="thumbTitleLabel">Cover Frame Selected</div>
+                  <div style="color: var(--text-muted); font-size: 0.68rem;" id="thumbSubtitleLabel">Applied to YouTube Shorts, Instagram Reels & Facebook Reels</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Publishing Form -->
+          <form id="scheduleForm" onsubmit="handleSinglePublish(event)" style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;">
+            <input type="hidden" id="videoPathInput">
+            <input type="hidden" id="thumbnailPathInput">
+            <input type="hidden" id="thumbOffsetMsInput">
+
+            <div class="form-group">
+              <label for="videoTitle">Video Title (Auto-generated from filename):</label>
+              <input type="text" id="videoTitle" class="form-control" placeholder="e.g. 5 Coding Tricks in 60s" oninput="updateMockupCaption()">
+            </div>
+
+            <div class="form-group">
+              <label for="videoCaption">Caption & Description:</label>
+              <textarea id="videoCaption" class="form-control" rows="3" placeholder="Write an engaging hook..." oninput="updateMockupCaption()"></textarea>
+            </div>
+
+            <!-- Smart Tag Pills -->
+            <div class="form-group">
+              <label>1-Click Viral Hashtags:</label>
+              <div class="tag-pills-bar">
+                <span class="tag-pill" onclick="appendTag('#Shorts')">+ #Shorts</span>
+                <span class="tag-pill" onclick="appendTag('#Reels')">+ #Reels</span>
+                <span class="tag-pill" onclick="appendTag('#FYP')">+ #FYP</span>
+                <span class="tag-pill" onclick="appendTag('#Viral')">+ #Viral</span>
+                <span class="tag-pill" onclick="appendTag('#Trending')">+ #Trending</span>
+                <span class="tag-pill" onclick="appendTag('#Tech')">+ #Tech</span>
+                <span class="tag-pill" onclick="appendTag('#Coding')">+ #Coding</span>
+                <span class="tag-pill" onclick="appendTag('#Motivation')">+ #Motivation</span>
+                <span class="tag-pill" onclick="appendTag('#Comedy')">+ #Comedy</span>
+                <span class="tag-pill" onclick="appendTag('#Pakistan')">+ #Pakistan</span>
+              </div>
+              <input type="text" id="videoHashtags" class="form-control" style="margin-top: 0.4rem;" placeholder="#Shorts #Reels #fyp" oninput="updateMockupCaption()">
+            </div>
+
+            <!-- Platforms to target -->
+            <div class="form-group">
+              <label>Publish To Platforms:</label>
+              <div class="platform-selector">
+                <div class="plat-choice selected" id="platChoiceYT" onclick="togglePlatformChoice('youtube', this)">
+                  <div class="plat-choice-left"><span style="color: var(--yt-color)">▶️</span> YouTube Shorts</div>
+                  <input type="checkbox" checked id="checkYT">
+                </div>
+                <div class="plat-choice selected" id="platChoiceFB" onclick="togglePlatformChoice('facebook', this)">
+                  <div class="plat-choice-left"><span style="color: var(--fb-color)">📘</span> Facebook Reels</div>
+                  <input type="checkbox" checked id="checkFB">
+                </div>
+                <div class="plat-choice selected" id="platChoiceIG" onclick="togglePlatformChoice('instagram', this)">
+                  <div class="plat-choice-left"><span style="color: var(--ig-color)">📸</span> Instagram Reels</div>
+                  <input type="checkbox" checked id="checkIG">
+                </div>
+                <div class="plat-choice" id="platChoiceTT" onclick="togglePlatformChoice('tiktok', this)">
+                  <div class="plat-choice-left"><span style="color: var(--tt-color)">🎵</span> TikTok</div>
+                  <input type="checkbox" id="checkTT">
+                </div>
+              </div>
+            </div>
+
+            <!-- Platform Advanced Settings Accordion -->
+            <div class="advanced-settings-box">
+              <div class="advanced-settings-header" onclick="toggleAdvancedSettings()">
+                <span>⚙️ Platform-Specific Settings & AI Disclosures</span>
+                <span id="advSettingsArrow" style="font-size: 0.8rem; transition: transform 0.2s;">▼</span>
+              </div>
+              <div class="advanced-settings-body" id="advSettingsBody" style="display: none;">
+                <!-- Instagram Settings -->
+                <div class="platform-settings-subcard">
+                  <div class="plat-settings-title"><span style="color: var(--ig-color);">📸</span> Instagram Reels Advanced</div>
+                  <div class="plat-setting-row">
+                    <label class="setting-checkbox-label">
+                      <input type="checkbox" id="igAiContent">
+                      <span>🏷️ <strong>AI-Generated Content Label</strong> (Meta's official "Created with AI" tag)</span>
+                    </label>
+                  </div>
+                  <div class="plat-setting-row">
+                    <label class="setting-checkbox-label">
+                      <input type="checkbox" id="igShareFeed" checked>
+                      <span>📰 <strong>Share to Main Feed Grid</strong> (Show on both Profile Grid & Reels Tab)</span>
+                    </label>
+                  </div>
+                  <div style="margin-top: 0.35rem; display: flex; flex-direction: column; gap: 0.3rem;">
+                    <label style="font-size: 0.72rem; color: var(--text-muted);">🎵 Original Audio Name (Optional):</label>
+                    <input type="text" id="igAudioName" class="form-control" style="padding: 0.35rem 0.6rem; font-size: 0.78rem;" placeholder="e.g. Original Audio - ZCodeDev">
+                  </div>
+                  <div style="margin-top: 0.35rem; display: flex; flex-direction: column; gap: 0.3rem;">
+                    <label style="font-size: 0.72rem; color: var(--text-muted);">🤝 Invite Collaborators (Optional Co-Author Usernames):</label>
+                    <input type="text" id="igCollaborators" class="form-control" style="padding: 0.35rem 0.6rem; font-size: 0.78rem;" placeholder="@username1, @username2">
+                  </div>
+                </div>
+
+                <!-- YouTube Settings -->
+                <div class="platform-settings-subcard">
+                  <div class="plat-settings-title"><span style="color: var(--yt-color);">▶️</span> YouTube Shorts Advanced</div>
+                  <div class="plat-setting-row">
+                    <label class="setting-checkbox-label">
+                      <input type="checkbox" id="ytMadeForKids">
+                      <span>👶 <strong>Made for Kids</strong> (COPPA Compliance - Keep unchecked for general audience)</span>
+                    </label>
+                  </div>
+                  <div class="plat-setting-row">
+                    <label class="setting-checkbox-label">
+                      <input type="checkbox" id="ytEmbeddable" checked>
+                      <span>🌐 <strong>Allow Video Embedding</strong></span>
+                    </label>
+                  </div>
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.35rem;">
+                    <div>
+                      <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 0.2rem;">Category:</label>
+                      <select id="ytCategory" class="form-control" style="padding: 0.35rem 0.6rem; font-size: 0.78rem;">
+                        <option value="28" selected>Science & Technology</option>
+                        <option value="27">Education</option>
+                        <option value="22">People & Blogs</option>
+                        <option value="24">Entertainment</option>
+                        <option value="23">Comedy</option>
+                        <option value="20">Gaming</option>
+                        <option value="1">Film & Animation</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 0.2rem;">License:</label>
+                      <select id="ytLicense" class="form-control" style="padding: 0.35rem 0.6rem; font-size: 0.78rem;">
+                        <option value="youtube" selected>Standard YouTube</option>
+                        <option value="creativeCommon">Creative Commons</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- TikTok Settings -->
+                <div class="platform-settings-subcard">
+                  <div class="plat-settings-title"><span style="color: var(--tt-color);">🎵</span> TikTok Advanced</div>
+                  <div class="plat-setting-row">
+                    <label class="setting-checkbox-label">
+                      <input type="checkbox" id="ttAiContent">
+                      <span>🤖 <strong>AI-Generated Content Disclosure</strong> (TikTok AI Policy)</span>
+                    </label>
+                  </div>
+                  <div class="plat-setting-row">
+                    <label class="setting-checkbox-label">
+                      <input type="checkbox" id="ttAllowComments" checked>
+                      <span>💬 <strong>Allow Comments</strong></span>
+                    </label>
+                  </div>
+                  <div class="plat-setting-row">
+                    <label class="setting-checkbox-label">
+                      <input type="checkbox" id="ttAllowDuet" checked>
+                      <span>👥 <strong>Allow Duet & Stitch</strong></span>
+                    </label>
+                  </div>
+                  <div class="plat-setting-row">
+                    <label class="setting-checkbox-label">
+                      <input type="checkbox" id="ttBrandContent">
+                      <span>💼 <strong>Commercial / Paid Partnership Disclosure</strong></span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Timing & Presets -->
+            <div class="form-group">
+              <label>Publish Timing (Karachi Time PKT):</label>
+              <div class="time-presets">
+                <button type="button" class="preset-btn active" onclick="applyTimePreset('now', this)">⚡ Now</button>
+                <button type="button" class="preset-btn" onclick="applyTimePreset('15min', this)">⏱️ In 15 Min</button>
+                <button type="button" class="preset-btn" onclick="applyTimePreset('today6pm', this)">🌇 Today 6:00 PM (Peak)</button>
+                <button type="button" class="preset-btn" onclick="applyTimePreset('tomorrow12pm', this)">📅 Tomorrow 12:00 PM</button>
+                <button type="button" class="preset-btn" onclick="applyTimePreset('tomorrow6pm', this)">🌙 Tomorrow 6:00 PM</button>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                <input type="date" id="scheduledDate" class="form-control" required>
+                <input type="time" id="scheduledTime" class="form-control" required>
+              </div>
+            </div>
+
+            <!-- Privacy & Safeguards -->
+            <div style="display: flex; gap: 1rem; align-items: center; justify-content: space-between; flex-wrap: wrap;">
+              <div style="flex: 1; min-width: 160px;">
+                <label style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 0.3rem;">Privacy Setting:</label>
+                <select id="postPrivacy" class="form-control">
+                  <option value="private" selected>Private (Safest for testing)</option>
+                  <option value="unlisted">Unlisted</option>
+                  <option value="public">Public (Go Live directly)</option>
+                </select>
+              </div>
+              <div style="display: flex; align-items: center; gap: 0.5rem; padding-top: 1rem;">
+                <input type="checkbox" id="allowRepost">
+                <label for="allowRepost" style="font-size: 0.78rem; cursor: pointer;">Allow Repost (Bypass Duplicate Check)</label>
+              </div>
+            </div>
+
+            <!-- Action Buttons Grid -->
+            <div class="action-buttons-grid">
+              <button type="button" class="btn btn-success" id="publishNowBtn" onclick="triggerInstantPublish()" style="padding: 0.85rem;" disabled>
+                🚀 Publish Now
+              </button>
+              <button type="submit" class="btn btn-primary" id="scheduleBtn" style="padding: 0.85rem;" disabled>
+                📅 Schedule
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- ================= BULK / BATCH MODE ================= -->
+        <div id="batchModeContainer" style="display: none;">
+          <div class="dropzone" id="batchDropzone">
+            <input type="file" id="batchFileInput" multiple accept="video/mp4,video/quicktime,video/webm">
+            <div class="dropzone-icon">📁</div>
+            <h3>Drop Multiple Videos Here (Batch Mode)</h3>
+            <p>Select 5-10 videos to auto-stagger across days or hours</p>
+          </div>
+
+          <div class="batch-list" id="batchFilesList">
+            <div style="text-align: center; color: var(--text-dim); padding: 1.5rem; font-size: 0.82rem;">
+              No batch videos loaded yet. Drop multiple video files above.
+            </div>
+          </div>
+
+          <form id="batchScheduleForm" onsubmit="handleBatchSchedule(event)" style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;">
+            <div class="form-group">
+              <label>Title Template:</label>
+              <input type="text" id="batchTitleTemplate" class="form-control" value="Part {n}: {filename}" placeholder="e.g. Part {n}: {filename}">
+              <span style="font-size: 0.72rem; color: var(--text-dim);">{n} = video number (1, 2, 3), {filename} = original clean name</span>
+            </div>
+
+            <div class="form-group">
+              <label>Stagger Schedule Interval:</label>
+              <select id="batchStaggerInterval" class="form-control">
+                <option value="24" selected>📅 1 Video Every Day (24 Hours apart at same time)</option>
+                <option value="12">⏱️ 2 Videos Per Day (Every 12 Hours)</option>
+                <option value="6">⚡ Every 6 Hours</option>
+                <option value="4">🚀 Every 4 Hours</option>
+                <option value="0">💥 All at the same time</option>
+              </select>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+              <div class="form-group">
+                <label>First Video Start Date:</label>
+                <input type="date" id="batchStartDate" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label>Start Time (Karachi PKT):</label>
+                <input type="time" id="batchStartTime" class="form-control" value="18:00" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Common Caption:</label>
+              <textarea id="batchCaption" class="form-control" rows="2" placeholder="Common caption for all videos in batch..."></textarea>
+            </div>
+
+            <div class="form-group">
+              <label>Common Hashtags:</label>
+              <input type="text" id="batchHashtags" class="form-control" value="#Shorts #Reels #fyp #viral">
+            </div>
+
+            <div class="form-group">
+              <label>Target Platforms:</label>
+              <div class="platform-selector">
+                <div class="plat-choice selected" id="batchPlatYT" onclick="toggleBatchPlat('youtube', this)">
+                  <div class="plat-choice-left"><span style="color: var(--yt-color)">▶️</span> YouTube Shorts</div>
+                  <input type="checkbox" checked id="batchCheckYT">
+                </div>
+                <div class="plat-choice selected" id="batchPlatFB" onclick="toggleBatchPlat('facebook', this)">
+                  <div class="plat-choice-left"><span style="color: var(--fb-color)">📘</span> Facebook Reels</div>
+                  <input type="checkbox" checked id="batchCheckFB">
+                </div>
+                <div class="plat-choice selected" id="batchPlatIG" onclick="toggleBatchPlat('instagram', this)">
+                  <div class="plat-choice-left"><span style="color: var(--ig-color)">📸</span> Instagram Reels</div>
+                  <input type="checkbox" checked id="batchCheckIG">
+                </div>
+                <div class="plat-choice" id="batchPlatTT" onclick="toggleBatchPlat('tiktok', this)">
+                  <div class="plat-choice-left"><span style="color: var(--tt-color)">🎵</span> TikTok</div>
+                  <input type="checkbox" id="batchCheckTT">
+                </div>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" id="scheduleBatchBtn" style="padding: 0.9rem; font-size: 0.92rem;" disabled>
+              🚀 Schedule Entire Batch (<span id="batchCountLabel">0</span> Videos)
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <!-- Right Column: Queue Pipeline & Live Status -->
+      <section class="card">
+        <div class="card-header">
+          <h2>📋 Publishing Queue & Pipeline</h2>
+          <div style="display: flex; gap: 0.4rem;">
+            <button class="btn btn-outline btn-sm" onclick="loadJobs()">
+              🔄 Refresh
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="filter-tabs">
+          <button class="tab-btn active" onclick="setJobFilter('ALL', this)">All Jobs</button>
+          <button class="tab-btn" onclick="setJobFilter('PENDING', this)">Pending</button>
+          <button class="tab-btn" onclick="setJobFilter('UPLOADING', this)">In Progress</button>
+          <button class="tab-btn" onclick="setJobFilter('PUBLISHED', this)">Published</button>
+          <button class="tab-btn" onclick="setJobFilter('FAILED', this)">Failed / Needs Action</button>
+        </div>
+
+        <!-- Queue Cards List -->
+        <div class="queue-list" id="queueList">
+          <div style="text-align: center; padding: 2rem; color: var(--text-dim);">
+            Loading job queue...
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Live Log Console -->
+    <div class="log-terminal">
+      <div class="terminal-header">
+        <span>🖥️ Live System Log Stream (OS Vault Encrypted & Secret-Masked)</span>
+        <span style="font-size: 0.72rem;">Auto-refreshes every 4s</span>
+      </div>
+      <div class="log-lines" id="logLines">
+        <div class="log-line info">Connected to ZCodeDev Social Publisher engine. Initializing live stream...</div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ================= SETTINGS & ACCOUNTS MODAL ================= -->
+  <div class="modal-overlay" id="settingsModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>🔐 Platform Accounts & API Setup</h3>
+        <button class="close-btn" onclick="closeSettingsModal()">&times;</button>
+      </div>
+
+      <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+        API tokens and keys are encrypted inside the <strong>Windows Credential Locker (WinVaultKeyring)</strong>. Never exposed in plain text files.
+      </p>
+
+      <!-- UNIFIED META (Facebook + Instagram) -->
+      <div class="acc-card" style="border-color: rgba(24, 119, 242, 0.4);">
+        <div class="acc-card-header">
+          <div class="acc-card-title">
+            <span style="font-size: 1.3rem;">🌐</span>
+            <span>Meta Unified Assistant (Facebook + Instagram)</span>
+          </div>
+          <span class="status-badge status-PENDING" id="metaUnifiedBadge">Checking...</span>
+        </div>
+        <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+          Paste your Meta User or Page Token. Backend automatically finds your Facebook Pages and connects your <strong>Facebook Reels + linked Instagram Professional Reels</strong> in 1 click!
+        </p>
+
+        <div style="display: flex; flex-direction: column; gap: 0.6rem;">
+          <input type="text" id="metaTokenInput" class="form-control" placeholder="Paste Meta Access Token (EAAB...)">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+            <input type="text" id="metaAppIdInput" class="form-control" placeholder="Meta App ID (Optional for permanent token)">
+            <input type="password" id="metaAppSecretInput" class="form-control" placeholder="Meta App Secret (Optional)">
+          </div>
+          <div style="display: flex; gap: 0.6rem; margin-top: 0.25rem;">
+            <button class="btn btn-primary btn-sm" onclick="connectMetaSmart()" id="metaConnectBtn">
+              🚀 1-Click Auto-Connect Meta (FB + Insta)
+            </button>
+            <a href="https://developers.facebook.com/tools/explorer/" target="_blank" class="btn btn-outline btn-sm">
+              🔑 Get Token from Graph Explorer
+            </a>
+          </div>
+          <div id="metaStatusBox" style="font-size: 0.76rem; margin-top: 0.3rem;"></div>
+        </div>
+      </div>
+
+      <!-- YOUTUBE -->
+      <div class="acc-card">
+        <div class="acc-card-header">
+          <div class="acc-card-title">
+            <span style="color: var(--yt-color); font-size: 1.2rem;">▶️</span>
+            <span>YouTube Shorts (Google OAuth2)</span>
+          </div>
+          <span class="status-badge" id="ytStatusBadge">Checking...</span>
+        </div>
+        <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.6rem;" id="ytSubtext">
+          <code>client_secret.json</code> file is detected in project! Click to authenticate with your YouTube channel.
+        </p>
+        <div style="display: flex; gap: 0.6rem; align-items: center;">
+          <button class="btn btn-primary btn-sm" onclick="launchWizard('youtube')">
+            🚀 1-Click YouTube Login
+          </button>
+          <button class="btn btn-outline btn-sm" onclick="promptSaveCredentials('youtube')">
+            Manual JSON Paste
+          </button>
+          <button class="btn btn-outline btn-sm" style="color: var(--danger);" onclick="deletePlatformCreds('youtube')">
+            Revoke
+          </button>
+        </div>
+        <div id="ytDetailsBox" style="font-size: 0.76rem; color: var(--text-muted); margin-top: 0.4rem;"></div>
+      </div>
+
+      <!-- TIKTOK -->
+      <div class="acc-card">
+        <div class="acc-card-header">
+          <div class="acc-card-title">
+            <span style="color: var(--tt-color); font-size: 1.2rem;">🎵</span>
+            <span>TikTok (Content Posting API v2)</span>
+          </div>
+          <span class="status-badge" id="ttStatusBadge">Checking...</span>
+        </div>
+        <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.6rem;">
+          Connect your TikTok Developer Creator Access Token for direct FILE_UPLOAD binary chunk transfer.
+        </p>
+        <div style="display: flex; gap: 0.6rem;">
+          <button class="btn btn-outline btn-sm" onclick="promptSaveCredentials('tiktok')">
+            Configure TikTok Token
+          </button>
+          <button class="btn btn-outline btn-sm" style="color: var(--danger);" onclick="deletePlatformCreds('tiktok')">
+            Revoke
+          </button>
+        </div>
+        <div id="ttDetailsBox" style="font-size: 0.76rem; color: var(--text-muted); margin-top: 0.4rem;"></div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; margin-top: 1rem;">
+        <button class="btn btn-outline" onclick="closeSettingsModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Element -->
+  <div class="toast" id="toastBox">
+    <span id="toastIcon">ℹ️</span>
+    <span id="toastMsg">Notification message</span>
+  </div>
+
+  <!-- JavaScript Application Logic -->
+  <script>
+    const API_BASE = "";
+    let currentFilter = "ALL";
+    let activeStudioMode = "single";
+    let activeMockupPlatform = "youtube";
+    let batchUploadedVideos = [];
+
+    // Initialize application
+    document.addEventListener("DOMContentLoaded", () => {
+      initKarachiTime();
+      loadSystemStatus();
+      loadPlatformDetails();
+      loadJobs();
+      loadLogs();
+      setupDropzones();
+      initCoverScrubber();
+
+      // Set default date to today
+      const today = new Date().toISOString().split("T")[0];
+      document.getElementById("scheduledDate").value = today;
+      document.getElementById("batchStartDate").value = today;
+
+      // Intervals for live updates
+      setInterval(loadSystemStatus, 4000);
+      setInterval(loadJobs, 4000);
+      setInterval(loadLogs, 4000);
+    });
+
+    // Toast helper
+    function showToast(message, type = "info") {
+      const toast = document.getElementById("toastBox");
+      const msg = document.getElementById("toastMsg");
+      const icon = document.getElementById("toastIcon");
+
+      toast.className = `toast show ${type}`;
+      msg.textContent = message;
+      icon.textContent = type === "success" ? "✅" : (type === "error" ? "❌" : "ℹ️");
+
+      setTimeout(() => {
+        toast.className = "toast";
+      }, 4000);
+    }
+
+    // Karachi Real-Time Clock
+    function initKarachiTime() {
+      function update() {
+        const now = new Date();
+        const options = {
+          timeZone: "Asia/Karachi",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: false
+        };
+        const timeStr = new Intl.DateTimeFormat([], options).format(now);
+        document.getElementById("karachiClock").textContent = timeStr + " PKT";
+      }
+      update();
+      setInterval(update, 1000);
+    }
+
+    // System Status & Queue Metrics
+    async function loadSystemStatus() {
+      try {
+        const res = await fetch(`${API_BASE}/api/system/status`);
+        if (!res.ok) return;
+        const data = await res.json();
+
+        // Metrics
+        const counts = data.queue_counts || {};
+        document.getElementById("statTotal").textContent = counts.total || 0;
+        document.getElementById("statPending").textContent = counts.pending || 0;
+        document.getElementById("statUploading").textContent = counts.uploading || 0;
+        document.getElementById("statPublished").textContent = counts.published || 0;
+        document.getElementById("statFailed").textContent = counts.failed || 0;
+
+        // Scheduler
+        const dot = document.getElementById("schedDot");
+        const statusText = document.getElementById("schedStatus");
+        if (data.scheduler_running) {
+          dot.style.background = "var(--success)";
+          statusText.textContent = "Scheduler: Active (PKT)";
+        } else {
+          dot.style.background = "var(--warning)";
+          statusText.textContent = "Scheduler: Standby";
+        }
+      } catch (err) {
+        console.error("Status check failed", err);
+      }
+    }
+
+    // Platform Health & Connections
+    async function loadPlatformDetails() {
+      try {
+        const res = await fetch(`${API_BASE}/api/platforms/details`);
+        if (!res.ok) return;
+        const data = await res.json();
+
+        // Update header chips
+        updateHeaderChip("chipYT", data.youtube);
+        updateHeaderChip("chipFB", data.facebook);
+        updateHeaderChip("chipIG", data.instagram);
+        updateHeaderChip("chipTT", data.tiktok);
+
+        // Update Modal Badges
+        updateModalBadge("ytStatusBadge", "ytDetailsBox", data.youtube);
+        updateModalBadge("ttStatusBadge", "ttDetailsBox", data.tiktok);
+
+        // Meta unified status
+        const fbOk = data.facebook && data.facebook.valid;
+        const igOk = data.instagram && data.instagram.valid;
+        const metaBadge = document.getElementById("metaUnifiedBadge");
+        if (fbOk && igOk) {
+          metaBadge.textContent = "FB + Insta Connected";
+          metaBadge.className = "status-badge status-PUBLISHED";
+        } else if (fbOk) {
+          metaBadge.textContent = "FB Page Connected";
+          metaBadge.className = "status-badge status-PUBLISHED";
+        } else {
+          metaBadge.textContent = "Not Connected";
+          metaBadge.className = "status-badge status-FAILED";
+        }
+
+      } catch (e) {
+        console.error("Failed loading platform details", e);
+      }
+    }
+
+    function updateHeaderChip(elementId, platData) {
+      const chip = document.getElementById(elementId);
+      if (!chip) return;
+      if (platData && platData.valid) {
+        chip.className = "plat-chip connected";
+        chip.title = `${platData.title || "Active"} (${platData.subtitle || ""})`;
+      } else {
+        chip.className = "plat-chip";
+        chip.title = platData && platData.error ? platData.error : "Not Connected";
+      }
+    }
+
+    function updateModalBadge(badgeId, boxId, platData) {
+      const badge = document.getElementById(badgeId);
+      const box = document.getElementById(boxId);
+      if (!badge) return;
+
+      if (platData && platData.valid) {
+        badge.textContent = "Connected";
+        badge.className = "status-badge status-PUBLISHED";
+        if (box) box.textContent = `Active Account: ${platData.title || ""} (${platData.subtitle || ""})`;
+      } else if (platData && platData.configured) {
+        badge.textContent = "Token Invalid / Expired";
+        badge.className = "status-badge status-FAILED";
+        if (box) box.textContent = `Error: ${platData.error || "Session Expired"}`;
+      } else {
+        badge.textContent = "Not Connected";
+        badge.className = "status-badge status-PENDING";
+        if (box) box.textContent = "No credentials in Windows Vault.";
+      }
+    }
+
+    // Mode Switcher (Single vs Batch)
+    function setStudioMode(mode) {
+      activeStudioMode = mode;
+      const singleContainer = document.getElementById("singleModeContainer");
+      const batchContainer = document.getElementById("batchModeContainer");
+      const singleTab = document.getElementById("singleModeTab");
+      const batchTab = document.getElementById("batchModeTab");
+
+      if (mode === "single") {
+        singleContainer.style.display = "block";
+        batchContainer.style.display = "none";
+        singleTab.className = "mode-tab active";
+        batchTab.className = "mode-tab";
+      } else {
+        singleContainer.style.display = "none";
+        batchContainer.style.display = "block";
+        singleTab.className = "mode-tab";
+        batchTab.className = "mode-tab active";
+      }
+    }
+
+    // Dropzones & File Handling
+    function setupDropzones() {
+      // Single dropzone
+      const singleDz = document.getElementById("videoDropzone");
+      const singleInput = document.getElementById("videoFileInput");
+
+      singleDz.addEventListener("dragover", (e) => { e.preventDefault(); singleDz.classList.add("dragover"); });
+      singleDz.addEventListener("dragleave", () => { singleDz.classList.remove("dragover"); });
+      singleDz.addEventListener("drop", (e) => {
+        e.preventDefault();
+        singleDz.classList.remove("dragover");
+        if (e.dataTransfer.files.length) uploadSingleFile(e.dataTransfer.files[0]);
+      });
+      singleInput.addEventListener("change", (e) => {
+        if (e.target.files.length) uploadSingleFile(e.target.files[0]);
+      });
+
+      // Batch dropzone
+      const batchDz = document.getElementById("batchDropzone");
+      const batchInput = document.getElementById("batchFileInput");
+
+      batchDz.addEventListener("dragover", (e) => { e.preventDefault(); batchDz.classList.add("dragover"); });
+      batchDz.addEventListener("dragleave", () => { batchDz.classList.remove("dragover"); });
+      batchDz.addEventListener("drop", (e) => {
+        e.preventDefault();
+        batchDz.classList.remove("dragover");
+        if (e.dataTransfer.files.length) uploadBatchFiles(e.dataTransfer.files);
+      });
+      batchInput.addEventListener("change", (e) => {
+        if (e.target.files.length) uploadBatchFiles(e.target.files);
+      });
+    }
+
+    // Single File Upload
+    async function uploadSingleFile(file) {
+      const prompt = document.getElementById("dropzonePrompt");
+      prompt.textContent = `Uploading & Inspecting: ${file.name}...`;
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      try {
+        const res = await fetch(`${API_BASE}/api/upload-video`, { method: "POST", body: formData });
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.detail || "Upload failed");
+        }
+        const data = await res.json();
+
+        // Populate form
+        document.getElementById("videoPathInput").value = data.file_path;
+        const cleanName = file.name.replace(/\.[^/.]+$/, "").replace(/_/g, " ");
+        document.getElementById("videoTitle").value = cleanName;
+        prompt.textContent = `Loaded: ${file.name}`;
+
+        // Enable action buttons
+        document.getElementById("publishNowBtn").disabled = false;
+        document.getElementById("scheduleBtn").disabled = false;
+
+        // Show preview
+        const previewSection = document.getElementById("previewSection");
+        previewSection.style.display = "flex";
+        const player = document.getElementById("previewPlayer");
+        player.src = data.download_url;
+        player.load();
+        clearSelectedThumbnail();
+
+        // Metadata tags
+        renderMetaTags(data);
+        updateMockupCaption();
+        showToast("Video uploaded and specs validated!", "success");
+
+      } catch (err) {
+        showToast(err.message, "error");
+        prompt.textContent = "Select or Drop Short Video Here";
+      }
+    }
+
+    function renderMetaTags(meta) {
+      const container = document.getElementById("metaTagsList");
+      container.innerHTML = "";
+
+      const pills = [
+        `📐 ${meta.width}x${meta.height} (${meta.aspect_ratio || "N/A"})`,
+        `⏱️ ${meta.duration_sec ? meta.duration_sec.toFixed(1) + 's' : 'N/A'}`,
+        `💾 ${(meta.size_bytes / (1024 * 1024)).toFixed(1)} MB`,
+        meta.is_vertical_short ? "✅ 9:16 Shorts Spec OK" : "⚠️ Not 9:16 vertical"
+      ];
+
+      pills.forEach((p, idx) => {
+        const span = document.createElement("span");
+        span.className = `meta-pill ${idx === 3 ? (meta.is_vertical_short ? 'valid' : 'warning') : ''}`;
+        span.textContent = p;
+        container.appendChild(span);
+      });
+
+      // Platform warnings
+      const warnBox = document.getElementById("platformWarningBox");
+      const warnings = [];
+      const pw = meta.platform_warnings || {};
+      for (const [plat, result] of Object.entries(pw)) {
+        if (!result.compliant) {
+          warnings.push(`${plat.toUpperCase()}: ${result.errors.join(", ")}`);
+        }
+      }
+      warnBox.textContent = warnings.join(" | ");
+    }
+
+    // Batch Upload Files
+    async function uploadBatchFiles(files) {
+      const listContainer = document.getElementById("batchFilesList");
+      listContainer.innerHTML = `<div style="text-align: center; color: var(--secondary); padding: 1rem;">Uploading and validating ${files.length} videos...</div>`;
+
+      const formData = new FormData();
+      for (let i = 0; i < files.length; i++) {
+        formData.append("files", files[i]);
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/api/upload-batch-videos`, { method: "POST", body: formData });
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.detail || "Batch upload failed");
+        }
+        const data = await res.json();
+        batchUploadedVideos = data.videos || [];
+
+        renderBatchList();
+        document.getElementById("scheduleBatchBtn").disabled = batchUploadedVideos.length === 0;
+        document.getElementById("batchCountLabel").textContent = batchUploadedVideos.length;
+        showToast(`${batchUploadedVideos.length} videos validated and ready for batch scheduling!`, "success");
+
+      } catch (e) {
+        showToast(e.message, "error");
+        listContainer.innerHTML = `<div style="text-align: center; color: var(--danger); padding: 1rem;">Batch error: ${e.message}</div>`;
+      }
+    }
+
+    function renderBatchList() {
+      const listContainer = document.getElementById("batchFilesList");
+      listContainer.innerHTML = "";
+
+      if (!batchUploadedVideos.length) {
+        listContainer.innerHTML = `<div style="text-align: center; color: var(--text-dim); padding: 1.5rem; font-size: 0.82rem;">No batch videos loaded.</div>`;
+        return;
+      }
+
+      batchUploadedVideos.forEach((v, idx) => {
+        const div = document.createElement("div");
+        div.className = "batch-item";
+        div.innerHTML = `
+          <div class="batch-item-info">
+            <span style="font-weight: 700; color: var(--secondary);">#${idx + 1}</span>
+            <span>📹 ${v.original_filename}</span>
+            <span style="color: var(--text-muted); font-size: 0.74rem;">(${v.duration_sec.toFixed(1)}s, ${v.aspect_ratio})</span>
+          </div>
+          <button type="button" class="btn btn-outline btn-sm" style="color: var(--danger);" onclick="removeBatchItem(${idx})">✖</button>
+        `;
+        listContainer.appendChild(div);
+      });
+    }
+
+    function removeBatchItem(index) {
+      batchUploadedVideos.splice(index, 1);
+      renderBatchList();
+      document.getElementById("scheduleBatchBtn").disabled = batchUploadedVideos.length === 0;
+      document.getElementById("batchCountLabel").textContent = batchUploadedVideos.length;
+    }
+
+    // Phone Mockup Controls
+    function setMockupPlatform(platform, btn) {
+      activeMockupPlatform = platform;
+      document.querySelectorAll(".mockup-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+
+      const topLeft = document.getElementById("mockupTopLeft");
+      if (platform === "youtube") topLeft.textContent = "YouTube Shorts";
+      else if (platform === "instagram") topLeft.textContent = "Instagram Reels";
+      else if (platform === "tiktok") topLeft.textContent = "TikTok";
+
+      updateMockupCaption();
+    }
+
+    function updateMockupCaption() {
+      const title = document.getElementById("videoTitle").value || "";
+      const caption = document.getElementById("videoCaption").value || "";
+      const tags = document.getElementById("videoHashtags").value || "";
+      const mockupText = document.getElementById("mockupCaptionPreview");
+
+      let full = title;
+      if (caption) full += " - " + caption;
+      if (tags) full += " " + tags;
+
+      mockupText.textContent = full || "Shorts caption preview...";
+    }
+
+    function appendTag(tag) {
+      const input = document.getElementById("videoHashtags");
+      if (!input.value.includes(tag)) {
+        input.value = (input.value + " " + tag).trim();
+        updateMockupCaption();
+      }
+    }
+
+    // Thumbnail & Cover Management
+    function formatTimeMs(sec) {
+      if (isNaN(sec) || sec < 0) sec = 0;
+      const s = Math.floor(sec);
+      const ms = Math.floor((sec - s) * 10);
+      const mins = Math.floor(s / 60);
+      const remSec = s % 60;
+      return `${String(mins).padStart(2, '0')}:${String(remSec).padStart(2, '0')}.${ms}`;
+    }
+
+    function initCoverScrubber() {
+      const player = document.getElementById("previewPlayer");
+      const slider = document.getElementById("coverTimeSlider");
+      const badge = document.getElementById("thumbTimeBadge");
+      if (!player || !slider) return;
+
+      player.addEventListener("loadedmetadata", () => {
+        if (player.duration) {
+          slider.max = player.duration;
+          slider.value = 0;
+          if (badge) badge.textContent = `${formatTimeMs(0)} / ${formatTimeMs(player.duration)}`;
+        }
+      });
+
+      player.addEventListener("timeupdate", () => {
+        if (slider && player.duration && !slider.matches(":active")) {
+          slider.value = player.currentTime;
+          if (badge) badge.textContent = `${formatTimeMs(player.currentTime)} / ${formatTimeMs(player.duration)}`;
+        }
+      });
+    }
+
+    function onCoverScrubberInput(val) {
+      const player = document.getElementById("previewPlayer");
+      const badge = document.getElementById("thumbTimeBadge");
+      if (player) {
+        player.currentTime = parseFloat(val);
+        if (badge) badge.textContent = `${formatTimeMs(player.currentTime)} / ${formatTimeMs(player.duration || 0)}`;
+      }
+    }
+
+    async function captureCurrentVideoFrame() {
+      const player = document.getElementById("previewPlayer");
+      if (!player || !player.videoWidth) {
+        showToast("Please upload and preview a video first.", "error");
+        return;
+      }
+      try {
+        const canvas = document.createElement("canvas");
+        canvas.width = player.videoWidth;
+        canvas.height = player.videoHeight;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(player, 0, 0, canvas.width, canvas.height);
+        const dataUrl = canvas.toDataURL("image/jpeg", 0.92);
+
+        const currentSec = player.currentTime || 0;
+        const offsetMs = Math.round(currentSec * 1000);
+
+        const res = await fetch(`${API_BASE}/api/capture-thumbnail`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ data_url: dataUrl, offset_ms: offsetMs })
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Failed to capture thumbnail");
+
+        setThumbnailState(data.thumbnail_path, data.thumbnail_url, offsetMs, `Frame at ${formatTimeMs(currentSec)} (${offsetMs}ms)`);
+        showToast(`Captured cover frame at ${formatTimeMs(currentSec)}!`, "success");
+      } catch (err) {
+        showToast(err.message, "error");
+      }
+    }
+
+    async function handleCustomThumbUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      try {
+        const res = await fetch(`${API_BASE}/api/upload-thumbnail`, {
+          method: "POST",
+          body: formData
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Failed to upload cover image");
+
+        setThumbnailState(data.thumbnail_path, data.thumbnail_url, 0, `Custom Image: ${file.name}`);
+        showToast("Custom cover image uploaded successfully!", "success");
+      } catch (err) {
+        showToast(err.message, "error");
+      } finally {
+        e.target.value = "";
+      }
+    }
+
+    function setThumbnailState(path, url, offsetMs, label) {
+      document.getElementById("thumbnailPathInput").value = path || "";
+      document.getElementById("thumbOffsetMsInput").value = (offsetMs !== null && offsetMs !== undefined && offsetMs !== "") ? offsetMs : "";
+
+      const box = document.getElementById("thumbPreviewBox");
+      const img = document.getElementById("thumbPreviewImg");
+      const title = document.getElementById("thumbTitleLabel");
+      const clearBtn = document.getElementById("clearThumbBtn");
+
+      if (url) {
+        img.src = url;
+        title.textContent = label || "Cover Frame Selected";
+        box.style.display = "flex";
+        clearBtn.style.display = "inline-flex";
+      } else {
+        box.style.display = "none";
+        clearBtn.style.display = "none";
+      }
+    }
+
+    function clearSelectedThumbnail() {
+      setThumbnailState("", "", "", "");
+    }
+
+    // Platform Advanced Settings
+    function toggleAdvancedSettings() {
+      const body = document.getElementById("advSettingsBody");
+      const arrow = document.getElementById("advSettingsArrow");
+      const isHidden = body.style.display === "none";
+      body.style.display = isHidden ? "flex" : "none";
+      arrow.textContent = isHidden ? "▲" : "▼";
+    }
+
+    function getPlatformSettings() {
+      return {
+        instagram: {
+          is_created_with_ai: document.getElementById("igAiContent")?.checked || false,
+          share_to_feed: document.getElementById("igShareFeed")?.checked ?? true,
+          audio_name: document.getElementById("igAudioName")?.value || "",
+          collaborators: document.getElementById("igCollaborators")?.value || ""
+        },
+        youtube: {
+          made_for_kids: document.getElementById("ytMadeForKids")?.checked || false,
+          category_id: document.getElementById("ytCategory")?.value || "28",
+          license: document.getElementById("ytLicense")?.value || "youtube",
+          embeddable: document.getElementById("ytEmbeddable")?.checked ?? true
+        },
+        tiktok: {
+          ai_generated_content: document.getElementById("ttAiContent")?.checked || false,
+          disable_comment: !document.getElementById("ttAllowComments")?.checked,
+          disable_duet: !document.getElementById("ttAllowDuet")?.checked,
+          disable_stitch: !document.getElementById("ttAllowDuet")?.checked,
+          brand_content_toggle: document.getElementById("ttBrandContent")?.checked || false
+        }
+      };
+    }
+
+    // Platform Selector Toggles
+    function togglePlatformChoice(plat, el) {
+      const check = el.querySelector("input[type='checkbox']");
+      check.checked = !check.checked;
+      el.classList.toggle("selected", check.checked);
+    }
+
+    function toggleBatchPlat(plat, el) {
+      const check = el.querySelector("input[type='checkbox']");
+      check.checked = !check.checked;
+      el.classList.toggle("selected", check.checked);
+    }
+
+    // Time Presets
+    function applyTimePreset(preset, btn) {
+      document.querySelectorAll(".preset-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+
+      const now = new Date();
+      let target = new Date(now);
+
+      if (preset === "now") {
+        // Now
+      } else if (preset === "15min") {
+        target = new Date(now.getTime() + 15 * 60000);
+      } else if (preset === "today6pm") {
+        target.setHours(18, 0, 0, 0);
+        if (target < now) target.setDate(target.getDate() + 1);
+      } else if (preset === "tomorrow12pm") {
+        target.setDate(target.getDate() + 1);
+        target.setHours(12, 0, 0, 0);
+      } else if (preset === "tomorrow6pm") {
+        target.setDate(target.getDate() + 1);
+        target.setHours(18, 0, 0, 0);
+      }
+
+      const dateStr = target.toISOString().split("T")[0];
+      const hours = String(target.getHours()).padStart(2, "0");
+      const mins = String(target.getMinutes()).padStart(2, "0");
+
+      document.getElementById("scheduledDate").value = dateStr;
+      document.getElementById("scheduledTime").value = `${hours}:${mins}`;
+    }
+
+    // Publish Handlers
+    function getSelectedPlatforms(prefix = "check") {
+      const plats = [];
+      if (document.getElementById(`${prefix}YT`).checked) plats.push("youtube");
+      if (document.getElementById(`${prefix}FB`).checked) plats.push("facebook");
+      if (document.getElementById(`${prefix}IG`).checked) plats.push("instagram");
+      if (document.getElementById(`${prefix}TT`).checked) plats.push("tiktok");
+      return plats;
+    }
+
+    // 1-Click Instant Publish Now
+    async function triggerInstantPublish() {
+      const videoPath = document.getElementById("videoPathInput").value;
+      if (!videoPath) {
+        showToast("Please upload a video first.", "error");
+        return;
+      }
+
+      const platforms = getSelectedPlatforms("check");
+      if (!platforms.length) {
+        showToast("Select at least one target platform.", "error");
+        return;
+      }
+
+      const thumbPath = document.getElementById("thumbnailPathInput").value || null;
+      const thumbOffsetVal = document.getElementById("thumbOffsetMsInput").value;
+      const thumbOffsetMs = (thumbOffsetVal !== "" && !isNaN(thumbOffsetVal)) ? parseInt(thumbOffsetVal) : null;
+
+      const payload = {
+        video_path: videoPath,
+        platforms: platforms,
+        scheduled_time: "", // Handled by publish-now endpoint
+        title: document.getElementById("videoTitle").value,
+        caption: document.getElementById("videoCaption").value,
+        hashtags: document.getElementById("videoHashtags").value,
+        privacy: document.getElementById("postPrivacy").value,
+        allow_repost: document.getElementById("allowRepost").checked,
+        thumbnail_path: thumbPath,
+        thumb_offset_ms: thumbOffsetMs,
+        platform_settings: getPlatformSettings()
+      };
+
+      const btn = document.getElementById("publishNowBtn");
+      btn.disabled = true;
+      btn.textContent = "⚡ Dispatching...";
+
+      try {
+        const res = await fetch(`${API_BASE}/api/jobs/publish-now`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Publish Now failed");
+
+        showToast(data.message || "Video jobs dispatched for immediate publish!", "success");
+        loadJobs();
+
+      } catch (err) {
+        showToast(err.message, "error");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "🚀 Publish Now";
+      }
+    }
+
+    // Schedule for Later
+    async function handleSinglePublish(e) {
+      e.preventDefault();
+      const videoPath = document.getElementById("videoPathInput").value;
+      if (!videoPath) {
+        showToast("Please upload a video first.", "error");
+        return;
+      }
+
+      const platforms = getSelectedPlatforms("check");
+      if (!platforms.length) {
+        showToast("Select at least one target platform.", "error");
+        return;
+      }
+
+      const dateStr = document.getElementById("scheduledDate").value;
+      const timeStr = document.getElementById("scheduledTime").value;
+      const scheduledTime = `${dateStr} ${timeStr}:00`;
+
+      const thumbPath = document.getElementById("thumbnailPathInput").value || null;
+      const thumbOffsetVal = document.getElementById("thumbOffsetMsInput").value;
+      const thumbOffsetMs = (thumbOffsetVal !== "" && !isNaN(thumbOffsetVal)) ? parseInt(thumbOffsetVal) : null;
+
+      const payload = {
+        video_path: videoPath,
+        platforms: platforms,
+        scheduled_time: scheduledTime,
+        title: document.getElementById("videoTitle").value,
+        caption: document.getElementById("videoCaption").value,
+        hashtags: document.getElementById("videoHashtags").value,
+        privacy: document.getElementById("postPrivacy").value,
+        allow_repost: document.getElementById("allowRepost").checked,
+        thumbnail_path: thumbPath,
+        thumb_offset_ms: thumbOffsetMs,
+        platform_settings: getPlatformSettings()
+      };
+
+      const btn = document.getElementById("scheduleBtn");
+      btn.disabled = true;
+      btn.textContent = "Scheduling...";
+
+      try {
+        const res = await fetch(`${API_BASE}/api/jobs`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Scheduling failed");
+
+        showToast(`Successfully scheduled across ${data.created.length} platform(s)!`, "success");
+        loadJobs();
+
+      } catch (err) {
+        showToast(err.message, "error");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "📅 Schedule";
+      }
+    }
+
+    // Batch Schedule Submit
+    async function handleBatchSchedule(e) {
+      e.preventDefault();
+      if (!batchUploadedVideos.length) {
+        showToast("Upload at least one video in batch mode.", "error");
+        return;
+      }
+
+      const platforms = getSelectedPlatforms("batchCheck");
+      if (!platforms.length) {
+        showToast("Select at least one target platform.", "error");
+        return;
+      }
+
+      const startDate = document.getElementById("batchStartDate").value;
+      const startTime = document.getElementById("batchStartTime").value;
+      const startDateTime = `${startDate} ${startTime}:00`;
+
+      const payload = {
+        video_paths: batchUploadedVideos.map(v => v.file_path),
+        platforms: platforms,
+        start_time: startDateTime,
+        stagger_interval_hours: parseFloat(document.getElementById("batchStaggerInterval").value),
+        title_template: document.getElementById("batchTitleTemplate").value,
+        caption: document.getElementById("batchCaption").value,
+        hashtags: document.getElementById("batchHashtags").value,
+        privacy: "private",
+        allow_repost: true
+      };
+
+      const btn = document.getElementById("scheduleBatchBtn");
+      btn.disabled = true;
+      btn.textContent = "Scheduling Batch...";
+
+      try {
+        const res = await fetch(`${API_BASE}/api/jobs/batch-schedule`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Batch schedule failed");
+
+        showToast(`Batch scheduled! Total ${data.total_scheduled} jobs created.`, "success");
+        batchUploadedVideos = [];
+        renderBatchList();
+        loadJobs();
+
+      } catch (err) {
+        showToast(err.message, "error");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "🚀 Schedule Entire Batch";
+      }
+    }
+
+    // Job Queue List & Actions
+    function setJobFilter(filter, btn) {
+      currentFilter = filter;
+      document.querySelectorAll(".filter-tabs .tab-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      loadJobs();
+    }
+
+    async function loadJobs() {
+      try {
+        const filterParam = currentFilter === "ALL" ? "" : `?status=${currentFilter}`;
+        const res = await fetch(`${API_BASE}/api/jobs${filterParam}`);
+        if (!res.ok) return;
+        const jobs = await res.json();
+        renderQueue(jobs);
+      } catch (e) {
+        console.error("Queue fetch error", e);
+      }
+    }
+
+    function renderQueue(jobs) {
+      const container = document.getElementById("queueList");
+      if (!jobs || !jobs.length) {
+        container.innerHTML = `<div style="text-align: center; padding: 2.5rem; color: var(--text-dim);">No jobs found in queue.</div>`;
+        return;
+      }
+
+      container.innerHTML = "";
+      jobs.forEach(job => {
+        const card = document.createElement("div");
+        card.className = "queue-card";
+
+        const pIcons = { youtube: "▶️", facebook: "📘", instagram: "📸", tiktok: "🎵" };
+        const icon = pIcons[job.platform] || "📱";
+
+        let actionBtns = "";
+        if (job.status === "PUBLISHED" && job.remote_url) {
+          actionBtns = `<a href="${job.remote_url}" target="_blank" class="btn btn-success btn-sm">🌐 View Post</a>`;
+        } else if (job.status === "PENDING" || job.status === "READY") {
+          actionBtns = `
+            <button class="btn btn-success btn-sm" onclick="publishExistingJobNow('${job.job_uid}')">⚡ Publish Now</button>
+            <button class="btn btn-outline btn-sm" style="color: var(--danger);" onclick="cancelJob('${job.job_uid}')">✖ Cancel</button>
+          `;
+        } else if (job.status === "FAILED" || job.status === "UNKNOWN_OUTCOME") {
+          actionBtns = `
+            <button class="btn btn-primary btn-sm" onclick="retryJob('${job.job_uid}')">🔄 Retry</button>
+            <button class="btn btn-outline btn-sm" style="color: var(--danger);" onclick="cancelJob('${job.job_uid}')">✖ Cancel</button>
+          `;
+        }
+
+        let thumbHtml = "";
+        if (job.thumbnail_path) {
+          const thumbFilename = job.thumbnail_path.split(/[\\/]/).pop();
+          thumbHtml = `<img src="/api/video-file/${thumbFilename}" style="width: 38px; height: 56px; object-fit: cover; border-radius: 6px; border: 1px solid rgba(255,255,255,0.15); flex-shrink: 0;" title="Cover Frame/Thumbnail">`;
+        }
+
+        const offsetBadge = (job.thumb_offset_ms !== null && job.thumb_offset_ms !== undefined)
+          ? `<span style="font-size: 0.68rem; color: var(--primary); background: rgba(99,102,241,0.1); padding: 0.15rem 0.4rem; border-radius: 4px;">🖼️ ${(job.thumb_offset_ms / 1000).toFixed(1)}s cover</span>`
+          : "";
+
+        card.innerHTML = `
+          <div class="queue-top">
+            <span class="queue-platform-badge" style="background: rgba(255,255,255,0.05);">
+              ${icon} ${job.platform.toUpperCase()}
+            </span>
+            <div style="display: flex; gap: 0.4rem; align-items: center;">
+              ${offsetBadge}
+              <span class="status-badge status-${job.status}">${job.status}</span>
+            </div>
+          </div>
+          <div style="display: flex; gap: 0.75rem; align-items: center;">
+            ${thumbHtml}
+            <div style="flex: 1;">
+              <div style="font-weight: 700; font-size: 0.88rem; margin-bottom: 0.2rem;">${job.title || "Short Video"}</div>
+              <div style="font-size: 0.76rem; color: var(--text-muted);">🕒 Scheduled: ${job.scheduled_time_local} (PKT)</div>
+              ${errHtml}
+            </div>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.3rem;">
+            <span style="font-size: 0.7rem; color: var(--text-dim); font-family: monospace;">UID: ${job.job_uid.slice(0, 8)}...</span>
+            <div class="queue-actions">${actionBtns}</div>
+          </div>
+        `;
+
+        container.appendChild(card);
+      });
+    }
+
+    async function publishExistingJobNow(jobUid) {
+      try {
+        const res = await fetch(`${API_BASE}/api/jobs/${jobUid}/publish-now`, { method: "POST" });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Publish trigger failed");
+        showToast("Job is publishing immediately!", "success");
+        loadJobs();
+      } catch (e) {
+        showToast(e.message, "error");
+      }
+    }
+
+    async function cancelJob(jobUid) {
+      if (!confirm("Are you sure you want to cancel this job?")) return;
+      try {
+        const res = await fetch(`${API_BASE}/api/jobs/${jobUid}/cancel`, { method: "POST" });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Cancel failed");
+        showToast("Job cancelled", "info");
+        loadJobs();
+      } catch (e) {
+        showToast(e.message, "error");
+      }
+    }
+
+    async function retryJob(jobUid) {
+      try {
+        const res = await fetch(`${API_BASE}/api/jobs/${jobUid}/retry`, { method: "POST" });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Retry failed");
+        showToast("Job queued for retry!", "success");
+        loadJobs();
+      } catch (e) {
+        showToast(e.message, "error");
+      }
+    }
+
+    // Live Log Stream
+    async function loadLogs() {
+      try {
+        const res = await fetch(`${API_BASE}/api/logs?lines=40`);
+        if (!res.ok) return;
+        const data = await res.json();
+        const container = document.getElementById("logLines");
+
+        if (data.lines && data.lines.length) {
+          container.innerHTML = "";
+          data.lines.forEach(line => {
+            const div = document.createElement("div");
+            div.className = "log-line";
+            if (line.includes("ERROR")) div.className += " error";
+            else if (line.includes("WARNING")) div.className += " warn";
+            else if (line.includes("SUCCESS") || line.includes("successful")) div.className += " success";
+            div.textContent = line;
+            container.appendChild(div);
+          });
+          container.scrollTop = container.scrollHeight;
+        }
+      } catch (e) {
+        console.error("Log fetch error", e);
+      }
+    }
+
+    // Settings Modal & API Wizards
+    function openSettingsModal() {
+      document.getElementById("settingsModal").style.display = "flex";
+      loadPlatformDetails();
+    }
+
+    function closeSettingsModal() {
+      document.getElementById("settingsModal").style.display = "none";
+    }
+
+    // Smart Meta Connect (FB + Instagram in 1 click)
+    async function connectMetaSmart() {
+      const token = document.getElementById("metaTokenInput").value.trim();
+      const appId = document.getElementById("metaAppIdInput").value.trim();
+      const appSecret = document.getElementById("metaAppSecretInput").value.trim();
+      const statusBox = document.getElementById("metaStatusBox");
+
+      if (!token) {
+        showToast("Please paste your Meta Access Token first.", "error");
+        return;
+      }
+
+      const btn = document.getElementById("metaConnectBtn");
+      btn.disabled = true;
+      btn.textContent = "Connecting & Auto-detecting...";
+      statusBox.innerHTML = `<span style="color: var(--secondary);">Querying Meta Graph API...</span>`;
+
+      try {
+        const res = await fetch(`${API_BASE}/api/meta/smart-connect`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token, app_id: appId, app_secret: appSecret })
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Meta connect failed");
+
+        let msg = `✅ Facebook Page connected: <strong>${data.page_name}</strong>`;
+        if (data.instagram_connected) {
+          msg += `<br>✅ Linked Instagram connected: <strong>@${data.instagram_username}</strong>`;
+        } else {
+          msg += `<br>ℹ️ No Instagram Business account linked to this page.`;
+        }
+
+        statusBox.innerHTML = `<div style="color: #34d399; margin-top: 0.4rem;">${msg}</div>`;
+        showToast("Facebook & Instagram successfully configured!", "success");
+        loadPlatformDetails();
+
+      } catch (err) {
+        statusBox.innerHTML = `<span style="color: var(--danger);">${err.message}</span>`;
+        showToast(err.message, "error");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "🚀 1-Click Auto-Connect Meta (FB + Insta)";
+      }
+    }
+
+    // Launch Wizard
+    async function launchWizard(platform) {
+      try {
+        const res = await fetch(`${API_BASE}/api/wizard/${platform}`, { method: "POST" });
+        const data = await res.json();
+        showToast(data.message || `Launched ${platform} wizard`, "info");
+      } catch (e) {
+        showToast(`Failed to launch ${platform} wizard: ${e}`, "error");
+      }
+    }
+
+    // Manual Save Credentials
+    async function promptSaveCredentials(platform) {
+      const jsonStr = prompt(`Enter credentials JSON for '${platform}':\nExample: {"access_token": "..."}`);
+      if (!jsonStr) return;
+
+      try {
+        const creds = JSON.parse(jsonStr);
+        const res = await fetch(`${API_BASE}/api/platforms/${platform}/credentials`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ credentials: creds })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(`Saved ${platform} credentials to Windows Locker!`, "success");
+          loadPlatformDetails();
+        } else {
+          showToast(`Failed to save ${platform} credentials`, "error");
+        }
+      } catch (e) {
+        showToast(`Invalid JSON: ${e.message}`, "error");
+      }
+    }
+
+    // Revoke Credentials
+    async function deletePlatformCreds(platform) {
+      if (!confirm(`Revoke and delete credentials for ${platform}?`)) return;
+      try {
+        const res = await fetch(`${API_BASE}/api/platforms/${platform}/credentials`, { method: "DELETE" });
+        const data = await res.json();
+        if (data.success) {
+          showToast(`Credentials revoked for ${platform}`, "info");
+          loadPlatformDetails();
+        }
+      } catch (e) {
+        showToast(`Failed to revoke ${platform}: ${e}`, "error");
+      }
+    }
+  </script>
+</body>
+</html>
