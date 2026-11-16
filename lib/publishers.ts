@@ -3,6 +3,8 @@ import { execFile } from 'child_process';
 import path from 'path';
 import fs from 'fs';
 import os from 'os';
+import { PutObjectCommand } from '@aws-sdk/client-s3';
+import { getR2Client, getR2BucketName, getR2PublicBaseUrl } from './r2';
 
 export interface PlatformPublishResult {
   platform: SocialPlatform;
@@ -16,6 +18,7 @@ export interface PlatformPublishResult {
 const GRAPH_API_VERSION = 'v22.0';
 
 const mediaBufferCache = new Map<string, Promise<Buffer>>();
+const r2PublicUrlCache = new Map<string, Promise<string>>();
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -86,6 +89,54 @@ async function loadMediaBytes(urlOrPath: string): Promise<Buffer> {
     mediaBufferCache.set(fullUrl, pending);
     pending.finally(() => {
       setTimeout(() => mediaBufferCache.delete(fullUrl), 60000);
+    });
+  }
+  return pending;
+}
+
+async function ensurePublicMediaUrl(urlOrPath: string, fileName?: string): Promise<string> {
+  if (
+    urlOrPath.startsWith('https://') &&
+    !urlOrPath.includes('localhost') &&
+    !urlOrPath.includes('127.0.0.1') &&
+    !urlOrPath.includes('/api/upload?file=')
+  ) {
+    return urlOrPath;
+  }
+
+  let pending = r2PublicUrlCache.get(urlOrPath);
+  if (!pending) {
+    pending = (async () => {
+      const s3 = getR2Client();
+      const publicBase = getR2PublicBaseUrl();
+      if (s3 && publicBase) {
+        const videoBytes = await loadMediaBytes(urlOrPath);
+        const safeName = (fileName || path.basename(urlOrPath) || 'video.mp4').replace(
+          /[^a-zA-Z0-9._-]/g,
+          '_'
+        );
+        const finalName = safeName.endsWith('.mp4') ? safeName : `${safeName}.mp4`;
+        const storageKey = `videos/original/${Date.now()}_${Math.random()
+          .toString(36)
+          .slice(2, 8)}_${finalName}`;
+        await s3.send(
+          new PutObjectCommand({
+            Bucket: getR2BucketName(),
+            Key: storageKey,
+            Body: videoBytes,
+            ContentType: 'video/mp4',
+            ContentLength: videoBytes.byteLength,
+          })
+        );
+        return `${publicBase}/${storageKey}`;
+      }
+      return urlOrPath.startsWith('http')
+        ? urlOrPath
+        : `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}${urlOrPath}`;
+    })();
+    r2PublicUrlCache.set(urlOrPath, pending);
+    pending.finally(() => {
+      setTimeout(() => r2PublicUrlCache.delete(urlOrPath), 300000);
     });
   }
   return pending;
@@ -586,11 +637,10 @@ export async function publishToPlatform(
         if (!igUserId) {
           throw new Error('Missing Instagram Business Account ID (ig_user_id)');
         }
+        const publicVideoUrl = await ensurePublicMediaUrl(post.mediaUrl, post.mediaFileName);
         const payload: Record<string, unknown> = {
           media_type: override?.postType === 'story' ? 'STORIES' : 'REELS',
-          video_url: post.mediaUrl.startsWith('http')
-            ? post.mediaUrl
-            : `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}${post.mediaUrl}`,
+          video_url: publicVideoUrl,
           caption: caption.slice(0, 2200),
           share_to_feed: override?.shareToFeed !== false,
           access_token: creds.accessToken,
@@ -717,15 +767,16 @@ export async function publishToPlatform(
         const canNativeSchedule =
           useNativeSchedule && schedUnix > Math.floor(Date.now() / 1000) + 600;
 
+        const publicVideoUrl = await ensurePublicMediaUrl(post.mediaUrl, post.mediaFileName);
+        const fbDescription =
+          override?.isCreatedWithAi || override?.isAiGenerated
+            ? `${caption}\n\n[AI Info: Created or edited with AI]`.trim()
+            : caption;
+
         const fbBody: Record<string, unknown> = {
-          file_url: post.mediaUrl.startsWith('http')
-            ? post.mediaUrl
-            : `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}${post.mediaUrl}`,
+          file_url: publicVideoUrl,
           title: title.slice(0, 100),
-          description:
-            override?.isCreatedWithAi || override?.isAiGenerated
-              ? `${caption}\n\n[AI Info: Created or edited with AI]`.trim()
-              : caption,
+          description: fbDescription,
           published: !canNativeSchedule,
           embeddable: override?.embeddable !== false,
           secret: Boolean(override?.secret),
@@ -735,7 +786,7 @@ export async function publishToPlatform(
           fbBody.scheduled_publish_time = schedUnix;
         }
 
-        const fbRes = await fetch(
+        let fbRes = await fetch(
           `https://graph.facebook.com/${GRAPH_API_VERSION}/${encodeURIComponent(pageId)}/videos`,
           {
             method: 'POST',
@@ -743,7 +794,36 @@ export async function publishToPlatform(
             body: JSON.stringify(fbBody),
           }
         );
-        const fbData = await fbRes.json();
+        let fbData = await fbRes.json();
+
+        // Fallback: Direct binary multipart upload if Facebook could not fetch file_url
+        if (fbData.error) {
+          const videoBytes = await loadMediaBytes(post.mediaUrl);
+          const form = new FormData();
+          form.append(
+            'source',
+            new Blob([new Uint8Array(videoBytes)], { type: 'video/mp4' }),
+            post.mediaFileName || 'video.mp4'
+          );
+          form.append('title', title.slice(0, 100));
+          form.append('description', fbDescription);
+          form.append('published', String(!canNativeSchedule));
+          form.append('access_token', creds.accessToken);
+          if (canNativeSchedule) {
+            form.append('scheduled_publish_time', String(schedUnix));
+          }
+          fbRes = await fetch(
+            `https://graph-video.facebook.com/${GRAPH_API_VERSION}/${encodeURIComponent(
+              pageId
+            )}/videos`,
+            {
+              method: 'POST',
+              body: form,
+            }
+          );
+          fbData = await fbRes.json();
+        }
+
         if (fbData.error) {
           throw new Error(fbData.error.message || 'Facebook video publish error');
         }
@@ -772,6 +852,7 @@ export async function publishToPlatform(
 
       case 'threads': {
         const threadsUserId = creds.accountId || 'me';
+        const publicVideoUrl = await ensurePublicMediaUrl(post.mediaUrl, post.mediaFileName);
         const thText =
           override?.isAiGenerated || override?.isCreatedWithAi
             ? `${caption.slice(0, 465)}\n\n#AIGenerated`
@@ -783,9 +864,7 @@ export async function publishToPlatform(
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               media_type: 'VIDEO',
-              video_url: post.mediaUrl.startsWith('http')
-                ? post.mediaUrl
-                : `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}${post.mediaUrl}`,
+              video_url: publicVideoUrl,
               text: thText,
               reply_control: override?.replyControl || 'everyone',
               topic_tag: override?.topicTag || undefined,
@@ -904,7 +983,9 @@ export async function publishToPlatform(
 
         // Auto-refresh TikTok token if expired
         if (
-          ttData?.error?.code === 'access_token_invalid' &&
+          (ttRes.status === 401 ||
+            ttData?.error?.code === 'access_token_invalid' ||
+            String(ttData?.error?.message || '').toLowerCase().includes('access token')) &&
           (creds.refreshToken || process.env.TIKTOK_REFRESH_TOKEN)
         ) {
           const ttRef = await refreshTikTokAccessToken(creds);
