@@ -1005,13 +1005,18 @@ export async function publishToPlatform(
         }
 
         // Sandbox / unaudited TikTok client fallback to SELF_ONLY
-        if (
+        const ttErrCode = String(ttData?.error?.code || '').toLowerCase();
+        const ttErrMsg = String(ttData?.error?.message || '').toLowerCase();
+        const isUnauditedOrPrivacyError =
           ttData?.error &&
           ttData.error.code !== 'ok' &&
-          (ttData.error.code === 'unaudited_client_can_only_post_to_private_accounts' ||
-            String(ttData.error.message || '').toLowerCase().includes('private') ||
-            String(ttData.error.code || '').toLowerCase().includes('privacy'))
-        ) {
+          (ttErrCode === 'unaudited_client_can_only_post_to_private_accounts' ||
+            ttErrMsg.includes('private') ||
+            ttErrCode.includes('privacy') ||
+            ttErrMsg.includes('integration guidelines') ||
+            ttErrMsg.includes('unaudited'));
+
+        if (isUnauditedOrPrivacyError) {
           ttRes = await fetch('https://open.tiktokapis.com/v2/post/publish/video/init/', {
             method: 'POST',
             headers: {
@@ -1021,6 +1026,31 @@ export async function publishToPlatform(
             body: JSON.stringify(buildInitPayload('SELF_ONLY', false)),
           });
           ttData = await ttRes.json();
+        }
+
+        // If direct post is still blocked on an unaudited app, fall back to TikTok Inbox (Draft) upload
+        let uploadedToInbox = false;
+        if (ttData?.error && ttData.error.code !== 'ok' && isUnauditedOrPrivacyError) {
+          const inboxRes = await fetch('https://open.tiktokapis.com/v2/post/publish/inbox/video/init/', {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${activeTikTokToken}`,
+              'Content-Type': 'application/json; charset=UTF-8',
+            },
+            body: JSON.stringify({
+              source_info: {
+                source: 'FILE_UPLOAD',
+                video_size: fileSize,
+                chunk_size: chunkSize,
+                total_chunk_count: totalChunkCount,
+              },
+            }),
+          });
+          const inboxData = await inboxRes.json();
+          if (!inboxData?.error || inboxData.error.code === 'ok') {
+            ttData = inboxData;
+            uploadedToInbox = true;
+          }
         }
 
         if (ttData.error && ttData.error.code !== 'ok') {
@@ -1074,6 +1104,9 @@ export async function publishToPlatform(
           remoteUrl: `https://www.tiktok.com/${account.handle}/video/${pubId}`,
           remoteStatus: 'PUBLISHED',
           mode: 'live_api',
+          ...(uploadedToInbox
+            ? { error: 'Uploaded to TikTok Inbox/Drafts (unaudited app fallback).' }
+            : {}),
         };
       }
 

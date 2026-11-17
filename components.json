@@ -14,5 +14,8 @@
     "components": "@/components",
     "utils": "@/lib/utils",
     "ui": "@/components/ui/shadcn"
+  },
+  "registries": {
+    "@scrollxui": "https://scrollxui.dev/registry/{name}.json"
   }
 }
