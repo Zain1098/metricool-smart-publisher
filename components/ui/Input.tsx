@@ -16,17 +16,17 @@ export function FieldLabel({
     <div className={cn('flex items-center justify-between gap-2 mb-1.5', className)}>
       <label
         htmlFor={htmlFor}
-        className="text-xs font-semibold text-slate-700"
+        className="text-xs font-semibold text-content-primary"
       >
         {children}
       </label>
-      {hint && <span className="text-[11px] text-slate-400 font-mono">{hint}</span>}
+      {hint && <span className="text-[11px] text-content-muted font-mono">{hint}</span>}
     </div>
   );
 }
 
 const BASE_INPUT_CLASSES =
-  'w-full rounded-lg bg-[#FFFFFF] border border-slate-300 text-[13px] text-slate-800 placeholder:text-slate-400 transition-all focus:outline-none focus:border-[#00D2B4] focus:ring-2 focus:ring-[#00D2B4]/20 disabled:opacity-50 shadow-xs';
+  'w-full rounded-xl bg-surface-lowest border border-border text-[13px] text-content-primary placeholder:text-content-muted transition-all focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/25 disabled:opacity-50 shadow-card';
 
 export const Input = React.forwardRef<
   HTMLInputElement,

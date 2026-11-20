@@ -23,7 +23,22 @@
    - Unified connection dashboard supporting Postiz-proxied channels or direct platform OAuth credentials.
 
 5. **Performance & Growth Analytics (`/analytics`):**
-   - Cross-platform audience reach, views, likes, comments, and growth snapshots.
+   - Cross-platform audience reach, views, likes, comments, per-post metrics (YouTube, Instagram, Facebook, TikTok, X, Threads, LinkedIn, Pinterest), and growth snapshots.
+
+6. **Reporting Studio & Public Share Links (`/reports`, `/reports/preview/[token]`):**
+   - Block-based custom report builder (KPIs, platform breakdown, timeline chart, top videos, topic insights, strategist notes) with **CSV**, **Print/PDF** export, and **unlimited shareable public URLs** (no paywall or plan limits).
+
+7. **Web & Blog Analytics Pixel (`/web-analytics`, `/public/pixel.js`):**
+   - Self-hosted tracking script (`<script src=".../pixel.js" data-site="your-site" defer></script>`) to measure pageviews, unique sessions, top pages, and referrers on any website or WordPress blog.
+
+8. **SmartLinks / Link-in-Bio (`/smartlinks`, `/u/[slug]`):**
+   - Custom bio-link pages with live mobile preview and per-link click & view tracking.
+
+9. **Evergreen Flows / Autolists (`/flows`):**
+   - Recurring content queues that loop and feed directly into your Publishing Queue.
+
+10. **Competitors & Hashtag Tracker (`/competitors`):**
+    - Track competitor `@handles` (subscribers, views, video counts) and monitor hashtag search volume.
 
 ---
 
@@ -46,7 +61,7 @@
 
 ### 1. Clone & Install
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/Zain1098/metricool-smart-publisher.git
 cd metricool-smart-publisher
 npm install
 ```
@@ -121,11 +136,16 @@ npm run lint
 │   ├── calendar/page.tsx      # Interactive Visual Scheduler
 │   ├── media/page.tsx         # Media Asset Library
 │   ├── publishing/page.tsx    # Publishing Queue & Job Logs
-│   ├── analytics/page.tsx     # Performance & Growth Analytics
+│   ├── analytics/page.tsx     # Cross-Platform Performance & Growth Analytics
+│   ├── reports/page.tsx       # Reporting Studio & Public Shareable Reports
+│   ├── web-analytics/page.tsx # Self-Hosted Web & Blog Tracking Pixel
+│   ├── smartlinks/page.tsx    # SmartLinks (Link-in-Bio Builder) & /u/[slug]
+│   ├── flows/page.tsx         # Evergreen Flows (Autolists)
+│   ├── competitors/page.tsx   # Competitors & Hashtag Tracker
 │   ├── connections/page.tsx   # Social Media Connections
 │   ├── settings/page.tsx      # Brand settings & timezone configuration
 │   ├── login/page.tsx         # Authentication page
-│   └── api/                   # REST API routes (posts, accounts, media, r2, postiz, cron)
+│   └── api/                   # REST API routes (posts, accounts, analytics, reports, pixel, smartlinks, flows, competitors, r2, postiz, cron)
 ├── components/                # Modular UI components
 ├── lib/                       # Types, utilities, R2/Postiz/Supabase adapters & dual-mode store
 ├── supabase/migrations/       # PostgreSQL schema migrations

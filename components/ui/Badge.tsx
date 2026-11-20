@@ -11,12 +11,12 @@ export type BadgeTone =
   | 'danger';
 
 const TONE_CLASSES: Record<BadgeTone, string> = {
-  neutral: 'bg-slate-100 text-slate-700 border-slate-200',
-  accent: 'bg-[#E6FAF7] text-[#00A38C] border-[#7FE8D9]',
-  success: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  cloud: 'bg-sky-50 text-sky-700 border-sky-200',
-  warning: 'bg-amber-50 text-amber-700 border-amber-200',
-  danger: 'bg-red-50 text-red-700 border-red-200',
+  neutral: 'bg-surface-container text-content-secondary border-border',
+  accent: 'bg-brand-container text-brand border-brand/25',
+  success: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/25',
+  cloud: 'bg-sky-500/10 text-sky-700 dark:text-sky-300 border-sky-500/25',
+  warning: 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/25',
+  danger: 'bg-red-500/10 text-red-700 dark:text-red-300 border-red-500/25',
 };
 
 export function Badge({
@@ -58,7 +58,7 @@ const POST_STATUS_META: Record<
   scheduled: {
     label: 'Scheduled',
     tone: 'accent',
-    dot: 'bg-[#00D2B4]',
+    dot: 'bg-brand',
   },
   publishing: {
     label: 'Publishing',

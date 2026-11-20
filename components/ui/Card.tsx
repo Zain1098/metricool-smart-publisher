@@ -23,9 +23,9 @@ export function Card({
   return (
     <div
       className={cn(
-        'rounded-xl bg-studio-surface border border-studio-border shadow-studio',
+        'rounded-2xl bg-surface-lowest border border-border shadow-card text-content-primary',
         interactive &&
-          'transition-colors duration-150 hover:border-studio-borderStrong hover:bg-[#171C26]',
+          'transition-all duration-150 hover:border-brand/40 hover:shadow-elevated',
         PADDING_MAP[padding],
         className
       )}

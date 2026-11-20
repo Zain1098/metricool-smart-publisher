@@ -393,18 +393,18 @@ export default function VideoDropzone({
   const activeCoverSrc = localCoverPreview || coverUrl;
 
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-4">
+    <div className="bg-surface-lowest border border-border rounded-2xl p-5 shadow-xs space-y-4">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100">
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-border-subtle">
         <div className="flex items-center gap-2.5">
-          <span className="w-9 h-9 rounded-xl bg-slate-100 border border-slate-200 text-slate-800 flex items-center justify-center">
+          <span className="w-9 h-9 rounded-xl bg-surface-container border border-border text-content-primary flex items-center justify-center">
             <Film className="w-4 h-4" />
           </span>
           <div>
-            <h2 className="text-sm font-bold text-slate-900">
+            <h2 className="text-sm font-bold text-content-primary">
               Video Asset &amp; Thumbnail Cover Studio
             </h2>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-xs text-content-muted mt-0.5">
               Upload MP4/MOV or pick an existing video from your media library
             </p>
           </div>
@@ -413,11 +413,11 @@ export default function VideoDropzone({
         <div className="flex items-center gap-2.5">
           <Link
             href="/media"
-            className="h-9 px-3 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-xs font-bold text-slate-700 inline-flex items-center gap-1.5 shadow-2xs transition-colors"
+            className="h-9 px-3 rounded-xl border border-border bg-surface-lowest hover:bg-surface-low text-xs font-bold text-content-secondary inline-flex items-center gap-1.5 shadow-2xs transition-colors"
           >
-            <FolderOpen className="w-3.5 h-3.5 text-slate-500" />
+            <FolderOpen className="w-3.5 h-3.5 text-content-muted" />
             <span>Media Library</span>
-            <ArrowUpRight className="w-3.5 h-3.5 text-slate-400" />
+            <ArrowUpRight className="w-3.5 h-3.5 text-content-muted" />
           </Link>
           {videoUrl && (
             <button
@@ -448,8 +448,8 @@ export default function VideoDropzone({
             className={cn(
               'border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all',
               isDragging
-                ? 'border-[#211832] bg-slate-50'
-                : 'border-slate-300 hover:border-slate-400 bg-slate-50/60 hover:bg-slate-50'
+                ? 'border-[#211832] bg-surface-low'
+                : 'border-border hover:border-slate-400 bg-surface-low/60 hover:bg-surface-low'
             )}
           >
             <input
@@ -472,17 +472,17 @@ export default function VideoDropzone({
               )}
             </div>
 
-            <p className="text-sm font-bold text-slate-900">
+            <p className="text-sm font-bold text-content-primary">
               {isUploading
                 ? `Uploading video to cloud... ${uploadProgress}%`
                 : 'Drop MP4 / MOV video here or click to browse'}
             </p>
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-xs text-content-muted mt-1">
               Supports 9:16 vertical Shorts/Reels/TikTok and 16:9 landscape video via Cloudflare R2 or chunked upload
             </p>
 
             {isUploading && (
-              <div className="w-64 h-2 bg-slate-200 rounded-full overflow-hidden mx-auto mt-4">
+              <div className="w-64 h-2 bg-surface-high rounded-full overflow-hidden mx-auto mt-4">
                 <div
                   className="h-full bg-[#211832] transition-all duration-200"
                   style={{ width: `${uploadProgress}%` }}
@@ -492,15 +492,15 @@ export default function VideoDropzone({
           </div>
 
           {localFiles.length > 0 && (
-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2.5">
-              <div className="flex items-center justify-between text-xs font-bold text-slate-700">
+            <div className="p-4 rounded-xl bg-surface-low border border-border space-y-2.5">
+              <div className="flex items-center justify-between text-xs font-bold text-content-secondary">
                 <span className="inline-flex items-center gap-1.5">
                   <FolderOpen className="w-4 h-4 text-emerald-600" />
                   <span>Quick Select from Uploaded Videos ({localFiles.length})</span>
                 </span>
                 <Link
                   href="/media"
-                  className="text-xs font-bold text-slate-800 hover:underline"
+                  className="text-xs font-bold text-content-primary hover:underline"
                 >
                   Open Full Library →
                 </Link>
@@ -520,11 +520,11 @@ export default function VideoDropzone({
                         sizeMb: lf.sizeMb,
                       })
                     }
-                    className="h-9 px-3 rounded-xl bg-white hover:bg-slate-100 border border-slate-300 text-xs font-semibold text-slate-800 flex items-center gap-2 shadow-2xs transition-colors"
+                    className="h-9 px-3 rounded-xl bg-surface-lowest hover:bg-surface-container border border-border text-xs font-semibold text-content-primary flex items-center gap-2 shadow-2xs transition-colors"
                   >
-                    <Film className="w-3.5 h-3.5 text-slate-600 flex-shrink-0" />
+                    <Film className="w-3.5 h-3.5 text-content-secondary flex-shrink-0" />
                     <span className="truncate max-w-[200px]">{lf.fileName}</span>
-                    <span className="px-1.5 py-0.5 rounded bg-slate-100 text-[11px] text-slate-600 font-mono">
+                    <span className="px-1.5 py-0.5 rounded bg-surface-container text-[11px] text-content-secondary font-mono">
                       {lf.sizeMb} MB
                     </span>
                   </button>
@@ -536,7 +536,7 @@ export default function VideoDropzone({
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-start">
           {/* Video Preview Box */}
-          <div className="md:col-span-5 bg-slate-950 rounded-xl overflow-hidden border border-slate-300 shadow-xs">
+          <div className="md:col-span-5 bg-slate-950 rounded-xl overflow-hidden border border-border shadow-xs">
             <video
               ref={videoPlayerRef}
               src={activeVideoSrc}
@@ -571,9 +571,9 @@ export default function VideoDropzone({
 
           {/* Video Info & Cover Frame Studio */}
           <div className="md:col-span-7 space-y-4">
-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2.5">
+            <div className="p-4 rounded-xl bg-surface-low border border-border space-y-2.5">
               <div className="flex items-center justify-between gap-2">
-                <p className="text-sm font-bold text-slate-900 truncate">
+                <p className="text-sm font-bold text-content-primary truncate">
                   {videoFileName}
                 </p>
                 <span className="px-2.5 py-1 rounded-full bg-emerald-100 border border-emerald-300 text-emerald-800 text-xs font-bold inline-flex items-center gap-1 flex-shrink-0">
@@ -582,25 +582,25 @@ export default function VideoDropzone({
                 </span>
               </div>
               <div className="flex flex-wrap items-center gap-2">
-                <span className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-xs font-semibold text-slate-700 font-mono">
+                <span className="px-2.5 py-1 rounded-lg bg-surface-lowest border border-border text-xs font-semibold text-content-secondary font-mono">
                   Duration: {videoDuration}s
                 </span>
-                <span className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-xs font-semibold text-slate-700">
+                <span className="px-2.5 py-1 rounded-lg bg-surface-lowest border border-border text-xs font-semibold text-content-secondary">
                   {videoAspectRatio}
                 </span>
-                <span className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-xs font-semibold text-slate-700 font-mono">
+                <span className="px-2.5 py-1 rounded-lg bg-surface-lowest border border-border text-xs font-semibold text-content-secondary font-mono">
                   {videoSizeMb} MB
                 </span>
               </div>
             </div>
 
-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+            <div className="p-4 rounded-xl bg-surface-low border border-border space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                  <ImageIcon className="w-4 h-4 text-slate-700" />
+                <span className="text-xs font-bold text-content-primary flex items-center gap-1.5">
+                  <ImageIcon className="w-4 h-4 text-content-secondary" />
                   <span>Thumbnail / Cover Frame Selector</span>
                 </span>
-                <span className="px-2 py-0.5 rounded bg-white border border-slate-200 text-xs font-mono font-semibold text-slate-700">
+                <span className="px-2 py-0.5 rounded bg-surface-lowest border border-border text-xs font-mono font-semibold text-content-secondary">
                   Offset {(thumbOffsetMs / 1000).toFixed(1)}s
                 </span>
               </div>
@@ -619,7 +619,7 @@ export default function VideoDropzone({
                       videoPlayerRef.current.currentTime = val;
                     }
                   }}
-                  className="flex-1 accent-[#211832] h-2 bg-slate-200 rounded-lg cursor-pointer"
+                  className="flex-1 accent-[#211832] h-2 bg-surface-high rounded-lg cursor-pointer"
                 />
                 <button
                   type="button"
@@ -657,7 +657,7 @@ export default function VideoDropzone({
                       key={preset.label}
                       type="button"
                       onClick={() => handleCaptureFrameAt(preset.sec)}
-                      className="h-8 px-2.5 rounded-lg bg-white hover:bg-slate-100 border border-slate-300 text-xs font-bold text-slate-700 font-mono transition-colors"
+                      className="h-8 px-2.5 rounded-lg bg-surface-lowest hover:bg-surface-container border border-border text-xs font-bold text-content-secondary font-mono transition-colors"
                     >
                       {preset.label}
                     </button>
@@ -679,7 +679,7 @@ export default function VideoDropzone({
                   <button
                     type="button"
                     onClick={() => thumbInputRef.current?.click()}
-                    className="h-8 px-3 rounded-lg bg-white hover:bg-slate-100 border border-slate-300 text-xs font-bold text-slate-800 inline-flex items-center gap-1.5 shadow-2xs transition-colors"
+                    className="h-8 px-3 rounded-lg bg-surface-lowest hover:bg-surface-container border border-border text-xs font-bold text-content-primary inline-flex items-center gap-1.5 shadow-2xs transition-colors"
                   >
                     <ImageIcon className="w-3.5 h-3.5 text-emerald-600" />
                     <span>Upload Custom Cover</span>
@@ -688,7 +688,7 @@ export default function VideoDropzone({
               </div>
 
               {activeCoverSrc && (
-                <div className="pt-3 border-t border-slate-200 flex items-center justify-between gap-3">
+                <div className="pt-3 border-t border-border flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
@@ -700,7 +700,7 @@ export default function VideoDropzone({
                       <p className="text-xs font-bold text-emerald-800">
                         Custom Cover Image Active
                       </p>
-                      <p className="text-xs text-slate-500">
+                      <p className="text-xs text-content-muted">
                         Will be uploaded as YouTube Thumbnail &amp; Reels Cover
                       </p>
                     </div>

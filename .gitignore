@@ -55,7 +55,7 @@ Desktop.ini
 # Media uploads & local binaries
 data/test_videos/
 data/uploads/
-data/store.json
+data/*.json
 public/uploads/
 cloudflared.exe
 

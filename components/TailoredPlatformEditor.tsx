@@ -64,19 +64,19 @@ const ALL_PLATFORMS: SocialPlatform[] = [
 ];
 
 const INPUT_CLASS =
-  'w-full h-11 px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#211832] focus:ring-2 focus:ring-[#211832]/10 transition-all shadow-2xs';
+  'w-full h-11 px-3.5 py-2.5 rounded-xl bg-surface-lowest border border-border text-sm text-content-primary placeholder:text-content-muted focus:outline-none focus:border-[#211832] focus:ring-2 focus:ring-[#211832]/10 transition-all shadow-2xs';
 
 const SELECT_CLASS =
-  'w-full h-11 px-3.5 py-2 rounded-xl bg-white border border-slate-300 text-sm font-medium text-slate-900 focus:outline-none focus:border-[#211832] focus:ring-2 focus:ring-[#211832]/10 transition-all shadow-2xs cursor-pointer';
+  'w-full h-11 px-3.5 py-2 rounded-xl bg-surface-lowest border border-border text-sm font-medium text-content-primary focus:outline-none focus:border-[#211832] focus:ring-2 focus:ring-[#211832]/10 transition-all shadow-2xs cursor-pointer';
 
 const TEXTAREA_CLASS =
-  'w-full p-3.5 rounded-xl bg-white border border-slate-300 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#211832] focus:ring-2 focus:ring-[#211832]/10 transition-all shadow-2xs resize-y leading-relaxed';
+  'w-full p-3.5 rounded-xl bg-surface-lowest border border-border text-sm text-content-primary placeholder:text-content-muted focus:outline-none focus:border-[#211832] focus:ring-2 focus:ring-[#211832]/10 transition-all shadow-2xs resize-y leading-relaxed';
 
 const LABEL_CLASS =
-  'block text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1.5';
+  'block text-xs font-bold text-content-secondary mb-1.5 flex items-center gap-1.5';
 
 const CHECKBOX_CARD_CLASS =
-  'flex items-start gap-3 p-3.5 rounded-xl bg-slate-50 hover:bg-slate-100/80 border border-slate-200 cursor-pointer transition-colors text-xs font-semibold text-slate-800';
+  'flex items-start gap-3 p-3.5 rounded-xl bg-surface-low hover:bg-surface-container/80 border border-border cursor-pointer transition-colors text-xs font-semibold text-content-primary';
 
 export default function TailoredPlatformEditor({
   selectedPlatforms,
@@ -352,21 +352,21 @@ export default function TailoredPlatformEditor({
     return (
       <div
         key={plat}
-        className="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden transition-all"
+        className="bg-surface-lowest border border-border rounded-2xl shadow-xs overflow-hidden transition-all"
       >
         {/* Metricool-style Accordion Header Bar */}
         <button
           type="button"
           onClick={() => toggleAccordion(plat)}
-          className="w-full min-h-[56px] px-5 py-3.5 flex items-center justify-between gap-3 bg-white hover:bg-slate-50/80 transition-colors text-left"
+          className="w-full min-h-[56px] px-5 py-3.5 flex items-center justify-between gap-3 bg-surface-lowest hover:bg-surface-low/80 transition-colors text-left"
         >
           <div className="flex items-center gap-3 min-w-0">
             <PlatformBadge platform={plat} size="sm" />
             <div>
-              <span className="text-sm font-bold text-slate-900">
+              <span className="text-sm font-bold text-content-primary">
                 {cfg.name.replace(' (Twitter)', '')} presets
               </span>
-              <span className="hidden sm:inline-block ml-2.5 text-xs text-slate-500">
+              <span className="hidden sm:inline-block ml-2.5 text-xs text-content-muted">
                 •{' '}
                 {plat === 'youtube'
                   ? `${(override.postType || 'short').toUpperCase()} • ${
@@ -398,7 +398,7 @@ export default function TailoredPlatformEditor({
                 Paid Promo
               </span>
             )}
-            <span className="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center">
+            <span className="w-8 h-8 rounded-lg bg-surface-container text-content-secondary flex items-center justify-center">
               {isOpen ? (
                 <ChevronUp className="w-4 h-4" />
               ) : (
@@ -410,20 +410,20 @@ export default function TailoredPlatformEditor({
 
         {/* Accordion Body */}
         {isOpen && (
-          <div className="p-5 pt-4 border-t border-slate-200 space-y-5 bg-white">
+          <div className="p-5 pt-4 border-t border-border space-y-5 bg-surface-lowest">
             {/* Title Input for platforms that support Titles */}
             {cfg.fields.hasTitle && (
               <div>
                 <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                    <FileText className="w-4 h-4 text-slate-600" />
+                  <label className="text-xs font-bold text-content-secondary flex items-center gap-1.5">
+                    <FileText className="w-4 h-4 text-content-secondary" />
                     <span>
                       {plat === 'youtube'
                         ? 'Video / Short Title (Required • Max 100 chars)'
                         : `${cfg.name} Post Title`}
                     </span>
                   </label>
-                  <span className="text-xs font-mono font-semibold text-slate-500">
+                  <span className="text-xs font-mono font-semibold text-content-muted">
                     {override.title?.length || 0} / 100
                   </span>
                 </div>
@@ -443,13 +443,13 @@ export default function TailoredPlatformEditor({
             {/* Custom Network Caption / Description */}
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="text-xs font-bold text-slate-700">
+                <label className="text-xs font-bold text-content-secondary">
                   {plat === 'youtube'
                     ? 'YouTube Video Description & Hashtags'
                     : `${cfg.name} Caption & Hashtags`}
                 </label>
                 <div className="flex items-center gap-2.5">
-                  <span className="text-xs font-mono font-semibold text-slate-500">
+                  <span className="text-xs font-mono font-semibold text-content-muted">
                     {(override.caption ?? globalCaption).length} / {cfg.charLimit}
                   </span>
                   <button
@@ -457,7 +457,7 @@ export default function TailoredPlatformEditor({
                     onClick={() =>
                       onUpdateOverride(plat, { caption: globalCaption })
                     }
-                    className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 border border-slate-200 text-xs font-bold text-slate-700 transition-colors"
+                    className="px-2.5 py-1 rounded-lg bg-surface-container hover:bg-surface-high border border-border text-xs font-bold text-content-secondary transition-colors"
                   >
                     Reset to Global Text
                   </button>
@@ -476,9 +476,9 @@ export default function TailoredPlatformEditor({
 
             {/* YOUTUBE SPECIFIC PRESETS (WITH LIVE PLAYLIST SELECTOR!) */}
             {plat === 'youtube' && (
-              <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-5">
-                <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-                  <p className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+              <div className="p-4 sm:p-5 rounded-2xl bg-surface-low border border-border space-y-5">
+                <div className="flex items-center justify-between border-b border-border pb-3">
+                  <p className="text-xs font-bold text-content-primary uppercase tracking-wider flex items-center gap-2">
                     <Sliders className="w-4 h-4 text-red-600" />
                     <span>YouTube Studio &amp; Playlist Configuration</span>
                   </p>
@@ -585,7 +585,7 @@ export default function TailoredPlatformEditor({
 
                   <div>
                     <label className={LABEL_CLASS}>
-                      <Globe className="w-3.5 h-3.5 text-slate-600" />
+                      <Globe className="w-3.5 h-3.5 text-content-secondary" />
                       <span>Audio &amp; Title Language</span>
                     </label>
                     <select
@@ -607,9 +607,9 @@ export default function TailoredPlatformEditor({
                 {/* Row 3: LIVE YOUTUBE PLAYLIST SELECTOR + TAGS */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   {/* Live YouTube Playlist Box */}
-                  <div className="p-4 rounded-xl bg-white border border-slate-200 space-y-3 shadow-2xs">
+                  <div className="p-4 rounded-xl bg-surface-lowest border border-border space-y-3 shadow-2xs">
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                      <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                      <label className="text-xs font-bold text-content-primary flex items-center gap-1.5">
                         <ListPlus className="w-4 h-4 text-red-600" />
                         <span>Add Video to YouTube Playlist</span>
                       </label>
@@ -619,7 +619,7 @@ export default function TailoredPlatformEditor({
                           type="button"
                           onClick={fetchYouTubePlaylists}
                           disabled={ytPlaylistsLoading}
-                          className="h-7 px-2.5 rounded-lg bg-slate-100 hover:bg-slate-200 border border-slate-200 text-[11px] font-bold text-slate-700 inline-flex items-center gap-1 transition-colors"
+                          className="h-7 px-2.5 rounded-lg bg-surface-container hover:bg-surface-high border border-border text-[11px] font-bold text-content-secondary inline-flex items-center gap-1 transition-colors"
                           title="Refresh playlists from your YouTube channel"
                         >
                           <RefreshCw
@@ -673,7 +673,7 @@ export default function TailoredPlatformEditor({
                           </option>
                         </select>
 
-                        <div className="flex items-center justify-between text-[11px] text-slate-500">
+                        <div className="flex items-center justify-between text-[11px] text-content-muted">
                           <span>
                             {ytPlaylistsLoading
                               ? 'Loading playlists from ZCodeDev channel...'
@@ -684,7 +684,7 @@ export default function TailoredPlatformEditor({
                           <button
                             type="button"
                             onClick={() => setCustomPlaylistMode(true)}
-                            className="font-semibold text-slate-700 hover:underline"
+                            className="font-semibold text-content-secondary hover:underline"
                           >
                             Enter ID manually
                           </button>
@@ -707,7 +707,7 @@ export default function TailoredPlatformEditor({
                           <button
                             type="button"
                             onClick={() => setCustomPlaylistMode(false)}
-                            className="h-11 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-300 text-xs font-bold text-slate-700 whitespace-nowrap"
+                            className="h-11 px-3 rounded-xl bg-surface-container hover:bg-surface-high border border-border text-xs font-bold text-content-secondary whitespace-nowrap"
                           >
                             Use Dropdown
                           </button>
@@ -717,8 +717,8 @@ export default function TailoredPlatformEditor({
 
                     {/* Inline Create New YouTube Playlist Drawer */}
                     {showNewPlaylistModal && (
-                      <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-300 space-y-3">
-                        <p className="text-xs font-bold text-slate-800">
+                      <div className="p-3.5 rounded-xl bg-surface-low border border-border space-y-3">
+                        <p className="text-xs font-bold text-content-primary">
                           Create a New Playlist on YouTube
                         </p>
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
@@ -756,7 +756,7 @@ export default function TailoredPlatformEditor({
                           <button
                             type="button"
                             onClick={() => setShowNewPlaylistModal(false)}
-                            className="h-9 px-3 rounded-lg border border-slate-300 bg-white text-xs font-bold text-slate-700"
+                            className="h-9 px-3 rounded-lg border border-border bg-surface-lowest text-xs font-bold text-content-secondary"
                           >
                             Cancel
                           </button>
@@ -781,8 +781,8 @@ export default function TailoredPlatformEditor({
                   </div>
 
                   {/* YouTube Search Tags Box */}
-                  <div className="p-4 rounded-xl bg-white border border-slate-200 space-y-3 shadow-2xs">
-                    <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                  <div className="p-4 rounded-xl bg-surface-lowest border border-border space-y-3 shadow-2xs">
+                    <label className="text-xs font-bold text-content-primary flex items-center gap-1.5">
                       <Tag className="w-4 h-4 text-emerald-600" />
                       <span>YouTube Search Tags (comma-separated, up to 35)</span>
                     </label>
@@ -802,7 +802,7 @@ export default function TailoredPlatformEditor({
                       placeholder="python, coding, aiautomation, zcodedev, shorts"
                       className={INPUT_CLASS}
                     />
-                    <p className="text-[11px] text-slate-500">
+                    <p className="text-[11px] text-content-muted">
                       Separate tags with commas. Tip: Use the AI Hashtag &amp; SEO button above to auto-fill 25 high-ranking tags.
                     </p>
                   </div>
@@ -810,7 +810,7 @@ export default function TailoredPlatformEditor({
 
                 {/* Row 4: YouTube Checkboxes */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <label className="flex items-center gap-3 p-3.5 rounded-xl bg-white border border-slate-200 cursor-pointer text-xs font-bold text-slate-800 shadow-2xs">
+                  <label className="flex items-center gap-3 p-3.5 rounded-xl bg-surface-lowest border border-border cursor-pointer text-xs font-bold text-content-primary shadow-2xs">
                     <input
                       type="checkbox"
                       checked={override.embeddable !== false}
@@ -824,7 +824,7 @@ export default function TailoredPlatformEditor({
                     <span>Allow Video Embedding</span>
                   </label>
 
-                  <label className="flex items-center gap-3 p-3.5 rounded-xl bg-white border border-slate-200 cursor-pointer text-xs font-bold text-slate-800 shadow-2xs">
+                  <label className="flex items-center gap-3 p-3.5 rounded-xl bg-surface-lowest border border-border cursor-pointer text-xs font-bold text-content-primary shadow-2xs">
                     <input
                       type="checkbox"
                       checked={override.notifySubscribers !== false}
@@ -838,7 +838,7 @@ export default function TailoredPlatformEditor({
                     <span>Notify Channel Subscribers</span>
                   </label>
 
-                  <label className="flex items-center gap-3 p-3.5 rounded-xl bg-white border border-slate-200 cursor-pointer text-xs font-bold text-slate-800 shadow-2xs">
+                  <label className="flex items-center gap-3 p-3.5 rounded-xl bg-surface-lowest border border-border cursor-pointer text-xs font-bold text-content-primary shadow-2xs">
                     <input
                       type="checkbox"
                       checked={override.publicStatsViewable !== false}
@@ -857,8 +857,8 @@ export default function TailoredPlatformEditor({
 
             {/* INSTAGRAM SPECIFIC PRESETS */}
             {plat === 'instagram' && (
-              <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-4">
-                <p className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2 border-b border-slate-200 pb-3">
+              <div className="p-4 sm:p-5 rounded-2xl bg-surface-low border border-border space-y-4">
+                <p className="text-xs font-bold text-content-primary uppercase tracking-wider flex items-center gap-2 border-b border-border pb-3">
                   <Sliders className="w-4 h-4 text-pink-600" />
                   <span>Instagram Graph API v22.0 Reels &amp; Feed Options</span>
                 </p>
@@ -902,7 +902,7 @@ export default function TailoredPlatformEditor({
 
                   <div>
                     <label className={LABEL_CLASS}>
-                      <Music className="w-3.5 h-3.5 text-slate-600" />
+                      <Music className="w-3.5 h-3.5 text-content-secondary" />
                       <span>Original Audio Rename</span>
                     </label>
                     <input
@@ -973,7 +973,7 @@ export default function TailoredPlatformEditor({
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <label className="flex items-center gap-3 p-3.5 rounded-xl bg-white border border-slate-200 cursor-pointer text-xs font-bold text-slate-800 shadow-2xs">
+                  <label className="flex items-center gap-3 p-3.5 rounded-xl bg-surface-lowest border border-border cursor-pointer text-xs font-bold text-content-primary shadow-2xs">
                     <input
                       type="checkbox"
                       checked={override.shareToFeed !== false}
@@ -989,7 +989,7 @@ export default function TailoredPlatformEditor({
                     </span>
                   </label>
 
-                  <label className="flex items-center gap-3 p-3.5 rounded-xl bg-white border border-slate-200 cursor-pointer text-xs font-bold text-slate-800 shadow-2xs">
+                  <label className="flex items-center gap-3 p-3.5 rounded-xl bg-surface-lowest border border-border cursor-pointer text-xs font-bold text-content-primary shadow-2xs">
                     <input
                       type="checkbox"
                       checked={Boolean(override.disableComments)}
@@ -1008,8 +1008,8 @@ export default function TailoredPlatformEditor({
 
             {/* FACEBOOK SPECIFIC PRESETS */}
             {plat === 'facebook' && (
-              <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-4">
-                <p className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2 border-b border-slate-200 pb-3">
+              <div className="p-4 sm:p-5 rounded-2xl bg-surface-low border border-border space-y-4">
+                <p className="text-xs font-bold text-content-primary uppercase tracking-wider flex items-center gap-2 border-b border-border pb-3">
                   <Sliders className="w-4 h-4 text-blue-600" />
                   <span>Facebook Page Graph API v22.0 Reels &amp; Video Options</span>
                 </p>
@@ -1079,7 +1079,7 @@ export default function TailoredPlatformEditor({
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <label className="flex items-center gap-3 p-3.5 rounded-xl bg-white border border-slate-200 cursor-pointer text-xs font-bold text-slate-800 shadow-2xs">
+                  <label className="flex items-center gap-3 p-3.5 rounded-xl bg-surface-lowest border border-border cursor-pointer text-xs font-bold text-content-primary shadow-2xs">
                     <input
                       type="checkbox"
                       checked={override.shareToFeed !== false}
@@ -1093,7 +1093,7 @@ export default function TailoredPlatformEditor({
                     <span>Share Reel to Page Feed Timeline</span>
                   </label>
 
-                  <label className="flex items-center gap-3 p-3.5 rounded-xl bg-white border border-slate-200 cursor-pointer text-xs font-bold text-slate-800 shadow-2xs">
+                  <label className="flex items-center gap-3 p-3.5 rounded-xl bg-surface-lowest border border-border cursor-pointer text-xs font-bold text-content-primary shadow-2xs">
                     <input
                       type="checkbox"
                       checked={override.embeddable !== false}
@@ -1107,7 +1107,7 @@ export default function TailoredPlatformEditor({
                     <span>Allow Video Embedding</span>
                   </label>
 
-                  <label className="flex items-center gap-3 p-3.5 rounded-xl bg-white border border-slate-200 cursor-pointer text-xs font-bold text-slate-800 shadow-2xs">
+                  <label className="flex items-center gap-3 p-3.5 rounded-xl bg-surface-lowest border border-border cursor-pointer text-xs font-bold text-content-primary shadow-2xs">
                     <input
                       type="checkbox"
                       checked={Boolean(override.secret)}
@@ -1126,9 +1126,9 @@ export default function TailoredPlatformEditor({
 
             {/* TIKTOK SPECIFIC PRESETS */}
             {plat === 'tiktok' && (
-              <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-4">
-                <p className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2 border-b border-slate-200 pb-3">
-                  <Sliders className="w-4 h-4 text-slate-900" />
+              <div className="p-4 sm:p-5 rounded-2xl bg-surface-low border border-border space-y-4">
+                <p className="text-xs font-bold text-content-primary uppercase tracking-wider flex items-center gap-2 border-b border-border pb-3">
+                  <Sliders className="w-4 h-4 text-content-primary" />
                   <span>TikTok Direct Post API v2 Creator Settings</span>
                 </p>
 
@@ -1162,7 +1162,7 @@ export default function TailoredPlatformEditor({
                       Interaction Permissions
                     </label>
                     <div className="grid grid-cols-3 gap-2.5">
-                      <label className="flex items-center gap-2 h-11 px-3 rounded-xl bg-white border border-slate-300 cursor-pointer text-xs font-bold text-slate-800">
+                      <label className="flex items-center gap-2 h-11 px-3 rounded-xl bg-surface-lowest border border-border cursor-pointer text-xs font-bold text-content-primary">
                         <input
                           type="checkbox"
                           checked={override.allowComments !== false}
@@ -1176,7 +1176,7 @@ export default function TailoredPlatformEditor({
                         <span>Comments</span>
                       </label>
 
-                      <label className="flex items-center gap-2 h-11 px-3 rounded-xl bg-white border border-slate-300 cursor-pointer text-xs font-bold text-slate-800">
+                      <label className="flex items-center gap-2 h-11 px-3 rounded-xl bg-surface-lowest border border-border cursor-pointer text-xs font-bold text-content-primary">
                         <input
                           type="checkbox"
                           checked={override.allowDuet !== false}
@@ -1190,7 +1190,7 @@ export default function TailoredPlatformEditor({
                         <span>Duet</span>
                       </label>
 
-                      <label className="flex items-center gap-2 h-11 px-3 rounded-xl bg-white border border-slate-300 cursor-pointer text-xs font-bold text-slate-800">
+                      <label className="flex items-center gap-2 h-11 px-3 rounded-xl bg-surface-lowest border border-border cursor-pointer text-xs font-bold text-content-primary">
                         <input
                           type="checkbox"
                           checked={override.allowStitch !== false}
@@ -1208,8 +1208,8 @@ export default function TailoredPlatformEditor({
                 </div>
 
                 {override.commercialContent && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 rounded-xl bg-white border border-slate-200">
-                    <label className="flex items-center gap-2.5 cursor-pointer text-xs font-bold text-slate-800">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 rounded-xl bg-surface-lowest border border-border">
+                    <label className="flex items-center gap-2.5 cursor-pointer text-xs font-bold text-content-primary">
                       <input
                         type="checkbox"
                         checked={override.commercialYourBrand !== false}
@@ -1222,7 +1222,7 @@ export default function TailoredPlatformEditor({
                       />
                       <span>Your Brand (Promoting your own business)</span>
                     </label>
-                    <label className="flex items-center gap-2.5 cursor-pointer text-xs font-bold text-slate-800">
+                    <label className="flex items-center gap-2.5 cursor-pointer text-xs font-bold text-content-primary">
                       <input
                         type="checkbox"
                         checked={Boolean(override.commercialBrandedContent)}
@@ -1239,7 +1239,7 @@ export default function TailoredPlatformEditor({
                 )}
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <label className="flex items-center gap-3 p-3.5 rounded-xl bg-white border border-slate-200 cursor-pointer text-xs font-bold text-slate-800 shadow-2xs">
+                  <label className="flex items-center gap-3 p-3.5 rounded-xl bg-surface-lowest border border-border cursor-pointer text-xs font-bold text-content-primary shadow-2xs">
                     <input
                       type="checkbox"
                       checked={Boolean(override.autoAddMusic)}
@@ -1253,7 +1253,7 @@ export default function TailoredPlatformEditor({
                     <span>Auto-Sync Trending Sound (auto_add_music)</span>
                   </label>
 
-                  <label className="flex items-center gap-3 p-3.5 rounded-xl bg-white border border-slate-200 cursor-pointer text-xs font-bold text-slate-800 shadow-2xs">
+                  <label className="flex items-center gap-3 p-3.5 rounded-xl bg-surface-lowest border border-border cursor-pointer text-xs font-bold text-content-primary shadow-2xs">
                     <input
                       type="checkbox"
                       checked={override.highQualityUpload !== false}
@@ -1272,7 +1272,7 @@ export default function TailoredPlatformEditor({
 
             {/* X (TWITTER) SPECIFIC PRESETS */}
             {plat === 'twitter' && (
-              <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="p-4 sm:p-5 rounded-2xl bg-surface-low border border-border grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className={LABEL_CLASS}>
                     Who Can Reply on X (reply_settings)
@@ -1300,7 +1300,7 @@ export default function TailoredPlatformEditor({
                 </div>
 
                 <div className="flex items-end">
-                  <label className="w-full h-11 px-4 rounded-xl bg-white border border-slate-300 flex items-center gap-3 cursor-pointer text-xs font-bold text-slate-800 shadow-2xs">
+                  <label className="w-full h-11 px-4 rounded-xl bg-surface-lowest border border-border flex items-center gap-3 cursor-pointer text-xs font-bold text-content-primary shadow-2xs">
                     <input
                       type="checkbox"
                       checked={Boolean(override.sensitiveContent)}
@@ -1319,7 +1319,7 @@ export default function TailoredPlatformEditor({
 
             {/* LINKEDIN SPECIFIC PRESETS */}
             {plat === 'linkedin' && (
-              <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="p-4 sm:p-5 rounded-2xl bg-surface-low border border-border grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className={LABEL_CLASS}>
                     <Eye className="w-3.5 h-3.5 text-blue-600" />
@@ -1362,7 +1362,7 @@ export default function TailoredPlatformEditor({
 
             {/* THREADS SPECIFIC PRESETS */}
             {plat === 'threads' && (
-              <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="p-4 sm:p-5 rounded-2xl bg-surface-low border border-border grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className={LABEL_CLASS}>
                     Who Can Reply on Threads (reply_control)
@@ -1389,7 +1389,7 @@ export default function TailoredPlatformEditor({
 
                 <div>
                   <label className={LABEL_CLASS}>
-                    <Hash className="w-3.5 h-3.5 text-slate-700" />
+                    <Hash className="w-3.5 h-3.5 text-content-secondary" />
                     <span>Threads Topic Tag</span>
                   </label>
                   <input
@@ -1409,7 +1409,7 @@ export default function TailoredPlatformEditor({
 
             {/* PINTEREST SPECIFIC PRESETS */}
             {plat === 'pinterest' && (
-              <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200 grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="p-4 sm:p-5 rounded-2xl bg-surface-low border border-border grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <label className={LABEL_CLASS}>
                     Pinterest Board ID / Name
@@ -1494,7 +1494,7 @@ export default function TailoredPlatformEditor({
                   className="mt-0.5 w-4 h-4 rounded accent-[#211832]"
                 />
                 <div className="space-y-1">
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-content-primary">
                     <Cpu className="w-4 h-4 text-amber-600 flex-shrink-0" />
                     <span>
                       {plat === 'youtube'
@@ -1506,7 +1506,7 @@ export default function TailoredPlatformEditor({
                         : `${cfg.name} AI-Generated Content Disclosure`}
                     </span>
                   </div>
-                  <p className="text-[11px] font-normal text-slate-500 leading-snug">
+                  <p className="text-[11px] font-normal text-content-muted leading-snug">
                     {plat === 'youtube'
                       ? 'Sends status.containsSyntheticMedia=true to YouTube Data API v3.'
                       : plat === 'instagram' || plat === 'facebook'
@@ -1531,11 +1531,11 @@ export default function TailoredPlatformEditor({
                   className="mt-0.5 w-4 h-4 rounded accent-[#211832]"
                 />
                 <div className="space-y-1">
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-content-primary">
                     <Shield className="w-4 h-4 text-emerald-600 flex-shrink-0" />
                     <span>Paid Promotion / Branded Content Disclosure</span>
                   </div>
-                  <p className="text-[11px] font-normal text-slate-500 leading-snug">
+                  <p className="text-[11px] font-normal text-content-muted leading-snug">
                     Discloses sponsorship, brand partnership, or commercial product placement on {cfg.name}.
                   </p>
                 </div>
@@ -1550,11 +1550,11 @@ export default function TailoredPlatformEditor({
   return (
     <div className="space-y-5">
       {/* 1. METRICOOL MASTER COMPOSER CARD (Title + Caption + Bottom Action Toolbar + Edit By Network) */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-4">
+      <div className="bg-surface-lowest border border-border rounded-2xl p-5 shadow-xs space-y-4">
         {/* Top Mode Bar: Global vs Edit by Network (Metricool signature dark eggplant pill) */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100">
+        <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-border-subtle">
           <div className="flex items-center gap-2">
-            <h2 className="text-sm font-bold text-slate-900">
+            <h2 className="text-sm font-bold text-content-primary">
               Post Title, Caption &amp; Content Editor
             </h2>
             {editByNetwork && (
@@ -1572,7 +1572,7 @@ export default function TailoredPlatformEditor({
                 'h-9 px-3.5 rounded-xl text-xs font-bold inline-flex items-center gap-2 transition-all shadow-2xs',
                 editByNetwork
                   ? 'bg-[#211832] text-[#D8FF36] border border-[#211832]'
-                  : 'bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300'
+                  : 'bg-surface-container hover:bg-surface-high text-content-primary border border-border'
               )}
             >
               <Layers className="w-3.5 h-3.5" />
@@ -1596,7 +1596,7 @@ export default function TailoredPlatformEditor({
                     'h-9 px-3.5 rounded-xl text-xs font-bold flex items-center gap-2 border transition-all flex-shrink-0',
                     isAct
                       ? 'bg-[#211832] text-white border-[#211832] shadow-xs'
-                      : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-300'
+                      : 'bg-surface-lowest hover:bg-surface-low text-content-secondary border-border'
                   )}
                 >
                   <PlatformBadge platform={plat} size="xs" />
@@ -1610,13 +1610,13 @@ export default function TailoredPlatformEditor({
         {/* Prominent Video / Short Title Box right inside main composer */}
         <div>
           <div className="flex items-center justify-between mb-1.5">
-            <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+            <label className="text-xs font-bold text-content-primary flex items-center gap-1.5">
               <FileText className="w-4 h-4 text-red-600" />
               <span>
                 Video / Short Title (YouTube &amp; Title-Enabled Networks)
               </span>
             </label>
-            <span className="text-xs font-mono font-semibold text-slate-500">
+            <span className="text-xs font-mono font-semibold text-content-muted">
               {primaryTitleValue.length} / 100
             </span>
           </div>
@@ -1631,14 +1631,14 @@ export default function TailoredPlatformEditor({
         </div>
 
         {/* Main Metricool Textarea Container with Integrated Bottom Toolbar */}
-        <div className="rounded-2xl border border-slate-300 bg-white overflow-hidden focus-within:border-[#211832] focus-within:ring-2 focus-within:ring-[#211832]/10 transition-all">
-          <div className="px-4 pt-3 pb-1 flex items-center justify-between border-b border-slate-100 bg-slate-50/60">
-            <span className="text-xs font-bold text-slate-700">
+        <div className="rounded-2xl border border-border bg-surface-lowest overflow-hidden focus-within:border-[#211832] focus-within:ring-2 focus-within:ring-[#211832]/10 transition-all">
+          <div className="px-4 pt-3 pb-1 flex items-center justify-between border-b border-border-subtle bg-surface-low/60">
+            <span className="text-xs font-bold text-content-secondary">
               {editByNetwork
                 ? `${currentEditConfig.name} Custom Caption / Description`
                 : 'Global Master Caption & Hashtags (Synced to All Networks)'}
             </span>
-            <span className="text-[11px] font-medium text-slate-500">
+            <span className="text-[11px] font-medium text-content-muted">
               {editByNetwork
                 ? `Applies to ${currentEditConfig.name}`
                 : `Syncs across ${selectedPlatforms.length} selected networks`}
@@ -1658,11 +1658,11 @@ export default function TailoredPlatformEditor({
             }}
             placeholder="Write your caption, description, links, and #hashtags here..."
             rows={5}
-            className="w-full p-4 bg-white text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none resize-y leading-relaxed"
+            className="w-full p-4 bg-surface-lowest text-sm text-content-primary placeholder:text-content-muted focus:outline-none resize-y leading-relaxed"
           />
 
           {/* Metricool Integrated Bottom Toolbar inside Editor Box */}
-          <div className="px-4 py-3 bg-slate-50 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2">
+          <div className="px-4 py-3 bg-surface-low border-t border-border flex flex-wrap items-center justify-between gap-2">
             <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
@@ -1671,7 +1671,7 @@ export default function TailoredPlatformEditor({
                   'h-9 px-3 rounded-xl border text-xs font-bold inline-flex items-center gap-1.5 transition-colors',
                   showAiStudio
                     ? 'bg-[#211832] text-[#D8FF36] border-[#211832]'
-                    : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-300'
+                    : 'bg-surface-lowest hover:bg-surface-container text-content-secondary border-border'
                 )}
               >
                 <Wand2 className="w-3.5 h-3.5" />
@@ -1684,8 +1684,8 @@ export default function TailoredPlatformEditor({
                 className={cn(
                   'h-9 px-3 rounded-xl border text-xs font-bold inline-flex items-center gap-1.5 transition-colors',
                   shortenerEnabled
-                    ? 'bg-emerald-50 border-emerald-300 text-emerald-800'
-                    : 'bg-white hover:bg-slate-100 text-slate-600 border-slate-300'
+                    ? 'bg-emerald-500/10 border-emerald-300 text-emerald-800'
+                    : 'bg-surface-lowest hover:bg-surface-container text-content-secondary border-border'
                 )}
               >
                 <Link2 className="w-3.5 h-3.5" />
@@ -1700,8 +1700,8 @@ export default function TailoredPlatformEditor({
                 className={cn(
                   'h-9 px-3 rounded-xl border text-xs font-bold inline-flex items-center gap-1.5 transition-colors',
                   globalAiDisclosure
-                    ? 'bg-amber-50 border-amber-300 text-amber-900'
-                    : 'bg-white hover:bg-slate-100 text-slate-600 border-slate-300'
+                    ? 'bg-amber-500/10 border-amber-300 text-amber-900'
+                    : 'bg-surface-lowest hover:bg-surface-container text-content-secondary border-border'
                 )}
               >
                 <Cpu className="w-3.5 h-3.5" />
@@ -1714,8 +1714,8 @@ export default function TailoredPlatformEditor({
                 className={cn(
                   'h-9 px-3 rounded-xl border text-xs font-bold inline-flex items-center gap-1.5 transition-colors',
                   globalPaidPromo
-                    ? 'bg-emerald-50 border-emerald-300 text-emerald-900'
-                    : 'bg-white hover:bg-slate-100 text-slate-600 border-slate-300'
+                    ? 'bg-emerald-500/10 border-emerald-300 text-emerald-900'
+                    : 'bg-surface-lowest hover:bg-surface-container text-content-secondary border-border'
                 )}
               >
                 <Shield className="w-3.5 h-3.5" />
@@ -1726,7 +1726,7 @@ export default function TailoredPlatformEditor({
             {/* Character Counter Pill */}
             <div className="flex items-center gap-2">
               <PlatformBadge platform={currentEditPlatform} size="xs" />
-              <span className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-xs font-mono font-bold text-slate-700">
+              <span className="px-2.5 py-1 rounded-lg bg-surface-lowest border border-border text-xs font-mono font-bold text-content-secondary">
                 {displayedCaption.length} / {currentEditConfig.charLimit}
               </span>
             </div>
@@ -1735,20 +1735,20 @@ export default function TailoredPlatformEditor({
 
         {/* Built-in AI Content, Title, Hashtag & SEO Generator Panel */}
         {showAiStudio && (
-          <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-4">
+          <div className="p-4 sm:p-5 rounded-2xl bg-surface-low border border-border space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="flex items-center gap-2.5">
                 <span className="w-9 h-9 rounded-xl bg-[#211832] text-[#D8FF36] flex items-center justify-center flex-shrink-0">
                   <Wand2 className="w-4 h-4" />
                 </span>
                 <div>
-                  <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                  <h3 className="text-sm font-bold text-content-primary flex items-center gap-2">
                     <span>AI Title, Caption, Hashtag &amp; SEO Generator</span>
                     <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold uppercase">
                       Live
                     </span>
                   </h3>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-content-muted">
                     Auto-generates titles, descriptions, viral hashtags, YouTube SEO tags &amp; first comments for all selected networks
                   </p>
                 </div>
@@ -1821,9 +1821,9 @@ export default function TailoredPlatformEditor({
                 type="button"
                 onClick={() => runAiAssistant('improve_caption')}
                 disabled={aiLoading !== null}
-                className="h-9 px-3.5 rounded-xl bg-white hover:bg-slate-100 border border-slate-300 text-xs font-bold text-slate-800 inline-flex items-center gap-1.5 shadow-2xs transition-colors"
+                className="h-9 px-3.5 rounded-xl bg-surface-lowest hover:bg-surface-container border border-border text-xs font-bold text-content-primary inline-flex items-center gap-1.5 shadow-2xs transition-colors"
               >
-                <Wand2 className="w-3.5 h-3.5 text-slate-700" />
+                <Wand2 className="w-3.5 h-3.5 text-content-secondary" />
                 <span>Rewrite &amp; Improve Hook</span>
               </button>
 
@@ -1831,7 +1831,7 @@ export default function TailoredPlatformEditor({
                 type="button"
                 onClick={() => runAiAssistant('viral_hashtags')}
                 disabled={aiLoading !== null}
-                className="h-9 px-3.5 rounded-xl bg-white hover:bg-slate-100 border border-slate-300 text-xs font-bold text-slate-800 inline-flex items-center gap-1.5 shadow-2xs transition-colors"
+                className="h-9 px-3.5 rounded-xl bg-surface-lowest hover:bg-surface-container border border-border text-xs font-bold text-content-primary inline-flex items-center gap-1.5 shadow-2xs transition-colors"
               >
                 <Tag className="w-3.5 h-3.5 text-emerald-600" />
                 <span>+15 Viral Hashtags &amp; YouTube Tags</span>
@@ -1841,14 +1841,14 @@ export default function TailoredPlatformEditor({
                 type="button"
                 onClick={() => runAiAssistant('first_comment')}
                 disabled={aiLoading !== null}
-                className="h-9 px-3.5 rounded-xl bg-white hover:bg-slate-100 border border-slate-300 text-xs font-bold text-slate-800 inline-flex items-center gap-1.5 shadow-2xs transition-colors"
+                className="h-9 px-3.5 rounded-xl bg-surface-lowest hover:bg-surface-container border border-border text-xs font-bold text-content-primary inline-flex items-center gap-1.5 shadow-2xs transition-colors"
               >
                 <MessageSquare className="w-3.5 h-3.5 text-amber-600" />
                 <span>Generate Engaging First Comment</span>
               </button>
 
               {aiNotice && (
-                <span className="text-xs font-bold text-emerald-700 flex items-center gap-1.5 ml-auto bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-xl">
+                <span className="text-xs font-bold text-emerald-700 flex items-center gap-1.5 ml-auto bg-emerald-500/10 border border-emerald-200 px-3 py-1.5 rounded-xl">
                   <CheckCircle2 className="w-4 h-4" />
                   <span>{aiNotice}</span>
                 </span>
@@ -1861,14 +1861,14 @@ export default function TailoredPlatformEditor({
       {/* 2. METRICOOL-STYLE PRESET ACCORDIONS (Global Presets + Per-Network Presets) */}
       <div className="space-y-3">
         <div className="flex items-center justify-between px-1">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-content-muted">
             Network Presets &amp; Advanced Settings
           </h3>
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={() => expandAllAccordions(true)}
-              className="text-xs font-bold text-slate-700 hover:text-slate-900 underline"
+              className="text-xs font-bold text-content-secondary hover:text-content-primary underline"
             >
               Expand All
             </button>
@@ -1876,7 +1876,7 @@ export default function TailoredPlatformEditor({
             <button
               type="button"
               onClick={() => expandAllAccordions(false)}
-              className="text-xs font-bold text-slate-500 hover:text-slate-800 underline"
+              className="text-xs font-bold text-content-muted hover:text-content-primary underline"
             >
               Collapse All
             </button>
@@ -1884,26 +1884,26 @@ export default function TailoredPlatformEditor({
         </div>
 
         {/* Global Presets Accordion */}
-        <div className="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
+        <div className="bg-surface-lowest border border-border rounded-2xl shadow-xs overflow-hidden">
           <button
             type="button"
             onClick={() => toggleAccordion('global')}
-            className="w-full min-h-[56px] px-5 py-3.5 flex items-center justify-between gap-3 bg-white hover:bg-slate-50/80 transition-colors text-left"
+            className="w-full min-h-[56px] px-5 py-3.5 flex items-center justify-between gap-3 bg-surface-lowest hover:bg-surface-low/80 transition-colors text-left"
           >
             <div className="flex items-center gap-3">
               <span className="w-7 h-7 rounded-lg bg-slate-900 text-white flex items-center justify-center text-xs font-bold">
                 G
               </span>
               <div>
-                <span className="text-sm font-bold text-slate-900">
+                <span className="text-sm font-bold text-content-primary">
                   Global presets
                 </span>
-                <span className="hidden sm:inline-block ml-2.5 text-xs text-slate-500">
+                <span className="hidden sm:inline-block ml-2.5 text-xs text-content-muted">
                   • First comment sync, URL shortener &amp; cross-network compliance
                 </span>
               </div>
             </div>
-            <span className="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center">
+            <span className="w-8 h-8 rounded-lg bg-surface-container text-content-secondary flex items-center justify-center">
               {openAccordions.global ? (
                 <ChevronUp className="w-4 h-4" />
               ) : (
@@ -1913,7 +1913,7 @@ export default function TailoredPlatformEditor({
           </button>
 
           {openAccordions.global && (
-            <div className="p-5 pt-4 border-t border-slate-200 space-y-4 bg-white">
+            <div className="p-5 pt-4 border-t border-border space-y-4 bg-surface-lowest">
               <div>
                 <label className={LABEL_CLASS}>
                   <MessageSquare className="w-4 h-4 text-emerald-600" />
@@ -1939,10 +1939,10 @@ export default function TailoredPlatformEditor({
                     className="mt-0.5 w-4 h-4 rounded accent-[#211832]"
                   />
                   <div>
-                    <p className="text-xs font-bold text-slate-900">
+                    <p className="text-xs font-bold text-content-primary">
                       Auto-Shorten URLs in Captions
                     </p>
-                    <p className="text-[11px] font-normal text-slate-500 mt-0.5">
+                    <p className="text-[11px] font-normal text-content-muted mt-0.5">
                       Converts long links into clean compact URLs when publishing
                     </p>
                   </div>
@@ -1958,10 +1958,10 @@ export default function TailoredPlatformEditor({
                     className="mt-0.5 w-4 h-4 rounded accent-[#211832]"
                   />
                   <div>
-                    <p className="text-xs font-bold text-slate-900">
+                    <p className="text-xs font-bold text-content-primary">
                       Global &ldquo;Created with AI&rdquo; Label
                     </p>
-                    <p className="text-[11px] font-normal text-slate-500 mt-0.5">
+                    <p className="text-[11px] font-normal text-content-muted mt-0.5">
                       Enables official AI / Synthetic Media flag on all networks
                     </p>
                   </div>
@@ -1977,10 +1977,10 @@ export default function TailoredPlatformEditor({
                     className="mt-0.5 w-4 h-4 rounded accent-[#211832]"
                   />
                   <div>
-                    <p className="text-xs font-bold text-slate-900">
+                    <p className="text-xs font-bold text-content-primary">
                       Global Paid Promotion Label
                     </p>
-                    <p className="text-[11px] font-normal text-slate-500 mt-0.5">
+                    <p className="text-[11px] font-normal text-content-muted mt-0.5">
                       Enables commercial / sponsored content disclosure everywhere
                     </p>
                   </div>

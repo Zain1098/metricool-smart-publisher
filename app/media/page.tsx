@@ -309,67 +309,97 @@ export default function MediaLibraryPage() {
 
   return (
     <div className="space-y-6">
-      {/* Row 1: 4 Pastel KPI Cards */}
+      {/* Stitch Editorial Header */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-1">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2 text-brand text-xs font-semibold uppercase tracking-wider">
+            <FolderOpen className="w-3.5 h-3.5" />
+            <span>Studio Asset Vault</span>
+          </div>
+          <h1 className="font-serif text-3xl sm:text-4xl font-normal text-content-primary tracking-tight">
+            Media Asset Library &amp; Cloud Storage
+          </h1>
+          <p className="text-xs sm:text-sm text-content-secondary">
+            Manage uploaded short-form videos, custom thumbnails, and Cloudflare R2 / local storage assets.
+          </p>
+        </div>
+      </div>
+
+      {/* Row 1: 4 Stitch Editorial KPI Cards */}
       <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        <Card className="bg-[#DCEAE2] border-[#C5DDD0] shadow-none">
-          <CardContent className="p-5 space-y-2">
-            <div className="flex items-center justify-between">
-              <FolderOpen className="w-4 h-4 text-[#24503B]" />
-              <Badge variant="sage" className="bg-white/80 border-transparent">
-                Library
-              </Badge>
-            </div>
-            <div className="text-3xl font-bold text-[#1E1B18] tabular-nums">
+        <div className="p-6 rounded-2xl bg-surface-lowest border border-border shadow-card hover:shadow-elevated transition-all flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-content-secondary">
+              Total Media Assets
+            </span>
+            <span className="w-8 h-8 rounded-lg bg-surface-low flex items-center justify-center text-brand">
+              <FolderOpen className="w-4 h-4" />
+            </span>
+          </div>
+          <div className="flex items-baseline justify-between mt-3 gap-2">
+            <span className="font-serif text-[2.25rem] leading-none font-medium text-content-primary tabular-nums">
               {loading ? '—' : stats?.totalCount ?? assets.length}
-            </div>
-            <p className="text-xs font-medium text-[#2F4F3E]">Total Media Assets</p>
-          </CardContent>
-        </Card>
+            </span>
+            <Badge variant="sage">Library</Badge>
+          </div>
+          <p className="mt-3 text-xs text-content-muted">Ready for multi-channel posts</p>
+        </div>
 
-        <Card className="bg-[#F5DFCE] border-[#EACBB4] shadow-none">
-          <CardContent className="p-5 space-y-2">
-            <div className="flex items-center justify-between">
-              <Film className="w-4 h-4 text-[#8D451E]" />
-              <Badge variant="peach" className="bg-white/80 border-transparent">
-                Reels & Shorts
-              </Badge>
-            </div>
-            <div className="text-3xl font-bold text-[#1E1B18] tabular-nums">
+        <div className="p-6 rounded-2xl bg-surface-lowest border border-border shadow-card hover:shadow-elevated transition-all flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-content-secondary">
+              Video Clips
+            </span>
+            <span className="w-8 h-8 rounded-lg bg-brand-container flex items-center justify-center text-brand">
+              <Film className="w-4 h-4" />
+            </span>
+          </div>
+          <div className="flex items-baseline justify-between mt-3 gap-2">
+            <span className="font-serif text-[2.25rem] leading-none font-medium text-content-primary tabular-nums">
               {loading ? '—' : stats?.videoCount ?? 0}
-            </div>
-            <p className="text-xs font-medium text-[#6B3A1E]">Video Clips</p>
-          </CardContent>
-        </Card>
+            </span>
+            <Badge variant="peach">Reels &amp; Shorts</Badge>
+          </div>
+          <p className="mt-3 text-xs text-content-muted">MP4, MOV, WebM, MKV</p>
+        </div>
 
-        <Card className="bg-[#F3DADF] border-[#E8C5CD] shadow-none">
-          <CardContent className="p-5 space-y-2">
-            <div className="flex items-center justify-between">
-              <ImageIcon className="w-4 h-4 text-[#8B3247]" />
-              <Badge variant="rose" className="bg-white/80 border-transparent">
-                Covers
-              </Badge>
-            </div>
-            <div className="text-3xl font-bold text-[#1E1B18] tabular-nums">
+        <div className="p-6 rounded-2xl bg-surface-lowest border border-border shadow-card hover:shadow-elevated transition-all flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-content-secondary">
+              Thumbnails &amp; Images
+            </span>
+            <span className="w-8 h-8 rounded-lg bg-surface-low flex items-center justify-center text-brand">
+              <ImageIcon className="w-4 h-4" />
+            </span>
+          </div>
+          <div className="flex items-baseline justify-between mt-3 gap-2">
+            <span className="font-serif text-[2.25rem] leading-none font-medium text-content-primary tabular-nums">
               {loading ? '—' : stats?.imageCount ?? 0}
-            </div>
-            <p className="text-xs font-medium text-[#6C2B3B]">Thumbnails & Images</p>
-          </CardContent>
-        </Card>
+            </span>
+            <Badge variant="rose">Covers</Badge>
+          </div>
+          <p className="mt-3 text-xs text-content-muted">Custom cover frames</p>
+        </div>
 
-        <Card className="bg-[#E5DFF5] border-[#D4CBEB] shadow-none">
-          <CardContent className="p-5 space-y-2">
-            <div className="flex items-center justify-between">
-              <HardDrive className="w-4 h-4 text-[#4B3688]" />
-              <Badge variant="lavender" className="bg-white/80 border-transparent">
-                {stats?.storageProvider || 'Storage'}
-              </Badge>
-            </div>
-            <div className="text-2xl font-bold text-[#1E1B18] tabular-nums">
+        <div className="p-6 rounded-2xl bg-surface-lowest border border-border shadow-card hover:shadow-elevated transition-all flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-content-secondary">
+              Storage Used
+            </span>
+            <span className="w-8 h-8 rounded-lg bg-surface-low flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+              <HardDrive className="w-4 h-4" />
+            </span>
+          </div>
+          <div className="flex items-baseline justify-between mt-3 gap-2">
+            <span className="font-serif text-[2rem] leading-none font-medium text-content-primary tabular-nums">
               {loading ? '—' : `${stats?.totalSizeMb ?? 0} MB`}
-            </div>
-            <Progress value={storagePercent} indicatorColor="#564098" />
-          </CardContent>
-        </Card>
+            </span>
+            <Badge variant="lavender">{stats?.storageProvider || 'Storage'}</Badge>
+          </div>
+          <div className="mt-3">
+            <Progress value={storagePercent} indicatorColor="#C27345" />
+          </div>
+        </div>
       </section>
 
       {/* Row 2: Upload Dropzone */}
@@ -388,8 +418,8 @@ export default function MediaLibraryPage() {
         className={cn(
           'border-2 border-dashed transition-colors cursor-pointer',
           isDragging
-            ? 'border-[#C27345] bg-[#F5DFCE]/40'
-            : 'border-[#D6CBC0] bg-white hover:border-[#C27345]'
+            ? 'border-[#C27345] bg-brand-container/40'
+            : 'border-border bg-surface-lowest hover:border-[#C27345]'
         )}
         onClick={() => !uploading && fileInputRef.current?.click()}
       >
@@ -402,16 +432,16 @@ export default function MediaLibraryPage() {
             className="hidden"
           />
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-[#F5DFCE] border border-[#EACBB4] flex items-center justify-center text-[#8D451E] flex-shrink-0">
+            <div className="w-12 h-12 rounded-2xl bg-brand-container border border-brand/25 flex items-center justify-center text-[#8D451E] flex-shrink-0">
               <UploadCloud className="w-6 h-6" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-[#1E1B18]">
+              <p className="text-sm font-semibold text-content-primary">
                 {uploading
                   ? `Uploading asset... ${uploadProgress}%`
                   : 'Drag & drop videos or cover images here'}
               </p>
-              <p className="text-xs text-[#6E655D] mt-0.5">
+              <p className="text-xs text-content-muted mt-0.5">
                 Supports MP4, MOV, WebM, MKV, JPG, PNG, WebP · Direct to{' '}
                 {stats?.r2Configured ? 'Cloudflare R2' : 'Local Storage'}
               </p>
@@ -452,7 +482,7 @@ export default function MediaLibraryPage() {
                 'px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
                 filterType === tab.id
                   ? 'bg-[#C27345] text-white border-[#C27345]'
-                  : 'bg-white text-[#4E463F] border-[#E7DFD5] hover:bg-[#F5EFE8]'
+                  : 'bg-surface-lowest text-content-secondary border-border hover:bg-surface-container'
               )}
             >
               {tab.label}
@@ -474,7 +504,7 @@ export default function MediaLibraryPage() {
           )}
 
           <div className="relative w-52">
-            <Search className="w-3.5 h-3.5 text-[#8E847A] absolute left-2.5 top-1/2 -translate-y-1/2" />
+            <Search className="w-3.5 h-3.5 text-content-muted absolute left-2.5 top-1/2 -translate-y-1/2" />
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -496,14 +526,14 @@ export default function MediaLibraryPage() {
             <span className="capitalize">Sort: {sortBy}</span>
           </Button>
 
-          <div className="inline-flex rounded-lg bg-[#EFE9E1] p-0.5 border border-[#E7DFD5]">
+          <div className="inline-flex rounded-lg bg-surface-high p-0.5 border border-border">
             <button
               type="button"
               onClick={() => setViewMode('grid')}
               aria-label="Grid view"
               className={cn(
                 'p-1.5 rounded-md',
-                viewMode === 'grid' ? 'bg-white text-[#1E1B18] shadow-xs' : 'text-[#6E655D]'
+                viewMode === 'grid' ? 'bg-surface-lowest text-content-primary shadow-xs' : 'text-content-muted'
               )}
             >
               <LayoutGrid className="w-3.5 h-3.5" />
@@ -514,7 +544,7 @@ export default function MediaLibraryPage() {
               aria-label="List view"
               className={cn(
                 'p-1.5 rounded-md',
-                viewMode === 'list' ? 'bg-white text-[#1E1B18] shadow-xs' : 'text-[#6E655D]'
+                viewMode === 'list' ? 'bg-surface-lowest text-content-primary shadow-xs' : 'text-content-muted'
               )}
             >
               <ListIcon className="w-3.5 h-3.5" />
@@ -527,14 +557,14 @@ export default function MediaLibraryPage() {
       {loading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-64 rounded-2xl bg-[#EFE9E1] animate-pulse" />
+            <div key={i} className="h-64 rounded-2xl bg-surface-high animate-pulse" />
           ))}
         </div>
       ) : filteredAssets.length === 0 ? (
         <Card className="p-10 text-center space-y-3">
           <FolderOpen className="w-10 h-10 text-[#958B81] mx-auto" />
-          <p className="text-sm font-semibold text-[#1E1B18]">No media assets found</p>
-          <p className="text-xs text-[#6E655D]">
+          <p className="text-sm font-semibold text-content-primary">No media assets found</p>
+          <p className="text-xs text-content-muted">
             Upload a video or image above to start building your library.
           </p>
         </Card>
@@ -578,14 +608,14 @@ export default function MediaLibraryPage() {
                       'absolute top-2 left-2 w-6 h-6 rounded-md border flex items-center justify-center transition-colors',
                       isSelected
                         ? 'bg-[#C27345] border-[#C27345] text-white'
-                        : 'bg-white/90 border-[#E7DFD5] text-transparent hover:text-[#6E655D]'
+                        : 'bg-surface-lowest/90 border-border text-transparent hover:text-content-muted'
                     )}
                   >
                     <Check className="w-3.5 h-3.5" />
                   </button>
 
                   {/* Source Badge */}
-                  <span className="absolute top-2 right-2 rounded-full bg-white/95 px-2 py-0.5 text-[10px] font-semibold text-[#1E1B18] shadow-xs uppercase">
+                  <span className="absolute top-2 right-2 rounded-full bg-surface-lowest/95 px-2 py-0.5 text-[10px] font-semibold text-content-primary shadow-xs uppercase">
                     {asset.source}
                   </span>
 
@@ -596,7 +626,7 @@ export default function MediaLibraryPage() {
                     aria-label={`Preview ${asset.fileName}`}
                     className="absolute inset-0 bg-black/0 group-hover:bg-black/35 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100"
                   >
-                    <span className="w-10 h-10 rounded-full bg-white text-[#1E1B18] flex items-center justify-center shadow-lg">
+                    <span className="w-10 h-10 rounded-full bg-surface-lowest text-content-primary flex items-center justify-center shadow-lg">
                       <Play className="w-4 h-4 fill-current ml-0.5" />
                     </span>
                   </button>
@@ -606,12 +636,12 @@ export default function MediaLibraryPage() {
                 <CardContent className="p-3.5 flex-1 flex flex-col justify-between gap-3">
                   <div className="space-y-1">
                     <p
-                      className="text-xs font-semibold text-[#1E1B18] truncate"
+                      className="text-xs font-semibold text-content-primary truncate"
                       title={asset.fileName}
                     >
                       {asset.fileName}
                     </p>
-                    <div className="flex items-center justify-between text-[11px] text-[#6E655D]">
+                    <div className="flex items-center justify-between text-[11px] text-content-muted">
                       <span>{asset.sizeMb} MB</span>
                       {asset.durationSec ? (
                         <span>{formatTimeSec(asset.durationSec)}</span>
@@ -621,9 +651,11 @@ export default function MediaLibraryPage() {
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between gap-1.5 pt-2 border-t border-[#EFE9E1]">
+                  <div className="flex items-center justify-between gap-1.5 pt-2 border-t border-border-subtle">
                     <Button asChild variant="secondary" size="sm" className="h-7 px-2.5 text-[11px] flex-1">
-                      <Link href={`/composer?mediaUrl=${encodeURIComponent(asset.url)}`}>
+                      <Link
+                        href={`/composer?mediaUrl=${encodeURIComponent(asset.url)}&fileName=${encodeURIComponent(asset.fileName)}&sizeMb=${asset.sizeMb}`}
+                      >
                         Use in Post
                       </Link>
                     </Button>
@@ -665,7 +697,7 @@ export default function MediaLibraryPage() {
           <CardContent className="p-0 overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="border-b border-[#E7DFD5] text-[#6E655D]">
+                <tr className="border-b border-border text-content-muted">
                   <th className="p-3 w-8" />
                   <th className="p-3 font-semibold">File</th>
                   <th className="p-3 font-semibold">Type</th>
@@ -676,7 +708,7 @@ export default function MediaLibraryPage() {
               </thead>
               <tbody className="divide-y divide-[#EFE9E1]">
                 {filteredAssets.map((asset) => (
-                  <tr key={asset.id} className="hover:bg-[#FAF6F1]">
+                  <tr key={asset.id} className="hover:bg-surface">
                     <td className="p-3">
                       <input
                         type="checkbox"
@@ -685,11 +717,11 @@ export default function MediaLibraryPage() {
                         aria-label={`Select ${asset.fileName}`}
                       />
                     </td>
-                    <td className="p-3 font-medium text-[#1E1B18] max-w-[260px] truncate">
+                    <td className="p-3 font-medium text-content-primary max-w-[260px] truncate">
                       {asset.fileName}
                     </td>
-                    <td className="p-3 capitalize text-[#6E655D]">{asset.mediaType}</td>
-                    <td className="p-3 uppercase text-[#6E655D]">{asset.source}</td>
+                    <td className="p-3 capitalize text-content-muted">{asset.mediaType}</td>
+                    <td className="p-3 uppercase text-content-muted">{asset.source}</td>
                     <td className="p-3 text-right tabular-nums">{asset.sizeMb} MB</td>
                     <td className="p-3 text-right space-x-1.5 whitespace-nowrap">
                       <Button
@@ -727,10 +759,10 @@ export default function MediaLibraryPage() {
           onClick={() => setPreviewAsset(null)}
         >
           <Card
-            className="w-full max-w-2xl overflow-hidden bg-white shadow-2xl"
+            className="w-full max-w-2xl overflow-hidden bg-surface-lowest shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <CardHeader className="flex flex-row items-center justify-between p-4 border-b border-[#E7DFD5]">
+            <CardHeader className="flex flex-row items-center justify-between p-4 border-b border-border">
               <div className="min-w-0 pr-4">
                 <CardTitle className="text-sm font-semibold truncate">
                   {previewAsset.fileName}
@@ -772,7 +804,9 @@ export default function MediaLibraryPage() {
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
                   <Button asChild size="sm">
-                    <Link href={`/composer?mediaUrl=${encodeURIComponent(previewAsset.url)}`}>
+                    <Link
+                      href={`/composer?mediaUrl=${encodeURIComponent(previewAsset.url)}&fileName=${encodeURIComponent(previewAsset.fileName)}&sizeMb=${previewAsset.sizeMb}`}
+                    >
                       Use in Composer
                     </Link>
                   </Button>

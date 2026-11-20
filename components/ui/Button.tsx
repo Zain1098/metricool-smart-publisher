@@ -12,17 +12,17 @@ export interface ButtonProps
 
 const VARIANT_CLASSES: Record<NonNullable<ButtonProps['variant']>, string> = {
   primary:
-    'bg-[#00D2B4] hover:bg-[#00BFA3] text-[#0D1525] font-bold border border-transparent shadow-xs',
+    'bg-brand hover:bg-brand-hover active:bg-brand-active text-brand-contrast font-semibold border border-transparent shadow-soft',
   secondary:
-    'bg-[#FFFFFF] hover:bg-slate-50 text-slate-700 border border-slate-200 hover:border-slate-300 shadow-xs',
+    'bg-surface-lowest hover:bg-surface-high text-content-primary border border-border shadow-card',
   outline:
-    'bg-transparent hover:bg-slate-100 text-slate-700 border border-slate-300',
+    'bg-transparent hover:bg-surface-high text-content-primary border border-border',
   ghost:
-    'bg-transparent hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-transparent',
+    'bg-transparent hover:bg-surface-high text-content-secondary hover:text-content-primary border border-transparent',
   danger:
-    'bg-red-50 hover:bg-red-100 text-red-600 border border-red-200',
+    'bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/25',
   success:
-    'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200',
+    'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/25',
 };
 
 const SIZE_CLASSES: Record<NonNullable<ButtonProps['size']>, string> = {

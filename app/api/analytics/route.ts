@@ -2,7 +2,11 @@ import { NextResponse } from 'next/server';
 import { store } from '@/lib/store';
 import realYtSnapshot from '@/lib/real_youtube_analytics.json';
 import { isSupabaseConfigured, saveAnalyticsSnapshot } from '@/lib/supabase';
-import { refreshAllConnectedPlatformsLive } from '@/lib/analytics-live';
+import {
+  refreshAllConnectedPlatformsLive,
+  loadCrossPlatformLivePosts,
+} from '@/lib/analytics-live';
+import type { SocialPlatform } from '@/lib/types';
 import { execFile } from 'child_process';
 import path from 'path';
 import fs from 'fs';
@@ -11,7 +15,7 @@ export const dynamic = 'force-dynamic';
 
 export interface RealVideoMetric {
   id: string;
-  platform: 'youtube' | 'instagram' | 'facebook';
+  platform: SocialPlatform;
   title: string;
   publishedAt: string;
   thumbnailUrl: string;
@@ -123,7 +127,9 @@ function loadRealVideos(): {
 }
 
 function buildAnalyticsResponse() {
-  const { channel, videos } = loadRealVideos();
+  const { channel, videos: ytVideos } = loadRealVideos();
+  const crossPlatformPosts = loadCrossPlatformLivePosts();
+  const videos: RealVideoMetric[] = [...ytVideos, ...crossPlatformPosts];
   const accounts = store.getAccounts();
   const posts = store.getPosts();
 

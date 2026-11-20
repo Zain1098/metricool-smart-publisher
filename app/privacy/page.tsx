@@ -91,7 +91,7 @@ export default function PrivacyPolicyPage() {
         <div className="flex items-center gap-2">
           <Link
             href="/"
-            className="p-1.5 rounded-lg bg-studio-surface border border-studio-border text-slate-400 hover:text-white transition-colors"
+            className="p-1.5 rounded-lg bg-studio-surface border border-studio-border text-content-muted hover:text-white transition-colors"
             title="Back to Dashboard"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -101,7 +101,7 @@ export default function PrivacyPolicyPage() {
               <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-status-success/15 text-status-success border border-status-success/40/30">
                 Privacy Protection
               </span>
-              <span className="text-[11px] text-slate-400 font-mono">
+              <span className="text-[11px] text-content-muted font-mono">
                 Effective Date: November 2026
               </span>
             </div>
@@ -123,7 +123,7 @@ export default function PrivacyPolicyPage() {
             onClick={handlePrint}
             className="px-3 py-1.5 rounded-lg bg-studio-surface border border-studio-border text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition-colors"
           >
-            <Printer className="w-3.5 h-3.5 text-slate-400" />
+            <Printer className="w-3.5 h-3.5 text-content-muted" />
             <span className="hidden sm:inline">Print / PDF</span>
           </button>
         </div>
@@ -138,25 +138,25 @@ export default function PrivacyPolicyPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 pt-1 text-xs">
           <div className="p-2.5 rounded-lg bg-studio-subtle/70 border border-studio-border">
             <p className="font-bold text-slate-200">Zero Selling of Data</p>
-            <p className="text-[11px] text-slate-400 mt-0.5">
+            <p className="text-[11px] text-content-muted mt-0.5">
               We never sell, rent, monetize, or broker your personal data or video media to any third parties.
             </p>
           </div>
           <div className="p-2.5 rounded-lg bg-studio-subtle/70 border border-studio-border">
             <p className="font-bold text-slate-200">AES-256 Vault Encryption</p>
-            <p className="text-[11px] text-slate-400 mt-0.5">
+            <p className="text-[11px] text-content-muted mt-0.5">
               All social access keys and tokens are encrypted at rest using industry-grade cryptography.
             </p>
           </div>
           <div className="p-2.5 rounded-lg bg-studio-subtle/70 border border-studio-border">
             <p className="font-bold text-slate-200">Google Limited Use</p>
-            <p className="text-[11px] text-slate-400 mt-0.5">
+            <p className="text-[11px] text-content-muted mt-0.5">
               Strict compliance with Google API Services User Data Policy, including Limited Use requirements.
             </p>
           </div>
           <div className="p-2.5 rounded-lg bg-studio-subtle/70 border border-studio-border">
             <p className="font-bold text-slate-200">Instant Token Deletion</p>
-            <p className="text-[11px] text-slate-400 mt-0.5">
+            <p className="text-[11px] text-content-muted mt-0.5">
               1-click Disconnect removes all stored tokens and cached channel metrics immediately.
             </p>
           </div>
@@ -168,7 +168,7 @@ export default function PrivacyPolicyPage() {
         {/* Sticky Table of Contents Sidebar */}
         <aside className="lg:col-span-4 sticky top-4 space-y-3">
           <div className="relative">
-            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-content-muted" />
             <input
               type="text"
               placeholder="Search privacy topics..."
@@ -179,7 +179,7 @@ export default function PrivacyPolicyPage() {
           </div>
 
           <div className="p-3 rounded-xl bg-studio-shell border border-studio-border space-y-1 max-h-[calc(100vh-140px)] overflow-y-auto">
-            <p className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            <p className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-content-muted">
               Privacy Clauses
             </p>
             {filtered.map((sec) => {
@@ -193,7 +193,7 @@ export default function PrivacyPolicyPage() {
                   className={`flex items-start gap-2 px-2.5 py-2 rounded-lg text-xs transition-colors ${
                     isSelected
                       ? 'bg-status-success/15 text-status-success font-bold border border-status-success/40/30'
-                      : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.02]'
+                      : 'text-content-muted hover:text-slate-200 hover:bg-surface-lowest/[0.02]'
                   }`}
                 >
                   <Icon className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />

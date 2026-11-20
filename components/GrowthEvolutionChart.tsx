@@ -136,17 +136,17 @@ export default function GrowthEvolutionChart({
 
   const strokeColor =
     chartMetric === 'likes'
-      ? '#10B981'
+      ? '#2E7D66'
       : chartMetric === 'engagement'
-      ? '#596CF2'
+      ? '#D9824C'
       : chartMetric === 'videosCount'
-      ? '#F59E0B'
-      : '#00D2B4'; // Metricool Teal
+      ? '#C27345'
+      : '#C27345'; // Stitch Terracotta
 
   return (
     <Card className="space-y-4">
       <CardHeader
-        icon={<TrendingUp className="w-4 h-4 text-[#00D2B4]" />}
+        icon={<TrendingUp className="w-4 h-4 text-[#C27345]" />}
         title={title}
         subtitle={subtitle}
         action={
@@ -185,22 +185,22 @@ export default function GrowthEvolutionChart({
       ) : (
         <>
           {/* Legend + Active Point Inspector */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-3.5 py-2.5 rounded-lg bg-slate-50 border border-slate-200">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-3.5 py-2.5 rounded-lg bg-surface-low border border-border">
             <div className="flex items-center gap-2.5 min-w-0">
               <span
                 className="w-2.5 h-2.5 rounded-full flex-shrink-0"
                 style={{ backgroundColor: strokeColor }}
               />
-              <span className="text-[11px] font-semibold text-slate-500 flex-shrink-0">
+              <span className="text-[11px] font-semibold text-content-muted flex-shrink-0">
                 {metricLabel}
               </span>
               {activePoint && (
                 <>
-                  <span className="text-[#4E463F]">•</span>
-                  <span className="px-1.5 py-0.5 rounded bg-[#FFFFFF] border border-slate-200 font-mono text-[11px] font-bold text-slate-800 flex-shrink-0">
+                  <span className="text-content-secondary">•</span>
+                  <span className="px-1.5 py-0.5 rounded bg-surface-lowest border border-border font-mono text-[11px] font-bold text-content-primary flex-shrink-0">
                     {activePoint.pt.date}
                   </span>
-                  <span className="text-xs font-semibold text-slate-800 truncate">
+                  <span className="text-xs font-semibold text-content-primary truncate">
                     {activePoint.pt.topTitle}
                   </span>
                 </>
@@ -209,15 +209,15 @@ export default function GrowthEvolutionChart({
 
             {activePoint && (
               <div className="flex items-center gap-3.5 text-xs font-mono tabular-nums flex-shrink-0">
-                <span className="text-slate-900 font-bold">
+                <span className="text-content-primary font-bold">
                   {activePoint.pt.views.toLocaleString()}{' '}
-                  <span className="text-[#6E655D] font-normal">views</span>
+                  <span className="text-content-muted font-normal">views</span>
                 </span>
                 <span className="text-emerald-600 font-bold">
                   {activePoint.pt.likes}{' '}
-                  <span className="text-[#6E655D] font-normal">likes</span>
+                  <span className="text-content-muted font-normal">likes</span>
                 </span>
-                <span className="text-[#596CF2] font-bold">
+                <span className="text-brand font-bold">
                   {activePoint.engagement}%
                 </span>
               </div>

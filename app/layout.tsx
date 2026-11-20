@@ -1,6 +1,22 @@
 import type { Metadata } from 'next';
+import { Newsreader, Plus_Jakarta_Sans } from 'next/font/google';
 import './globals.css';
 import AppShell from '@/components/AppShell';
+
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-sans',
+  display: 'swap',
+});
+
+const newsreader = Newsreader({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  style: ['normal', 'italic'],
+  variable: '--font-serif',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: 'ZCodeDev Studio — Social Media Planner & Analytics',
@@ -14,8 +30,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className="bg-[#FAF6F1] text-[#1E1B18] antialiased font-sans">
+    <html
+      lang="en"
+      className={`${plusJakartaSans.variable} ${newsreader.variable}`}
+      suppressHydrationWarning
+    >
+      <body className="bg-surface text-content-primary antialiased font-sans">
         <AppShell>{children}</AppShell>
       </body>
     </html>

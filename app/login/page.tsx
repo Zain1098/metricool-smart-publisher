@@ -58,25 +58,25 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen w-full bg-[#FAF6F1] flex flex-col items-center justify-center p-4">
+    <main className="min-h-screen w-full bg-surface flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-md space-y-6">
         <div className="text-center space-y-2">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#F5DFCE] border border-[#EACBB4] text-[#8D451E] text-xs font-semibold">
             <Sparkles className="w-3.5 h-3.5" />
             ZCodeDev Social Planner Pro
           </div>
-          <h1 className="text-3xl font-bold tracking-tight text-[#1E1B18]">
+          <h1 className="text-3xl font-bold tracking-tight text-content-primary">
             Your social media, <span className="text-[#C27345] italic font-serif">Finally Organized.</span>
           </h1>
-          <p className="text-sm text-[#6E655D]">
+          <p className="text-sm text-content-muted">
             Sign in with your admin password to access your studio.
           </p>
         </div>
 
-        <Card className="border-[#E7DFD5] bg-white shadow-[0_12px_36px_rgba(30,27,24,0.08)]">
+        <Card className="border-border bg-surface-lowest shadow-[0_12px_36px_rgba(30,27,24,0.08)]">
           <CardHeader className="space-y-1 pb-4">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-lg font-semibold text-[#1E1B18] flex items-center gap-2">
+              <CardTitle className="text-lg font-semibold text-content-primary flex items-center gap-2">
                 <Lock className="w-4 h-4 text-[#C27345]" />
                 Admin Sign In
               </CardTitle>
@@ -85,7 +85,7 @@ export default function LoginPage() {
                 Protected
               </Badge>
             </div>
-            <CardDescription className="text-[#6E655D]">
+            <CardDescription className="text-content-muted">
               Enter your workspace credentials to continue.
             </CardDescription>
           </CardHeader>
@@ -102,7 +102,7 @@ export default function LoginPage() {
 
             <form onSubmit={submit} className="space-y-4" noValidate>
               <div className="space-y-1.5">
-                <label htmlFor="email" className="text-xs font-medium text-[#4E463F] block">
+                <label htmlFor="email" className="text-xs font-medium text-content-secondary block">
                   Admin Email <span className="text-[#958B81]">(optional unless ADMIN_EMAIL is set)</span>
                 </label>
                 <Input
@@ -117,7 +117,7 @@ export default function LoginPage() {
               </div>
 
               <div className="space-y-1.5">
-                <label htmlFor="password" className="text-xs font-medium text-[#4E463F] block">
+                <label htmlFor="password" className="text-xs font-medium text-content-secondary block">
                   Admin Password *
                 </label>
                 <div className="relative">
@@ -136,7 +136,7 @@ export default function LoginPage() {
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#6E655D] hover:text-[#1E1B18] p-1"
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-content-muted hover:text-content-primary p-1"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>

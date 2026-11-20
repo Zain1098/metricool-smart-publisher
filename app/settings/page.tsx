@@ -133,13 +133,17 @@ export default function SettingsPage() {
 
   return (
     <div className="space-y-5 max-w-4xl">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-studio-border">
+      {/* Header (Stitch Editorial) */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-border">
         <div className="space-y-1">
-          <h1 className="text-xl font-semibold text-ink-primary tracking-[-0.02em]">
+          <div className="flex items-center gap-2 text-brand text-xs font-semibold uppercase tracking-wider">
+            <Globe className="w-3.5 h-3.5" />
+            <span>Workspace Admin</span>
+          </div>
+          <h1 className="font-serif text-2xl sm:text-3xl font-medium text-content-primary tracking-tight">
             Workspace Settings
           </h1>
-          <p className="text-xs text-ink-muted">
+          <p className="text-xs sm:text-sm text-content-secondary">
             Manage brand identity, scheduling engine defaults, storage configuration, notifications, and API security.
           </p>
         </div>

@@ -12,12 +12,17 @@ const PUBLIC_PAGE_PATHS = new Set([
   '/privacy-policy',
 ]);
 
+const PUBLIC_PAGE_PREFIXES = ['/reports/preview/', '/u/'];
+
 const PUBLIC_API_PREFIXES = [
   '/api/auth/login',
   '/api/auth/logout',
   '/api/cron',
   '/api/webhooks/postiz',
   '/api/mcp',
+  '/api/reports/public/',
+  '/api/pixel/collect',
+  '/api/smartlinks/click',
   '/.well-known/',
 ];
 
@@ -44,7 +49,10 @@ export async function middleware(req: NextRequest) {
     }
   }
 
-  if (PUBLIC_PAGE_PATHS.has(pathname)) {
+  if (
+    PUBLIC_PAGE_PATHS.has(pathname) ||
+    PUBLIC_PAGE_PREFIXES.some((prefix) => pathname.startsWith(prefix))
+  ) {
     return NextResponse.next();
   }
 

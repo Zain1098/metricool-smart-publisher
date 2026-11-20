@@ -130,7 +130,7 @@ export default function TermsAndConditionsPage() {
         <div className="flex items-center gap-2">
           <Link
             href="/"
-            className="p-1.5 rounded-lg bg-studio-surface border border-studio-border text-slate-400 hover:text-white transition-colors"
+            className="p-1.5 rounded-lg bg-studio-surface border border-studio-border text-content-muted hover:text-white transition-colors"
             title="Back to Dashboard"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -140,7 +140,7 @@ export default function TermsAndConditionsPage() {
               <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-accent/15 text-accent-soft border border-accent/50/30">
                 Legal Contract
               </span>
-              <span className="text-[11px] text-slate-400 font-mono">
+              <span className="text-[11px] text-content-muted font-mono">
                 Version 2.4 — Updated November 2026
               </span>
             </div>
@@ -162,7 +162,7 @@ export default function TermsAndConditionsPage() {
             onClick={handlePrint}
             className="px-3 py-1.5 rounded-lg bg-studio-surface border border-studio-border text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition-colors"
           >
-            <Printer className="w-3.5 h-3.5 text-slate-400" />
+            <Printer className="w-3.5 h-3.5 text-content-muted" />
             <span className="hidden sm:inline">Print / PDF</span>
           </button>
         </div>
@@ -179,25 +179,25 @@ export default function TermsAndConditionsPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 pt-1 text-xs">
             <div className="p-2.5 rounded-lg bg-studio-subtle/70 border border-studio-border">
               <p className="font-bold text-slate-200">100% Content Ownership</p>
-              <p className="text-[11px] text-slate-400 mt-0.5">
+              <p className="text-[11px] text-content-muted mt-0.5">
                 You retain complete intellectual property over all your videos, clips, and captions.
               </p>
             </div>
             <div className="p-2.5 rounded-lg bg-studio-subtle/70 border border-studio-border">
               <p className="font-bold text-slate-200">Official YouTube Terms</p>
-              <p className="text-[11px] text-slate-400 mt-0.5">
+              <p className="text-[11px] text-content-muted mt-0.5">
                 Explicit adherence to YouTube TOS and Google Privacy Policy for all YouTube Shorts.
               </p>
             </div>
             <div className="p-2.5 rounded-lg bg-studio-subtle/70 border border-studio-border">
               <p className="font-bold text-slate-200">Zero Password Storage</p>
-              <p className="text-[11px] text-slate-400 mt-0.5">
+              <p className="text-[11px] text-content-muted mt-0.5">
                 Authentication strictly via OAuth 2.0 with AES-256 encrypted credential tokens.
               </p>
             </div>
             <div className="p-2.5 rounded-lg bg-studio-subtle/70 border border-studio-border">
               <p className="font-bold text-slate-200">1-Click Revocation</p>
-              <p className="text-[11px] text-slate-400 mt-0.5">
+              <p className="text-[11px] text-content-muted mt-0.5">
                 Disconnect any social channel instantly with permanent local token wiping.
               </p>
             </div>
@@ -211,7 +211,7 @@ export default function TermsAndConditionsPage() {
         <aside className="lg:col-span-4 sticky top-4 space-y-3">
           {/* Search Terms Input */}
           <div className="relative">
-            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-content-muted" />
             <input
               type="text"
               placeholder="Search terms, clauses, or topics..."
@@ -222,7 +222,7 @@ export default function TermsAndConditionsPage() {
           </div>
 
           <div className="p-3 rounded-xl bg-studio-shell border border-studio-border space-y-1 max-h-[calc(100vh-140px)] overflow-y-auto">
-            <p className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            <p className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-content-muted">
               Clauses &amp; Table of Contents
             </p>
             {filteredSections.map((sec) => {
@@ -236,7 +236,7 @@ export default function TermsAndConditionsPage() {
                   className={`flex items-start gap-2 px-2.5 py-2 rounded-lg text-xs transition-colors ${
                     isSelected
                       ? 'bg-accent/15 text-accent-soft font-bold border border-accent/50/30'
-                      : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.02]'
+                      : 'text-content-muted hover:text-slate-200 hover:bg-surface-lowest/[0.02]'
                   }`}
                 >
                   <Icon className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
@@ -247,7 +247,7 @@ export default function TermsAndConditionsPage() {
           </div>
 
           {/* Quick Help Card */}
-          <div className="p-3 rounded-xl bg-studio-surface border border-studio-border text-xs text-slate-400 space-y-1.5">
+          <div className="p-3 rounded-xl bg-studio-surface border border-studio-border text-xs text-content-muted space-y-1.5">
             <div className="flex items-center gap-1.5 text-slate-200 font-bold">
               <HelpCircle className="w-3.5 h-3.5 text-status-success" />
               <span>Questions or Legal Inquiries?</span>
@@ -570,7 +570,7 @@ export default function TermsAndConditionsPage() {
               <ShieldCheck className="w-5 h-5 text-rose-400" />
               <h2 className="text-base font-bold">12. Disclaimer of Warranties &amp; Limitation of Liability</h2>
             </div>
-            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed uppercase font-semibold text-[11px] tracking-wide text-slate-400">
+            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed uppercase font-semibold text-[11px] tracking-wide text-content-muted">
               Please read this section carefully as it limits our liability.
             </p>
             <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">

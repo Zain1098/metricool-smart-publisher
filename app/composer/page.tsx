@@ -79,6 +79,28 @@ function ComposerContent() {
     const cloneId = searchParams.get('clone');
     const editId = searchParams.get('edit');
     const paramDate = searchParams.get('date');
+    const paramMediaUrl = searchParams.get('mediaUrl');
+    const paramFileName = searchParams.get('fileName');
+    const paramSizeMb = searchParams.get('sizeMb');
+
+    if (paramMediaUrl) {
+      setVideoUrl(paramMediaUrl);
+      setVideoPreviewUrl(paramMediaUrl);
+      if (paramFileName) {
+        setVideoFileName(paramFileName);
+      } else {
+        try {
+          const parsedUrl = new URL(paramMediaUrl, window.location.origin);
+          const fParam = parsedUrl.searchParams.get('file');
+          setVideoFileName(fParam || paramMediaUrl.split('/').pop() || 'media_asset.mp4');
+        } catch {
+          setVideoFileName(paramMediaUrl.split('/').pop() || 'media_asset.mp4');
+        }
+      }
+      if (paramSizeMb && !isNaN(Number(paramSizeMb))) {
+        setVideoSizeMb(Number(paramSizeMb));
+      }
+    }
 
     if (paramDate) {
       setScheduledAt(paramDate);
@@ -288,8 +310,13 @@ function ComposerContent() {
     setIsSubmitting(true);
 
     try {
-      const res = await fetch('/api/posts', {
-        method: 'POST',
+      const editId = searchParams.get('edit');
+      const isEditingExisting = Boolean(editId) && publishMode === 'local_queue';
+      const endpoint = isEditingExisting ? `/api/posts/${encodeURIComponent(editId!)}` : '/api/posts';
+      const method = isEditingExisting ? 'PATCH' : 'POST';
+
+      const res = await fetch(endpoint, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           publishMode,
@@ -366,14 +393,14 @@ function ComposerContent() {
   return (
     <div className="space-y-5 pb-10">
       {/* Metricool Top Header Bar: "Create new post" + Brand Pill */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-5 rounded-2xl bg-white border border-slate-200 shadow-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-5 rounded-2xl bg-surface-lowest border border-border shadow-xs">
         <div className="flex flex-wrap items-center gap-3">
-          <h1 className="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight">
+          <h1 className="font-serif text-2xl sm:text-3xl font-medium text-content-primary tracking-tight">
             Create new post
           </h1>
 
           {/* Metricool Brand Badge Pill */}
-          <div className="h-9 px-3 rounded-xl bg-slate-100 border border-slate-200 inline-flex items-center gap-2">
+          <div className="h-9 px-3 rounded-xl bg-surface-container border border-border inline-flex items-center gap-2">
             {ytAcc?.avatarUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -386,7 +413,7 @@ function ComposerContent() {
                 Z
               </span>
             )}
-            <span className="text-xs font-bold text-slate-800">ZCodeDev</span>
+            <span className="text-xs font-bold text-content-primary">ZCodeDev</span>
           </div>
         </div>
 
@@ -394,7 +421,7 @@ function ComposerContent() {
           <button
             type="button"
             onClick={handleSetOptimalTime}
-            className="h-10 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-300 text-xs font-bold text-slate-800 inline-flex items-center gap-2 transition-colors"
+            className="h-10 px-4 rounded-xl bg-surface-container hover:bg-surface-high border border-border text-xs font-bold text-content-primary inline-flex items-center gap-2 transition-colors"
           >
             <Sparkles className="w-4 h-4 text-emerald-600" />
             <span>Apply Best Time (18:30 PKT)</span>
@@ -402,9 +429,9 @@ function ComposerContent() {
 
           <Link
             href="/calendar"
-            className="h-10 px-4 rounded-xl bg-white hover:bg-slate-50 border border-slate-300 text-xs font-bold text-slate-700 inline-flex items-center gap-2 transition-colors"
+            className="h-10 px-4 rounded-xl bg-surface-lowest hover:bg-surface-low border border-border text-xs font-bold text-content-secondary inline-flex items-center gap-2 transition-colors"
           >
-            <CalendarIcon className="w-4 h-4 text-slate-500" />
+            <CalendarIcon className="w-4 h-4 text-content-muted" />
             <span>Planner Calendar</span>
           </Link>
         </div>
@@ -416,9 +443,9 @@ function ComposerContent() {
           className={cn(
             'p-4 rounded-2xl border flex flex-col gap-2.5 text-xs shadow-xs',
             statusMessage.type === 'success'
-              ? 'bg-emerald-50 border-emerald-300 text-emerald-900'
+              ? 'bg-emerald-500/10 border-emerald-300 text-emerald-900'
               : statusMessage.type === 'warning'
-              ? 'bg-amber-50 border-amber-300 text-amber-900'
+              ? 'bg-amber-500/10 border-amber-300 text-amber-900'
               : 'bg-rose-50 border-rose-300 text-rose-900'
           )}
         >
@@ -438,7 +465,7 @@ function ComposerContent() {
                   href={url}
                   target="_blank"
                   rel="noreferrer"
-                  className="h-8 px-3 rounded-lg bg-white border border-slate-300 hover:border-[#211832] text-slate-900 text-xs font-bold inline-flex items-center gap-1.5 shadow-2xs"
+                  className="h-8 px-3 rounded-lg bg-surface-lowest border border-border hover:border-[#211832] text-content-primary text-xs font-bold inline-flex items-center gap-1.5 shadow-2xs"
                 >
                   <span>Open {plat.toUpperCase()}</span>
                   <ExternalLink className="w-3.5 h-3.5 text-emerald-600" />
@@ -451,12 +478,12 @@ function ComposerContent() {
 
       {/* Unlinked Network Notice */}
       {unlinkedSelected.length > 0 && (
-        <div className="px-4 py-3.5 rounded-2xl bg-amber-50 border border-amber-300 flex items-center justify-between gap-3 text-xs">
+        <div className="px-4 py-3.5 rounded-2xl bg-amber-500/10 border border-amber-300 flex items-center justify-between gap-3 text-xs">
           <div className="flex items-center gap-2.5 text-amber-900 font-medium">
             <ShieldAlert className="w-4 h-4 text-amber-600 flex-shrink-0" />
             <span>
               Unconnected network selected:{' '}
-              <strong className="font-bold text-slate-900">
+              <strong className="font-bold text-content-primary">
                 {unlinkedSelected
                   .map((p) => PLATFORM_CONFIGS[p].name)
                   .join(', ')}
@@ -465,7 +492,7 @@ function ComposerContent() {
           </div>
           <Link
             href="/connections"
-            className="h-8 px-3 rounded-lg bg-white border border-amber-300 text-xs font-bold text-amber-900 hover:bg-amber-100 inline-flex items-center gap-1.5 flex-shrink-0"
+            className="h-8 px-3 rounded-lg bg-surface-lowest border border-amber-300 text-xs font-bold text-amber-900 hover:bg-amber-100 inline-flex items-center gap-1.5 flex-shrink-0"
           >
             <span>Connect Now</span>
             <ArrowRight className="w-3.5 h-3.5" />
@@ -549,7 +576,7 @@ function ComposerContent() {
               </ul>
             </div>
           ) : (
-            <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-300 flex items-center gap-2.5 text-xs font-bold text-emerald-900">
+            <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-300 flex items-center gap-2.5 text-xs font-bold text-emerald-900">
               <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
               <span>
                 All platform requirements verified — Ready to schedule or publish!
@@ -558,12 +585,12 @@ function ComposerContent() {
           )}
 
           {/* Metricool Bottom Dispatch & Scheduling Bar */}
-          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-5">
+          <div className="bg-surface-lowest border border-border rounded-2xl p-5 shadow-xs space-y-5">
             <div>
-              <h3 className="text-sm font-bold text-slate-900">
+              <h3 className="text-sm font-bold text-content-primary">
                 Dispatch &amp; Scheduling Strategy
               </h3>
-              <p className="text-xs text-slate-500 mt-0.5">
+              <p className="text-xs text-content-muted mt-0.5">
                 Choose Cloud Hold, Immediate Live Broadcast, or Planner Queue
               </p>
             </div>
@@ -575,15 +602,15 @@ function ComposerContent() {
                 className={cn(
                   'p-4 rounded-xl border-2 text-left transition-all space-y-1.5',
                   publishMode === 'native_schedule'
-                    ? 'bg-slate-50 border-[#211832] text-slate-900 shadow-2xs'
-                    : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50/50'
+                    ? 'bg-surface-low border-[#211832] text-content-primary shadow-2xs'
+                    : 'bg-surface-lowest border-border text-content-secondary hover:border-border hover:bg-surface-low'
                 )}
               >
-                <div className="flex items-center gap-2 text-xs font-bold text-slate-900">
+                <div className="flex items-center gap-2 text-xs font-bold text-content-primary">
                   <Cloud className="w-4 h-4 text-emerald-600" />
                   <span>Cloud Hold (Recommended)</span>
                 </div>
-                <p className="text-xs text-slate-500 leading-relaxed">
+                <p className="text-xs text-content-muted leading-relaxed">
                   Video uploads to cloud and publishes automatically at your chosen time.
                 </p>
               </button>
@@ -594,15 +621,15 @@ function ComposerContent() {
                 className={cn(
                   'p-4 rounded-xl border-2 text-left transition-all space-y-1.5',
                   publishMode === 'publish_now'
-                    ? 'bg-slate-50 border-[#211832] text-slate-900 shadow-2xs'
-                    : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50/50'
+                    ? 'bg-surface-low border-[#211832] text-content-primary shadow-2xs'
+                    : 'bg-surface-lowest border-border text-content-secondary hover:border-border hover:bg-surface-low'
                 )}
               >
-                <div className="flex items-center gap-2 text-xs font-bold text-slate-900">
+                <div className="flex items-center gap-2 text-xs font-bold text-content-primary">
                   <Zap className="w-4 h-4 text-amber-500" />
                   <span>Publish Immediately</span>
                 </div>
-                <p className="text-xs text-slate-500 leading-relaxed">
+                <p className="text-xs text-content-muted leading-relaxed">
                   Bypasses schedule queue; broadcasts live right now to all selected platforms.
                 </p>
               </button>
@@ -613,26 +640,26 @@ function ComposerContent() {
                 className={cn(
                   'p-4 rounded-xl border-2 text-left transition-all space-y-1.5',
                   publishMode === 'local_queue'
-                    ? 'bg-slate-50 border-[#211832] text-slate-900 shadow-2xs'
-                    : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50/50'
+                    ? 'bg-surface-low border-[#211832] text-content-primary shadow-2xs'
+                    : 'bg-surface-lowest border-border text-content-secondary hover:border-border hover:bg-surface-low'
                 )}
               >
-                <div className="flex items-center gap-2 text-xs font-bold text-slate-900">
+                <div className="flex items-center gap-2 text-xs font-bold text-content-primary">
                   <Clock className="w-4 h-4 text-blue-600" />
                   <span>Planner Queue</span>
                 </div>
-                <p className="text-xs text-slate-500 leading-relaxed">
+                <p className="text-xs text-content-muted leading-relaxed">
                   Saves post to calendar queue for scheduled cron-triggered delivery.
                 </p>
               </button>
             </div>
 
             {/* Metricool Bottom Action Footer */}
-            <div className="pt-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="pt-4 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
                 <Link
                   href="/calendar"
-                  className="h-11 px-4 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-xs font-bold text-slate-700 inline-flex items-center justify-center transition-colors"
+                  className="h-11 px-4 rounded-xl border border-border bg-surface-lowest hover:bg-surface-low text-xs font-bold text-content-secondary inline-flex items-center justify-center transition-colors"
                 >
                   Cancel
                 </Link>
@@ -644,13 +671,13 @@ function ComposerContent() {
                         type="datetime-local"
                         value={scheduledAt}
                         onChange={(e) => setScheduledAt(e.target.value)}
-                        className="h-11 px-3.5 rounded-xl bg-white border border-slate-300 text-slate-900 text-xs sm:text-sm font-semibold focus:outline-none focus:border-[#211832] focus:ring-2 focus:ring-[#211832]/10 shadow-2xs"
+                        className="h-11 px-3.5 rounded-xl bg-surface-lowest border border-border text-content-primary text-xs sm:text-sm font-semibold focus:outline-none focus:border-[#211832] focus:ring-2 focus:ring-[#211832]/10 shadow-2xs"
                         required
                       />
                     </div>
                   </div>
                 ) : (
-                  <span className="px-3.5 py-2 rounded-xl bg-amber-50 border border-amber-200 text-xs font-bold text-amber-900">
+                  <span className="px-3.5 py-2 rounded-xl bg-amber-500/10 border border-amber-200 text-xs font-bold text-amber-900">
                     Ready for immediate live broadcast to {selectedPlatforms.length}{' '}
                     network(s)
                   </span>

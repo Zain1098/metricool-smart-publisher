@@ -36,7 +36,7 @@ export function Modal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs"
       role="dialog"
       aria-modal="true"
       onClick={(e) => {
@@ -45,36 +45,36 @@ export function Modal({
     >
       <div
         className={cn(
-          'w-full rounded-2xl bg-[#FFFFFF] border border-slate-200 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]',
+          'w-full rounded-2xl bg-surface-lowest border border-border shadow-elevated overflow-hidden flex flex-col max-h-[90vh]',
           maxWidth
         )}
       >
-        <div className="px-5 py-4 border-b border-slate-200 flex items-start justify-between gap-3 flex-shrink-0 bg-slate-50/50">
+        <div className="px-5 py-4 border-b border-border flex items-start justify-between gap-3 flex-shrink-0 bg-surface-low">
           <div className="min-w-0 space-y-1">
             <div className="flex items-center gap-2 flex-wrap">
               {badge}
-              <h2 className="text-[15px] font-bold text-slate-900 tracking-tight">
+              <h2 className="text-[15px] font-bold text-content-primary tracking-tight">
                 {title}
               </h2>
             </div>
             {subtitle && (
-              <p className="text-xs text-slate-500 font-medium">{subtitle}</p>
+              <p className="text-xs text-content-secondary font-medium">{subtitle}</p>
             )}
           </div>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close modal"
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-800 hover:bg-slate-200/60 transition-colors"
+            className="p-1.5 rounded-lg text-content-muted hover:text-content-primary hover:bg-surface-high transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        <div className="p-5 overflow-y-auto flex-1 text-slate-800">{children}</div>
+        <div className="p-5 overflow-y-auto flex-1 text-content-primary">{children}</div>
 
         {footer && (
-          <div className="px-5 py-3.5 border-t border-slate-200 bg-slate-50 flex flex-wrap items-center justify-between gap-2 flex-shrink-0">
+          <div className="px-5 py-3.5 border-t border-border bg-surface-low flex flex-wrap items-center justify-between gap-2 flex-shrink-0">
             {footer}
           </div>
         )}

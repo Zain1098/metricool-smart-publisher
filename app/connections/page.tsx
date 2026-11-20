@@ -392,53 +392,69 @@ export default function ConnectionsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Row 1: 3 Pastel Summary KPI Cards */}
+      {/* Stitch Editorial Header */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-1">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2 text-brand text-xs font-semibold uppercase tracking-wider">
+            <Link2 className="w-3.5 h-3.5" />
+            <span>OAuth &amp; API Integration Hub</span>
+          </div>
+          <h1 className="font-serif text-3xl sm:text-4xl font-normal text-content-primary tracking-tight">
+            Connected Channels &amp; Credentials
+          </h1>
+          <p className="text-xs sm:text-sm text-content-secondary">
+            Manage live social network tokens, auto-discovery wizards, and Postiz publishing bridges.
+          </p>
+        </div>
+      </div>
+
+      {/* Row 1: 3 Stitch Editorial Summary KPI Cards */}
       <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card className="bg-[#DCEAE2] border-[#C5DDD0] shadow-none">
-          <CardContent className="p-5 flex items-center justify-between">
-            <div>
-              <p className="text-xs font-medium text-[#2F4F3E]">Connected Channels</p>
-              <p className="text-3xl font-bold text-[#1E1B18] mt-1 tabular-nums">
-                {loading ? '—' : `${connectedCount} / ${accounts.length || 8}`}
-              </p>
-            </div>
-            <div className="w-10 h-10 rounded-xl bg-white/75 flex items-center justify-center text-[#24503B]">
-              <Link2 className="w-5 h-5" />
-            </div>
-          </CardContent>
-        </Card>
+        <div className="p-6 rounded-2xl bg-surface-lowest border border-border shadow-card hover:shadow-elevated transition-all flex items-center justify-between">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-content-secondary">
+              Connected Channels
+            </p>
+            <p className="font-serif text-3xl sm:text-4xl font-medium text-content-primary mt-2 tabular-nums">
+              {loading ? '—' : `${connectedCount} / ${accounts.length || 8}`}
+            </p>
+          </div>
+          <div className="w-10 h-10 rounded-xl bg-surface-low border border-border flex items-center justify-center text-brand">
+            <Link2 className="w-5 h-5" />
+          </div>
+        </div>
 
-        <Card className="bg-[#F5DFCE] border-[#EACBB4] shadow-none">
-          <CardContent className="p-5 flex items-center justify-between">
-            <div>
-              <p className="text-xs font-medium text-[#6B3A1E]">Token Health</p>
-              <p className="text-2xl font-bold text-[#1E1B18] mt-1">
-                {loading
-                  ? '—'
-                  : expiredCount === 0
-                  ? 'All Healthy'
-                  : `${expiredCount} Need Refresh`}
-              </p>
-            </div>
-            <div className="w-10 h-10 rounded-xl bg-white/75 flex items-center justify-center text-[#8D451E]">
-              <ShieldCheck className="w-5 h-5" />
-            </div>
-          </CardContent>
-        </Card>
+        <div className="p-6 rounded-2xl bg-surface-lowest border border-border shadow-card hover:shadow-elevated transition-all flex items-center justify-between">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-content-secondary">
+              Token Health
+            </p>
+            <p className="font-serif text-2xl sm:text-3xl font-medium text-content-primary mt-2">
+              {loading
+                ? '—'
+                : expiredCount === 0
+                ? 'All Healthy'
+                : `${expiredCount} Need Refresh`}
+            </p>
+          </div>
+          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+            <ShieldCheck className="w-5 h-5" />
+          </div>
+        </div>
 
-        <Card className="bg-[#E5DFF5] border-[#D4CBEB] shadow-none">
-          <CardContent className="p-5 flex items-center justify-between">
-            <div>
-              <p className="text-xs font-medium text-[#3F2E73]">Combined Audience</p>
-              <p className="text-3xl font-bold text-[#1E1B18] mt-1 tabular-nums">
-                {loading ? '—' : totalAudience.toLocaleString()}
-              </p>
-            </div>
-            <div className="w-10 h-10 rounded-xl bg-white/75 flex items-center justify-center text-[#4B3688]">
-              <Users className="w-5 h-5" />
-            </div>
-          </CardContent>
-        </Card>
+        <div className="p-6 rounded-2xl bg-surface-lowest border border-border shadow-card hover:shadow-elevated transition-all flex items-center justify-between">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-content-secondary">
+              Combined Audience
+            </p>
+            <p className="font-serif text-3xl sm:text-4xl font-medium text-content-primary mt-2 tabular-nums">
+              {loading ? '—' : totalAudience.toLocaleString()}
+            </p>
+          </div>
+          <div className="w-10 h-10 rounded-xl bg-brand-container flex items-center justify-center text-brand">
+            <Users className="w-5 h-5" />
+          </div>
+        </div>
       </section>
 
       {/* Row 2: Express Wizards & Filter Toolbar */}
@@ -463,7 +479,7 @@ export default function ConnectionsPage() {
                   'px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
                   filterMode === tab.id
                     ? 'bg-[#C27345] text-white border-[#C27345]'
-                    : 'bg-[#FAF6F1] text-[#4E463F] border-[#E7DFD5] hover:bg-[#EFE9E1]'
+                    : 'bg-surface text-content-secondary border-border hover:bg-surface-high'
                 )}
               >
                 {tab.label}
@@ -513,7 +529,7 @@ export default function ConnectionsPage() {
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
           {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="h-60 rounded-2xl bg-[#EFE9E1] animate-pulse" />
+            <div key={i} className="h-60 rounded-2xl bg-surface-high animate-pulse" />
           ))}
         </div>
       ) : (
@@ -541,10 +557,10 @@ export default function ConnectionsPage() {
                         muted={!acc.isConnected}
                       />
                       <div className="min-w-0">
-                        <h3 className="text-sm font-bold text-[#1E1B18] truncate">
+                        <h3 className="text-sm font-bold text-content-primary truncate">
                           {cfg.name}
                         </h3>
-                        <p className="text-[11px] text-[#6E655D] truncate">{guide.apiBadge}</p>
+                        <p className="text-[11px] text-content-muted truncate">{guide.apiBadge}</p>
                       </div>
                     </div>
 
@@ -567,7 +583,7 @@ export default function ConnectionsPage() {
                   </div>
 
                   {/* Identity Block */}
-                  <div className="flex items-center gap-3 rounded-xl bg-[#FAF6F1] border border-[#EFE9E1] p-3">
+                  <div className="flex items-center gap-3 rounded-xl bg-surface border border-border-subtle p-3">
                     {acc.isConnected && acc.avatarUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
@@ -576,7 +592,7 @@ export default function ConnectionsPage() {
                         className="w-10 h-10 rounded-full object-cover border border-[#C5DDD0] flex-shrink-0"
                       />
                     ) : (
-                      <div className="w-10 h-10 rounded-full bg-white border border-[#E7DFD5] flex items-center justify-center flex-shrink-0">
+                      <div className="w-10 h-10 rounded-full bg-surface-lowest border border-border flex items-center justify-center flex-shrink-0">
                         <PlatformBadge
                           platform={acc.platform}
                           size="sm"
@@ -585,10 +601,10 @@ export default function ConnectionsPage() {
                       </div>
                     )}
                     <div className="min-w-0 flex-1">
-                      <p className="text-xs font-bold text-[#1E1B18] truncate">
+                      <p className="text-xs font-bold text-content-primary truncate">
                         {acc.isConnected ? acc.accountName : `Connect ${cfg.name}`}
                       </p>
-                      <p className="text-[11px] text-[#6E655D] truncate">
+                      <p className="text-[11px] text-content-muted truncate">
                         {acc.isConnected ? acc.handle : 'Paste OAuth token to link'}
                       </p>
                     </div>
@@ -597,23 +613,23 @@ export default function ConnectionsPage() {
                   {/* Clean Stat Pills (instead of text wall) */}
                   {acc.isConnected ? (
                     <div className="grid grid-cols-2 gap-2">
-                      <div className="rounded-lg bg-[#FAF6F1] border border-[#EFE9E1] px-2.5 py-1.5">
-                        <span className="text-[10px] text-[#6E655D] block">
+                      <div className="rounded-lg bg-surface border border-border-subtle px-2.5 py-1.5">
+                        <span className="text-[10px] text-content-muted block">
                           {acc.platform === 'youtube' ? 'Subscribers' : 'Followers'}
                         </span>
-                        <span className="text-xs font-bold text-[#1E1B18] tabular-nums">
+                        <span className="text-xs font-bold text-content-primary tabular-nums">
                           {(acc.followersCount || 0).toLocaleString()}
                         </span>
                       </div>
-                      <div className="rounded-lg bg-[#FAF6F1] border border-[#EFE9E1] px-2.5 py-1.5">
-                        <span className="text-[10px] text-[#6E655D] block">Posts</span>
-                        <span className="text-xs font-bold text-[#1E1B18] tabular-nums">
+                      <div className="rounded-lg bg-surface border border-border-subtle px-2.5 py-1.5">
+                        <span className="text-[10px] text-content-muted block">Posts</span>
+                        <span className="text-xs font-bold text-content-primary tabular-nums">
                           {(acc.postsCount || 0).toLocaleString()}
                         </span>
                       </div>
                     </div>
                   ) : (
-                    <div className="rounded-lg bg-[#FAF6F1] border border-[#EFE9E1] px-3 py-2 text-[11px] text-[#6E655D]">
+                    <div className="rounded-lg bg-surface border border-border-subtle px-3 py-2 text-[11px] text-content-muted">
                       Ready for auto-discovery via OAuth token.
                     </div>
                   )}
@@ -637,7 +653,7 @@ export default function ConnectionsPage() {
                   )}
 
                   {/* Action Buttons */}
-                  <div className="pt-2 border-t border-[#EFE9E1] space-y-2">
+                  <div className="pt-2 border-t border-border-subtle space-y-2">
                     {acc.isConnected ? (
                       <>
                         <div className="flex items-center gap-1.5">
@@ -679,7 +695,7 @@ export default function ConnectionsPage() {
                           href={guide.portalUrl}
                           target="_blank"
                           rel="noreferrer"
-                          className="w-full h-7 rounded-lg bg-[#FAF6F1] hover:bg-[#EFE9E1] border border-[#E7DFD5] text-[11px] font-medium text-[#4E463F] flex items-center justify-center gap-1.5 transition-colors"
+                          className="w-full h-7 rounded-lg bg-surface hover:bg-surface-high border border-border text-[11px] font-medium text-content-secondary flex items-center justify-center gap-1.5 transition-colors"
                         >
                           <span>Open {guide.portalName}</span>
                           <ExternalLink className="w-3 h-3" />
@@ -700,7 +716,7 @@ export default function ConnectionsPage() {
                           href={guide.portalUrl}
                           target="_blank"
                           rel="noreferrer"
-                          className="w-full h-7 rounded-lg bg-[#FAF6F1] hover:bg-[#EFE9E1] border border-[#E7DFD5] text-[11px] font-medium text-[#4E463F] flex items-center justify-center gap-1.5 transition-colors"
+                          className="w-full h-7 rounded-lg bg-surface hover:bg-surface-high border border-border text-[11px] font-medium text-content-secondary flex items-center justify-center gap-1.5 transition-colors"
                         >
                           <span>Get Token at {guide.portalName}</span>
                           <ExternalLink className="w-3 h-3" />
@@ -721,8 +737,8 @@ export default function ConnectionsPage() {
           className="fixed inset-0 z-50 bg-black/55 backdrop-blur-xs flex items-center justify-center p-4"
           onClick={() => setShowMetaWizard(false)}
         >
-          <Card className="w-full max-w-lg bg-white" onClick={(e) => e.stopPropagation()}>
-            <CardHeader className="flex flex-row items-center justify-between border-b border-[#E7DFD5] p-4">
+          <Card className="w-full max-w-lg bg-surface-lowest" onClick={(e) => e.stopPropagation()}>
+            <CardHeader className="flex flex-row items-center justify-between border-b border-border p-4">
               <div>
                 <CardTitle className="text-base">Meta (Facebook + Instagram) Wizard</CardTitle>
                 <CardDescription>
@@ -741,7 +757,7 @@ export default function ConnectionsPage() {
             <CardContent className="p-5">
               <form onSubmit={handleMetaAutoDiscover} className="space-y-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-[#4E463F]">
+                  <label className="text-xs font-medium text-content-secondary">
                     Meta Graph User Access Token *
                   </label>
                   <Input
@@ -754,7 +770,7 @@ export default function ConnectionsPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-medium text-[#4E463F]">
+                    <label className="text-xs font-medium text-content-secondary">
                       Meta App ID (optional)
                     </label>
                     <Input
@@ -764,7 +780,7 @@ export default function ConnectionsPage() {
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-medium text-[#4E463F]">
+                    <label className="text-xs font-medium text-content-secondary">
                       Meta App Secret (optional)
                     </label>
                     <Input
@@ -799,8 +815,8 @@ export default function ConnectionsPage() {
           className="fixed inset-0 z-50 bg-black/55 backdrop-blur-xs flex items-center justify-center p-4"
           onClick={() => setActiveModalAccount(null)}
         >
-          <Card className="w-full max-w-lg bg-white" onClick={(e) => e.stopPropagation()}>
-            <CardHeader className="flex flex-row items-center justify-between border-b border-[#E7DFD5] p-4">
+          <Card className="w-full max-w-lg bg-surface-lowest" onClick={(e) => e.stopPropagation()}>
+            <CardHeader className="flex flex-row items-center justify-between border-b border-border p-4">
               <div className="flex items-center gap-2.5">
                 <PlatformBadge platform={activeModalAccount.platform} size="md" />
                 <div>
@@ -822,9 +838,9 @@ export default function ConnectionsPage() {
               </Button>
             </CardHeader>
             <CardContent className="p-5 space-y-4">
-              <div className="rounded-xl bg-[#FAF6F1] border border-[#E7DFD5] p-3 space-y-1.5">
-                <p className="text-xs font-semibold text-[#1E1B18]">Quick Steps:</p>
-                <ol className="list-decimal list-inside space-y-1 text-xs text-[#6E655D]">
+              <div className="rounded-xl bg-surface border border-border p-3 space-y-1.5">
+                <p className="text-xs font-semibold text-content-primary">Quick Steps:</p>
+                <ol className="list-decimal list-inside space-y-1 text-xs text-content-muted">
                   {PLATFORM_GUIDES[activeModalAccount.platform]?.quickSteps.map((s, i) => (
                     <li key={i}>{s}</li>
                   ))}
@@ -833,7 +849,7 @@ export default function ConnectionsPage() {
 
               <form onSubmit={handleSaveConnection} className="space-y-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-[#4E463F]">
+                  <label className="text-xs font-medium text-content-secondary">
                     OAuth Access Token *
                   </label>
                   <Input

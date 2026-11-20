@@ -7,6 +7,11 @@ import {
   FolderOpen,
   Share2,
   Settings,
+  FileText,
+  Globe,
+  Link2,
+  Repeat,
+  Radar,
 } from 'lucide-react';
 
 export interface NavItem {
@@ -34,6 +39,30 @@ export const NAV_ITEMS: NavItem[] = [
     description: 'Channel growth, video metrics, and topic timing intelligence',
     group: 'workspace',
     icon: BarChart3,
+  },
+  {
+    href: '/reports',
+    label: 'Reporting Studio',
+    shortLabel: 'Reports',
+    description: 'Custom block reports, PDF/CSV exports, and public share links',
+    group: 'workspace',
+    icon: FileText,
+  },
+  {
+    href: '/web-analytics',
+    label: 'Web Pixel',
+    shortLabel: 'Web Pixel',
+    description: 'Self-hosted website & blog analytics pixel',
+    group: 'workspace',
+    icon: Globe,
+  },
+  {
+    href: '/competitors',
+    label: 'Competitors & Tags',
+    shortLabel: 'Competitors',
+    description: 'Track competitor channels and real-time hashtag performance',
+    group: 'workspace',
+    icon: Radar,
   },
   {
     href: '/calendar',
@@ -66,6 +95,22 @@ export const NAV_ITEMS: NavItem[] = [
     description: 'Uploaded videos, thumbnails, storage usage, and asset status',
     group: 'studio',
     icon: FolderOpen,
+  },
+  {
+    href: '/flows',
+    label: 'Evergreen Flows',
+    shortLabel: 'Flows',
+    description: 'Automated recurring posting queues (Autolists)',
+    group: 'studio',
+    icon: Repeat,
+  },
+  {
+    href: '/smartlinks',
+    label: 'SmartLinks',
+    shortLabel: 'SmartLinks',
+    description: 'Link-in-bio builder with click tracking',
+    group: 'studio',
+    icon: Link2,
   },
   {
     href: '/connections',

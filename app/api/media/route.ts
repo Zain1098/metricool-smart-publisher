@@ -190,9 +190,14 @@ async function deleteSingleAsset(params: {
   fileName?: string | null;
 }): Promise<{ ok: boolean; status: number; message?: string; error?: string }> {
   const { id, fileName } = params;
-  const safeFile = fileName
-    ? path.basename(fileName).replace(/[^a-zA-Z0-9._-]/g, '_')
+  const rawBaseName = fileName ? path.basename(fileName) : '';
+  const safeFile = rawBaseName
+    ? rawBaseName.replace(/[^a-zA-Z0-9._-]/g, '_')
     : '';
+  const localIdFile = id && id.startsWith('local_') ? path.basename(id.slice('local_'.length)) : '';
+  const candidateFiles = Array.from(
+    new Set([rawBaseName, safeFile, localIdFile].filter((f) => Boolean(f) && !f.includes('..')))
+  );
 
   const posts = store.getPosts();
   const activeRef = posts.some(
@@ -200,14 +205,16 @@ async function deleteSingleAsset(params: {
       (p.status === 'scheduled' ||
         p.status === 'scheduled_on_platform' ||
         p.status === 'publishing') &&
-      ((safeFile && (p.mediaFileName === safeFile || p.mediaUrl.includes(encodeURIComponent(safeFile)))) ||
+      (candidateFiles.some(
+        (f) => p.mediaFileName === f || p.mediaUrl.includes(encodeURIComponent(f)) || p.mediaUrl.includes(f)
+      ) ||
         (id && p.id && `post_media_${p.id}` === id))
   );
   if (activeRef) {
     return {
       ok: false,
       status: 409,
-      error: 'Cannot delete file while it is referenced by an active scheduled post.',
+      error: 'Cannot delete file while it is referenced by an active scheduled post. Cancel or delete the scheduled post first.',
     };
   }
 
@@ -225,8 +232,8 @@ async function deleteSingleAsset(params: {
 
       if (id && !id.startsWith('local_') && !id.startsWith('post_media_')) {
         query = query.eq('id', id);
-      } else if (fileName) {
-        query = query.eq('file_name', fileName);
+      } else if (rawBaseName) {
+        query = query.eq('file_name', rawBaseName);
       }
 
       const { data: rows } = await query;
@@ -256,10 +263,10 @@ async function deleteSingleAsset(params: {
     }
   }
 
-  // 2. Also try deleting local upload file if present
-  if (safeFile) {
-    for (const dir of getCandidateUploadDirs()) {
-      const target = path.join(dir, safeFile);
+  // 2. Try deleting local upload file if present (supports spaces/special chars in filename)
+  for (const dir of getCandidateUploadDirs()) {
+    for (const candidate of candidateFiles) {
+      const target = path.join(dir, candidate);
       if (fs.existsSync(target)) {
         fs.unlinkSync(target);
         deleted = true;
@@ -267,11 +274,21 @@ async function deleteSingleAsset(params: {
     }
   }
 
+  // 3. If asset was only referenced on a draft/published/failed post, unlink it from the post
+  if (id && id.startsWith('post_media_')) {
+    const postId = id.slice('post_media_'.length);
+    const targetPost = posts.find((p) => p.id === postId);
+    if (targetPost) {
+      store.updatePost(postId, { mediaUrl: '', coverUrl: '' });
+      deleted = true;
+    }
+  }
+
   if (!deleted) {
     return {
       ok: false,
       status: 404,
-      error: 'Asset not found or stored externally on a social post.',
+      error: 'Asset not found or already deleted.',
     };
   }
 

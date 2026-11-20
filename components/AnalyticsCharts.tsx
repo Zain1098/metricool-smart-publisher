@@ -155,63 +155,63 @@ export default function AnalyticsCharts({
     <div className="space-y-5">
       {/* 1. Primary KPI Row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="p-4 rounded-xl bg-[#FFFFFF] border border-[#E2E8F0] shadow-card space-y-2">
-          <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
+        <div className="p-4 rounded-xl bg-surface-lowest border border-[#E2E8F0] shadow-card space-y-2">
+          <div className="flex items-center justify-between text-xs font-semibold text-content-muted">
             <span>
               {selectedNetwork === 'all'
                 ? 'Total Community'
                 : `${PLATFORM_CONFIGS[selectedNetwork as keyof typeof PLATFORM_CONFIGS]?.name || selectedNetwork} Community`}
             </span>
-            <Users className="w-4 h-4 text-[#00D2B4]" />
+            <Users className="w-4 h-4 text-[#C27345]" />
           </div>
-          <p className="text-[28px] font-black text-slate-900 tracking-tight tabular-nums leading-none">
+          <p className="text-[28px] font-black text-content-primary tracking-tight tabular-nums leading-none">
             {displayFollowers.toLocaleString()}
           </p>
-          <p className="text-[11px] text-slate-400 font-medium truncate">
+          <p className="text-[11px] text-content-muted font-medium truncate">
             {connected.length} active social profile{connected.length === 1 ? '' : 's'}
           </p>
         </div>
 
-        <div className="p-4 rounded-xl bg-[#FFFFFF] border border-[#E2E8F0] shadow-card space-y-2">
-          <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
+        <div className="p-4 rounded-xl bg-surface-lowest border border-[#E2E8F0] shadow-card space-y-2">
+          <div className="flex items-center justify-between text-xs font-semibold text-content-muted">
             <span>Total Video Views</span>
             <Eye className="w-4 h-4 text-[#596CF2]" />
           </div>
-          <p className="text-[28px] font-black text-slate-900 tracking-tight tabular-nums leading-none">
+          <p className="text-[28px] font-black text-content-primary tracking-tight tabular-nums leading-none">
             {displayViews.toLocaleString()}
           </p>
-          <p className="text-[11px] text-slate-400 font-medium">
+          <p className="text-[11px] text-content-muted font-medium">
             Avg {(summary.avgViewsPerVideo || 0).toLocaleString()} views / video
           </p>
         </div>
 
-        <div className="p-4 rounded-xl bg-[#FFFFFF] border border-[#E2E8F0] shadow-card space-y-2">
-          <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
+        <div className="p-4 rounded-xl bg-surface-lowest border border-[#E2E8F0] shadow-card space-y-2">
+          <div className="flex items-center justify-between text-xs font-semibold text-content-muted">
             <span>Likes &amp; Interaction</span>
             <ThumbsUp className="w-4 h-4 text-[#10B981]" />
           </div>
           <div className="flex items-baseline gap-2">
-            <p className="text-[28px] font-black text-slate-900 tracking-tight tabular-nums leading-none">
+            <p className="text-[28px] font-black text-content-primary tracking-tight tabular-nums leading-none">
               {(totalLikes + totalComments).toLocaleString()}
             </p>
             <span className="text-[11px] font-bold text-[#10B981] bg-[#ECFDF5] px-2 py-0.5 rounded-full">
               {engagementPct}%
             </span>
           </div>
-          <p className="text-[11px] text-slate-400 font-medium">
+          <p className="text-[11px] text-content-muted font-medium">
             {totalLikes.toLocaleString()} likes • {totalComments.toLocaleString()} comments
           </p>
         </div>
 
-        <div className="p-4 rounded-xl bg-[#FFFFFF] border border-[#E2E8F0] shadow-card space-y-2">
-          <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
+        <div className="p-4 rounded-xl bg-surface-lowest border border-[#E2E8F0] shadow-card space-y-2">
+          <div className="flex items-center justify-between text-xs font-semibold text-content-muted">
             <span>Published Posts</span>
             <Video className="w-4 h-4 text-[#FF0000]" />
           </div>
-          <p className="text-[28px] font-black text-slate-900 tracking-tight tabular-nums leading-none">
+          <p className="text-[28px] font-black text-content-primary tracking-tight tabular-nums leading-none">
             {displayPosts.toLocaleString()}
           </p>
-          <p className="text-[11px] text-slate-400 font-medium">
+          <p className="text-[11px] text-content-muted font-medium">
             Peak video: {(summary.topVideoViews || 0).toLocaleString()} views
           </p>
         </div>
@@ -227,22 +227,22 @@ export default function AnalyticsCharts({
       {/* 3. Metricool Famous "Best Hours to Post" Heatmap */}
       <Card className="space-y-4">
         <CardHeader
-          icon={<Flame className="w-4 h-4 text-[#00D2B4]" />}
+          icon={<Flame className="w-4 h-4 text-[#C27345]" />}
           title="Best Hours to Post"
           subtitle="Follower active density heatmap: darker teal cells indicate peak audience online activity"
           action={
             hoveredCell ? (
-              <div className="flex items-center gap-2 px-3 py-1 rounded-md bg-[#E6FAF7] border border-[#7FE8D9] text-xs font-semibold text-[#00A38C]">
+              <div className="flex items-center gap-2 px-3 py-1 rounded-md bg-brand-container border border-brand/25 text-xs font-semibold text-[#C27345]">
                 <span>
                   {hoveredCell.day} at {hoveredCell.hour.toString().padStart(2, '0')}:00:
                 </span>
                 <span className="font-bold">{hoveredCell.score}% active</span>
               </div>
             ) : (
-              <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
-                <span className="w-2.5 h-2.5 rounded bg-[#E6FAF7] border border-[#CBD5E1]" />
+              <div className="flex items-center gap-1.5 text-xs text-content-muted font-medium">
+                <span className="w-2.5 h-2.5 rounded bg-brand-container border border-[#CBD5E1]" />
                 <span className="text-[11px]">Low</span>
-                <span className="w-2.5 h-2.5 rounded bg-[#00D2B4]" />
+                <span className="w-2.5 h-2.5 rounded bg-[#C27345]" />
                 <span className="text-[11px]">Peak Engagement</span>
               </div>
             )
@@ -252,8 +252,8 @@ export default function AnalyticsCharts({
         <div className="overflow-x-auto pb-2">
           <div className="min-w-[680px]">
             {/* Hours Header Row */}
-            <div className="grid grid-cols-25 gap-1 mb-1.5 text-[10px] font-mono text-slate-400 text-center">
-              <div className="text-left font-sans font-bold text-slate-500">Day</div>
+            <div className="grid grid-cols-25 gap-1 mb-1.5 text-[10px] font-mono text-content-muted text-center">
+              <div className="text-left font-sans font-bold text-content-muted">Day</div>
               {HOURS.map((h) => (
                 <div key={h} className="truncate">
                   {h % 3 === 0 ? `${h}h` : ''}
@@ -265,7 +265,7 @@ export default function AnalyticsCharts({
             <div className="space-y-1">
               {heatmapData.map((row, dIdx) => (
                 <div key={DAYS_OF_WEEK[dIdx]} className="grid grid-cols-25 gap-1 items-center">
-                  <div className="text-xs font-bold text-slate-600 font-sans text-left">
+                  <div className="text-xs font-bold text-content-secondary font-sans text-left">
                     {DAYS_OF_WEEK[dIdx]}
                   </div>
                   {row.map((cell) => {
@@ -279,7 +279,7 @@ export default function AnalyticsCharts({
                         style={{
                           backgroundColor:
                             cell.score > 80
-                              ? '#00D2B4'
+                              ? '#C27345'
                               : cell.score > 55
                               ? `rgba(0, 210, 180, ${opacity * 0.75})`
                               : `rgba(0, 210, 180, ${Math.max(0.12, opacity * 0.4)})`,
@@ -325,38 +325,38 @@ export default function AnalyticsCharts({
                 return (
                   <div
                     key={acc.id}
-                    className="p-3.5 rounded-xl bg-slate-50/80 border border-slate-200/80 space-y-2.5"
+                    className="p-3.5 rounded-xl bg-surface-low/80 border border-border/80 space-y-2.5"
                   >
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2.5 min-w-0">
                         <PlatformBadge platform={acc.platform} size="sm" />
                         <div className="min-w-0">
-                          <p className="text-xs font-bold text-slate-800 truncate">
+                          <p className="text-xs font-bold text-content-primary truncate">
                             {cfg.name} • {acc.accountName}
                           </p>
-                          <p className="text-[11px] text-slate-500 font-mono truncate">
+                          <p className="text-[11px] text-content-muted font-mono truncate">
                             {acc.handle}
                           </p>
                         </div>
                       </div>
                       <div className="text-right font-mono tabular-nums">
-                        <p className="text-xs font-bold text-slate-900">
+                        <p className="text-xs font-bold text-content-primary">
                           {(acc.followersCount || 0).toLocaleString()}
                         </p>
-                        <p className="text-[10px] text-slate-500">
+                        <p className="text-[10px] text-content-muted">
                           {acc.platform === 'youtube' ? 'subscribers' : 'followers'}
                         </p>
                       </div>
                     </div>
 
                     <div className="space-y-1.5">
-                      <div className="flex items-center justify-between text-[11px] text-slate-500">
+                      <div className="flex items-center justify-between text-[11px] text-content-muted">
                         <span>Audience share</span>
-                        <span className="font-mono text-slate-700 font-semibold tabular-nums">
+                        <span className="font-mono text-content-secondary font-semibold tabular-nums">
                           {acc.followersCount.toLocaleString()}
                         </span>
                       </div>
-                      <div className="h-1.5 rounded-full bg-slate-200 overflow-hidden">
+                      <div className="h-1.5 rounded-full bg-surface-high overflow-hidden">
                         <div
                           className="h-full rounded-full transition-all duration-300"
                           style={{
@@ -366,15 +366,15 @@ export default function AnalyticsCharts({
                         />
                       </div>
 
-                      <div className="flex items-center justify-between text-[11px] text-slate-500 pt-0.5">
+                      <div className="flex items-center justify-between text-[11px] text-content-muted pt-0.5">
                         <span>Published posts</span>
-                        <span className="font-mono text-slate-700 font-semibold tabular-nums">
+                        <span className="font-mono text-content-secondary font-semibold tabular-nums">
                           {(acc.postsCount || 0).toLocaleString()}
                         </span>
                       </div>
-                      <div className="h-1.5 rounded-full bg-slate-200 overflow-hidden">
+                      <div className="h-1.5 rounded-full bg-surface-high overflow-hidden">
                         <div
-                          className="h-full rounded-full bg-slate-500 transition-all duration-300"
+                          className="h-full rounded-full bg-surface-low0 transition-all duration-300"
                           style={{
                             width: `${Math.max(postPct, (acc.postsCount || 0) > 0 ? 4 : 0)}%`,
                           }}
@@ -391,7 +391,7 @@ export default function AnalyticsCharts({
         {/* Topic & Optimal Window Intelligence */}
         <Card className="lg:col-span-6 space-y-4">
           <CardHeader
-            icon={<Sparkles className="w-4 h-4 text-[#00D2B4]" />}
+            icon={<Sparkles className="w-4 h-4 text-[#C27345]" />}
             title="Topic &amp; Optimal Window Intelligence"
             subtitle={`Calculated from ${videos.length} real published video uploads`}
           />
@@ -407,10 +407,10 @@ export default function AnalyticsCharts({
               {topicInsights.map((item) => (
                 <div
                   key={item.topic}
-                  className="p-3.5 rounded-xl bg-slate-50/80 border border-slate-200/80 space-y-2"
+                  className="p-3.5 rounded-xl bg-surface-low/80 border border-border/80 space-y-2"
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <p className="text-[13px] font-bold text-slate-900 truncate">
+                    <p className="text-[13px] font-bold text-content-primary truncate">
                       {item.topic}
                     </p>
                     <Badge tone="accent">{sanitizeBadgeText(item.badge)}</Badge>
@@ -418,28 +418,28 @@ export default function AnalyticsCharts({
 
                   <div className="grid grid-cols-3 gap-2 pt-1 text-xs font-mono tabular-nums">
                     <div>
-                      <p className="text-[10px] text-slate-400 font-sans">Videos</p>
-                      <p className="font-bold text-slate-800">
+                      <p className="text-[10px] text-content-muted font-sans">Videos</p>
+                      <p className="font-bold text-content-primary">
                         {item.videosCount}
                       </p>
                     </div>
                     <div>
-                      <p className="text-[10px] text-slate-400 font-sans">Total Views</p>
-                      <p className="font-bold text-slate-800">
+                      <p className="text-[10px] text-content-muted font-sans">Total Views</p>
+                      <p className="font-bold text-content-primary">
                         {item.totalViews.toLocaleString()}
                       </p>
                     </div>
                     <div>
-                      <p className="text-[10px] text-slate-400 font-sans">Avg Views</p>
+                      <p className="text-[10px] text-content-muted font-sans">Avg Views</p>
                       <p className="font-bold text-emerald-600">
                         {item.avgViews.toLocaleString()}
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-1.5 text-[11px] text-slate-600 pt-1.5 border-t border-slate-200">
-                    <Clock className="w-3.5 h-3.5 text-[#00D2B4] flex-shrink-0" />
-                    <span>Best posting window: <strong className="text-slate-800 font-semibold">{item.bestTimePkt}</strong></span>
+                  <div className="flex items-center gap-1.5 text-[11px] text-content-secondary pt-1.5 border-t border-border">
+                    <Clock className="w-3.5 h-3.5 text-[#C27345] flex-shrink-0" />
+                    <span>Best posting window: <strong className="text-content-primary font-semibold">{item.bestTimePkt}</strong></span>
                   </div>
                 </div>
               ))}
@@ -464,9 +464,9 @@ export default function AnalyticsCharts({
                 href={vid.url}
                 target="_blank"
                 rel="noreferrer"
-                className="p-3.5 rounded-xl bg-slate-50/80 border border-slate-200 hover:border-[#00D2B4] flex items-center gap-3.5 group transition-all shadow-xs"
+                className="p-3.5 rounded-xl bg-surface-low/80 border border-border hover:border-[#C27345] flex items-center gap-3.5 group transition-all shadow-xs"
               >
-                <div className="relative w-20 h-14 rounded-lg overflow-hidden bg-slate-900 flex-shrink-0 border border-slate-200">
+                <div className="relative w-20 h-14 rounded-lg overflow-hidden bg-slate-900 flex-shrink-0 border border-border">
                   {vid.thumbnailUrl && (
                     <img
                       src={vid.thumbnailUrl}
@@ -480,10 +480,10 @@ export default function AnalyticsCharts({
                 </div>
 
                 <div className="min-w-0 flex-1 space-y-1">
-                  <p className="text-xs font-bold text-slate-800 line-clamp-2 leading-snug group-hover:text-[#00A38C] transition-colors">
+                  <p className="text-xs font-bold text-content-primary line-clamp-2 leading-snug group-hover:text-[#C27345] transition-colors">
                     {vid.title}
                   </p>
-                  <div className="flex items-center gap-2.5 text-[11px] font-mono tabular-nums text-slate-500">
+                  <div className="flex items-center gap-2.5 text-[11px] font-mono tabular-nums text-content-muted">
                     <span className="text-emerald-600 font-bold">
                       {vid.views.toLocaleString()} views
                     </span>
@@ -500,7 +500,7 @@ export default function AnalyticsCharts({
       {/* 6. Full Searchable & Sortable Video Performance Table */}
       <Card className="space-y-4">
         <CardHeader
-          icon={<BarChart2 className="w-4 h-4 text-[#00D2B4]" />}
+          icon={<BarChart2 className="w-4 h-4 text-[#C27345]" />}
           title={`Published Video Library (${filteredVideos.length} of ${videos.length})`}
           subtitle="Search and rank every published video with live analytics"
           action={
@@ -545,7 +545,7 @@ export default function AnalyticsCharts({
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="border-b border-slate-200 text-[11px] font-semibold uppercase tracking-wider text-slate-500 bg-slate-50/50">
+                  <tr className="border-b border-border text-[11px] font-semibold uppercase tracking-wider text-content-muted bg-surface-low">
                     <th className="py-2.5 px-3">Video</th>
                     <th className="py-2.5 px-3 hidden sm:table-cell">Published</th>
                     <th className="py-2.5 px-3 text-right">Views</th>
@@ -559,11 +559,11 @@ export default function AnalyticsCharts({
                   {filteredVideos.slice(0, visibleCount).map((vid) => (
                     <tr
                       key={vid.id}
-                      className="hover:bg-slate-50/80 transition-colors group"
+                      className="hover:bg-surface-low/80 transition-colors group"
                     >
                       <td className="py-3 px-3">
                         <div className="flex items-center gap-3 min-w-[240px]">
-                          <div className="relative w-14 h-9 rounded bg-slate-900 overflow-hidden flex-shrink-0 border border-slate-200">
+                          <div className="relative w-14 h-9 rounded bg-slate-900 overflow-hidden flex-shrink-0 border border-border">
                             {vid.thumbnailUrl && (
                               <img
                                 src={vid.thumbnailUrl}
@@ -575,21 +575,21 @@ export default function AnalyticsCharts({
                               {vid.duration}
                             </span>
                           </div>
-                          <p className="font-semibold text-slate-800 line-clamp-2 leading-snug group-hover:text-[#00A38C] transition-colors">
+                          <p className="font-semibold text-content-primary line-clamp-2 leading-snug group-hover:text-[#C27345] transition-colors">
                             {vid.title}
                           </p>
                         </div>
                       </td>
-                      <td className="py-3 px-3 text-slate-500 font-mono text-[11px] hidden sm:table-cell whitespace-nowrap">
+                      <td className="py-3 px-3 text-content-muted font-mono text-[11px] hidden sm:table-cell whitespace-nowrap">
                         {vid.publishedAt.slice(0, 10)}
                       </td>
-                      <td className="py-3 px-3 text-right font-mono font-bold text-slate-900 tabular-nums">
+                      <td className="py-3 px-3 text-right font-mono font-bold text-content-primary tabular-nums">
                         {vid.views.toLocaleString()}
                       </td>
-                      <td className="py-3 px-3 text-right font-mono text-slate-600 tabular-nums hidden md:table-cell">
+                      <td className="py-3 px-3 text-right font-mono text-content-secondary tabular-nums hidden md:table-cell">
                         {vid.likes.toLocaleString()}
                       </td>
-                      <td className="py-3 px-3 text-right font-mono text-slate-600 tabular-nums hidden lg:table-cell">
+                      <td className="py-3 px-3 text-right font-mono text-content-secondary tabular-nums hidden lg:table-cell">
                         {vid.comments.toLocaleString()}
                       </td>
                       <td className="py-3 px-3 text-right">
@@ -602,7 +602,7 @@ export default function AnalyticsCharts({
                           href={vid.url}
                           target="_blank"
                           rel="noreferrer"
-                          className="inline-flex items-center justify-center w-7 h-7 rounded-md hover:bg-slate-200 text-slate-500 hover:text-slate-900 transition-colors"
+                          className="inline-flex items-center justify-center w-7 h-7 rounded-md hover:bg-surface-high text-content-muted hover:text-content-primary transition-colors"
                           title="Open on YouTube"
                         >
                           <ExternalLink className="w-3.5 h-3.5" />
@@ -615,7 +615,7 @@ export default function AnalyticsCharts({
             </div>
 
             {filteredVideos.length > visibleCount && (
-              <div className="pt-3 text-center border-t border-slate-100">
+              <div className="pt-3 text-center border-t border-border-subtle">
                 <Button
                   size="sm"
                   variant="secondary"

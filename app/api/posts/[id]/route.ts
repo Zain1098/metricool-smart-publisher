@@ -90,8 +90,11 @@ export async function PATCH(
       return NextResponse.json({ success: false, error: 'Invalid JSON body' }, { status: 400 });
     }
 
-    if (body.coverUrl && !isSafeMediaUrl(String(body.coverUrl))) {
-      return NextResponse.json({ success: false, error: 'Invalid coverUrl' }, { status: 400 });
+    if (
+      (body.mediaUrl && !isSafeMediaUrl(String(body.mediaUrl))) ||
+      (body.coverUrl && !isSafeMediaUrl(String(body.coverUrl)))
+    ) {
+      return NextResponse.json({ success: false, error: 'Invalid mediaUrl or coverUrl' }, { status: 400 });
     }
 
     if (body.scheduledAt !== undefined) {
@@ -125,6 +128,11 @@ export async function PATCH(
       'platformOverrides',
       'shortenerEnabled',
       'publishMode',
+      'mediaUrl',
+      'mediaFileName',
+      'mediaDurationSec',
+      'mediaAspectRatio',
+      'mediaSizeMb',
       'coverUrl',
       'thumbOffsetMs',
     ];

@@ -38,12 +38,20 @@ function getUploadsDir(): string {
   return tmpDir;
 }
 
-function findUploadedFile(safeFile: string): string | null {
-  const localCandidate = path.join(process.cwd(), 'public', 'uploads', safeFile);
-  if (fs.existsSync(localCandidate)) return localCandidate;
+function findUploadedFile(requestedFile: string): string | null {
+  const rawBase = path.basename(requestedFile);
+  const safeFile = rawBase.replace(/[^a-zA-Z0-9._-]/g, '_');
+  const candidates = Array.from(
+    new Set([rawBase, safeFile].filter((f) => Boolean(f) && !f.includes('..')))
+  );
 
-  const tmpCandidate = path.join(os.tmpdir(), 'metricool-uploads', safeFile);
-  if (fs.existsSync(tmpCandidate)) return tmpCandidate;
+  for (const name of candidates) {
+    const localCandidate = path.join(process.cwd(), 'public', 'uploads', name);
+    if (fs.existsSync(localCandidate)) return localCandidate;
+
+    const tmpCandidate = path.join(os.tmpdir(), 'metricool-uploads', name);
+    if (fs.existsSync(tmpCandidate)) return tmpCandidate;
+  }
 
   return null;
 }
@@ -54,8 +62,7 @@ export async function GET(req: Request) {
     const requestedFile = searchParams.get('file');
 
     if (requestedFile) {
-      const safeFile = path.basename(requestedFile).replace(/[^a-zA-Z0-9._-]/g, '_');
-      const filePath = findUploadedFile(safeFile);
+      const filePath = findUploadedFile(requestedFile);
       if (!filePath) {
         return NextResponse.json(
           { success: false, error: 'File not found' },
@@ -65,7 +72,7 @@ export async function GET(req: Request) {
 
       const stat = fs.statSync(filePath);
       const fileSize = stat.size;
-      const ext = path.extname(safeFile).toLowerCase();
+      const ext = path.extname(filePath).toLowerCase();
       const mimeMap: Record<string, string> = {
         '.mp4': 'video/mp4',
         '.mov': 'video/quicktime',
@@ -75,6 +82,7 @@ export async function GET(req: Request) {
         '.jpeg': 'image/jpeg',
         '.png': 'image/png',
         '.webp': 'image/webp',
+        '.gif': 'image/gif',
       };
       const contentType = mimeMap[ext] || 'application/octet-stream';
       const range = req.headers.get('range');

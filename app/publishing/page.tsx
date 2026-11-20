@@ -60,6 +60,10 @@ export default function PublishingPage() {
   }, [pushToast]);
 
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const qParam = new URLSearchParams(window.location.search).get('q');
+      if (qParam) setSearch(qParam);
+    }
     loadPosts();
   }, [loadPosts]);
 
@@ -164,13 +168,17 @@ export default function PublishingPage() {
 
   return (
     <div className="space-y-5">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-4 border-b border-studio-border">
+      {/* Header (Stitch Editorial) */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-4 border-b border-border">
         <div className="space-y-1">
-          <h1 className="text-xl font-semibold text-ink-primary tracking-[-0.02em]">
+          <div className="flex items-center gap-2 text-brand text-xs font-semibold uppercase tracking-wider">
+            <Send className="w-3.5 h-3.5" />
+            <span>Dispatch &amp; Queue</span>
+          </div>
+          <h1 className="font-serif text-2xl sm:text-3xl font-medium text-content-primary tracking-tight">
             Publishing Management
           </h1>
-          <p className="text-xs text-ink-muted">
+          <p className="text-xs sm:text-sm text-content-secondary">
             Monitor queued dispatches, Cloud Server Holds, published history, and retry failed deliveries.
           </p>
         </div>
@@ -364,7 +372,7 @@ export default function PublishingPage() {
                           href={url}
                           target="_blank"
                           rel="noreferrer"
-                          className="h-8 px-2.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 text-xs font-medium inline-flex items-center gap-1.5"
+                          className="h-8 px-2.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 text-xs font-medium inline-flex items-center gap-1.5"
                         >
                           <span>
                             {PLATFORM_CONFIGS[plat as keyof typeof PLATFORM_CONFIGS]

@@ -298,10 +298,10 @@ ${bottom5
       <div className="space-y-5">
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-28 rounded-2xl bg-[#EFE9E1] animate-pulse" />
+            <div key={i} className="h-28 rounded-2xl bg-surface-high animate-pulse" />
           ))}
         </div>
-        <div className="h-72 rounded-2xl bg-[#EFE9E1] animate-pulse" />
+        <div className="h-72 rounded-2xl bg-surface-high animate-pulse" />
       </div>
     );
   }
@@ -310,7 +310,7 @@ ${bottom5
     return (
       <Card className="p-8 text-center space-y-3">
         <AlertTriangle className="w-8 h-8 text-[#C84B4B] mx-auto" />
-        <p className="text-sm font-semibold text-[#1E1B18]">{error}</p>
+        <p className="text-sm font-semibold text-content-primary">{error}</p>
         <Button onClick={fetchAnalytics}>Retry</Button>
       </Card>
     );
@@ -321,34 +321,22 @@ ${bottom5
 
   return (
     <div className="space-y-6">
-      {/* Top Toolbar: Filters + Live Sync + 3 Export Formats */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 print:hidden">
-        <div className="flex flex-wrap items-center gap-1.5">
-          {['all', 'youtube', 'instagram', 'facebook', 'tiktok', 'twitter', 'threads'].map(
-            (net) => {
-              const active = selectedNetwork === net;
-              const label =
-                net === 'all' ? 'All Platforms' : PLATFORM_CONFIGS[net as keyof typeof PLATFORM_CONFIGS]?.name || net;
-              return (
-                <button
-                  key={net}
-                  type="button"
-                  onClick={() => setSelectedNetwork(net)}
-                  className={cn(
-                    'px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
-                    active
-                      ? 'bg-[#C27345] text-white border-[#C27345]'
-                      : 'bg-white text-[#4E463F] border-[#E7DFD5] hover:bg-[#F5EFE8]'
-                  )}
-                >
-                  {label}
-                </button>
-              );
-            }
-          )}
+      {/* Stitch Editorial Header */}
+      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 pb-2">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2 text-brand text-xs font-semibold uppercase tracking-wider">
+            <TrendingUp className="w-3.5 h-3.5" />
+            <span>Performance Intelligence</span>
+          </div>
+          <h1 className="font-serif text-3xl sm:text-4xl font-normal text-content-primary tracking-tight">
+            Analytics &amp; Insights
+          </h1>
+          <p className="text-xs sm:text-sm text-content-secondary">
+            Cross-platform reach, engagement trajectories, posting window heatmaps, and AI-ready reports.
+          </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 print:hidden">
           <Button
             type="button"
             variant="outline"
@@ -361,12 +349,12 @@ ${bottom5
           </Button>
 
           <Button type="button" variant="outline" size="sm" onClick={handleExportExcelCsv}>
-            <FileSpreadsheet className="w-3.5 h-3.5 text-[#3A8E63]" />
+            <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
             <span>Excel / CSV</span>
           </Button>
 
           <Button type="button" variant="outline" size="sm" onClick={handleExportAiMarkdown}>
-            <Bot className="w-3.5 h-3.5 text-[#564098]" />
+            <Bot className="w-3.5 h-3.5 text-brand" />
             <span>AI Report (.md)</span>
           </Button>
 
@@ -377,75 +365,118 @@ ${bottom5
         </div>
       </div>
 
-      {/* Row 1: 4 Pastel KPI Cards */}
+      {/* Network Filter Pills */}
+      <div className="flex flex-wrap items-center gap-1.5 print:hidden">
+        {['all', 'youtube', 'instagram', 'facebook', 'tiktok', 'twitter', 'threads'].map(
+          (net) => {
+            const active = selectedNetwork === net;
+            const label =
+              net === 'all' ? 'All Platforms' : PLATFORM_CONFIGS[net as keyof typeof PLATFORM_CONFIGS]?.name || net;
+            return (
+              <button
+                key={net}
+                type="button"
+                onClick={() => setSelectedNetwork(net)}
+                className={cn(
+                  'px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all',
+                  active
+                    ? 'bg-brand text-brand-contrast border-brand shadow-soft'
+                    : 'bg-surface-lowest text-content-secondary border-border hover:bg-surface-high hover:text-content-primary'
+                )}
+              >
+                {label}
+              </button>
+            );
+          }
+        )}
+      </div>
+
+      {/* Row 1: 4 Stitch Editorial KPI Cards */}
       <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        <Card className="bg-[#DCEAE2] border-[#C5DDD0] shadow-none">
-          <CardContent className="p-5 space-y-2">
-            <div className="flex items-center justify-between">
-              <Eye className="w-4 h-4 text-[#24503B]" />
-              <Badge variant="sage" className="bg-white/80 border-transparent">
-                Reach
-              </Badge>
-            </div>
-            <div className="text-3xl font-bold text-[#1E1B18] tabular-nums">
+        <div className="p-6 rounded-2xl bg-surface-lowest border border-border shadow-card hover:shadow-elevated transition-all flex flex-col justify-between relative overflow-hidden">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-content-secondary">
+              Total Reach
+            </span>
+            <span className="w-8 h-8 rounded-lg bg-surface-low flex items-center justify-center text-brand">
+              <Eye className="w-4 h-4" />
+            </span>
+          </div>
+          <div className="flex items-baseline justify-between mt-3 gap-2">
+            <span className="font-serif text-[2.25rem] leading-none font-medium text-content-primary tabular-nums">
               {(s?.totalChannelViews || 0).toLocaleString()}
-            </div>
-            <p className="text-xs font-medium text-[#2F4F3E]">
-              Total Views · Avg {(s?.avgViewsPerVideo || 0).toLocaleString()}/video
-            </p>
-          </CardContent>
-        </Card>
+            </span>
+            <Badge variant="sage">Reach</Badge>
+          </div>
+          <div className="mt-3 flex items-end justify-between">
+            <span className="text-xs text-content-muted">
+              Avg {(s?.avgViewsPerVideo || 0).toLocaleString()}/video
+            </span>
+            <svg className="w-20 h-5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 100 24">
+              <path d="M0 18 L20 14 L40 16 L60 9 L80 11 L100 3" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+            </svg>
+          </div>
+        </div>
 
-        <Card className="bg-[#F5DFCE] border-[#EACBB4] shadow-none">
-          <CardContent className="p-5 space-y-2">
-            <div className="flex items-center justify-between">
-              <Users className="w-4 h-4 text-[#8D451E]" />
-              <Badge variant="peach" className="bg-white/80 border-transparent">
-                {connectedPlatforms.length} Connected
-              </Badge>
-            </div>
-            <div className="text-3xl font-bold text-[#1E1B18] tabular-nums">
+        <div className="p-6 rounded-2xl bg-surface-lowest border border-border shadow-card hover:shadow-elevated transition-all flex flex-col justify-between relative overflow-hidden">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-content-secondary">
+              Total Audience
+            </span>
+            <span className="w-8 h-8 rounded-lg bg-brand-container flex items-center justify-center text-brand">
+              <Users className="w-4 h-4" />
+            </span>
+          </div>
+          <div className="flex items-baseline justify-between mt-3 gap-2">
+            <span className="font-serif text-[2.25rem] leading-none font-medium text-content-primary tabular-nums">
               {(s?.totalFollowers || 0).toLocaleString()}
-            </div>
-            <p className="text-xs font-medium text-[#6B3A1E]">
-              Total Audience Across Channels
-            </p>
-          </CardContent>
-        </Card>
+            </span>
+            <Badge variant="peach">{connectedPlatforms.length} Connected</Badge>
+          </div>
+          <p className="mt-3 text-xs text-content-muted">
+            Total Audience Across Channels
+          </p>
+        </div>
 
-        <Card className="bg-[#F3DADF] border-[#E8C5CD] shadow-none">
-          <CardContent className="p-5 space-y-2">
-            <div className="flex items-center justify-between">
-              <Heart className="w-4 h-4 text-[#8B3247]" />
-              <Badge variant="rose" className="bg-white/80 border-transparent">
-                {s?.overallEngagementRate || 0}% Rate
-              </Badge>
-            </div>
-            <div className="text-3xl font-bold text-[#1E1B18] tabular-nums">
+        <div className="p-6 rounded-2xl bg-surface-lowest border border-border shadow-card hover:shadow-elevated transition-all flex flex-col justify-between relative overflow-hidden">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-content-secondary">
+              Engagements
+            </span>
+            <span className="w-8 h-8 rounded-lg bg-surface-low flex items-center justify-center text-brand">
+              <Heart className="w-4 h-4" />
+            </span>
+          </div>
+          <div className="flex items-baseline justify-between mt-3 gap-2">
+            <span className="font-serif text-[2.25rem] leading-none font-medium text-content-primary tabular-nums">
               {((s?.totalVideoLikes || 0) + (s?.totalVideoComments || 0)).toLocaleString()}
-            </div>
-            <p className="text-xs font-medium text-[#6C2B3B]">
-              {(s?.totalVideoLikes || 0).toLocaleString()} Likes · {(s?.totalVideoComments || 0).toLocaleString()} Comments
-            </p>
-          </CardContent>
-        </Card>
+            </span>
+            <Badge variant="sage">{s?.overallEngagementRate || 0}% Rate</Badge>
+          </div>
+          <p className="mt-3 text-xs text-content-muted">
+            {(s?.totalVideoLikes || 0).toLocaleString()} Likes · {(s?.totalVideoComments || 0).toLocaleString()} Comments
+          </p>
+        </div>
 
-        <Card className="bg-[#E5DFF5] border-[#D4CBEB] shadow-none">
-          <CardContent className="p-5 space-y-2">
-            <div className="flex items-center justify-between">
-              <TrendingUp className="w-4 h-4 text-[#4B3688]" />
-              <Badge variant="lavender" className="bg-white/80 border-transparent">
-                Peak Video
-              </Badge>
-            </div>
-            <div className="text-3xl font-bold text-[#1E1B18] tabular-nums">
+        <div className="p-6 rounded-2xl bg-surface-lowest border border-border shadow-card hover:shadow-elevated transition-all flex flex-col justify-between relative overflow-hidden">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-content-secondary">
+              Peak Video
+            </span>
+            <span className="w-8 h-8 rounded-lg bg-surface-low flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+              <TrendingUp className="w-4 h-4" />
+            </span>
+          </div>
+          <div className="flex items-baseline justify-between mt-3 gap-2">
+            <span className="font-serif text-[2.25rem] leading-none font-medium text-content-primary tabular-nums">
               {(s?.topVideoViews || 0).toLocaleString()}
-            </div>
-            <p className="text-xs font-medium text-[#3F2E73]">
-              Best Video Views · {s?.totalChannelPosts || 0} Total Videos
-            </p>
-          </CardContent>
-        </Card>
+            </span>
+            <Badge variant="lavender">Top Views</Badge>
+          </div>
+          <p className="mt-3 text-xs text-content-muted">
+            {s?.totalChannelPosts || 0} Total Published Videos
+          </p>
+        </div>
       </section>
 
       {/* Row 2: Platform-by-Platform Breakdown + AI Executive Insights */}
@@ -463,14 +494,14 @@ ${bottom5
             {(data?.platformBreakdown || []).map((p) => (
               <div
                 key={p.id}
-                className="rounded-xl border border-[#EFE9E1] bg-[#FAF6F1] p-3 space-y-2"
+                className="rounded-xl border border-border-subtle bg-surface p-3 space-y-2"
               >
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2 min-w-0">
-                    <span className="text-xs font-bold text-[#1E1B18] capitalize">
+                    <span className="text-xs font-bold text-content-primary capitalize">
                       {PLATFORM_CONFIGS[p.platform as keyof typeof PLATFORM_CONFIGS]?.name || p.platform}
                     </span>
-                    <span className="text-[11px] text-[#6E655D] truncate">
+                    <span className="text-[11px] text-content-muted truncate">
                       {p.handle || p.accountName}
                     </span>
                   </div>
@@ -481,20 +512,20 @@ ${bottom5
 
                 <div className="grid grid-cols-3 gap-2 text-xs">
                   <div>
-                    <span className="text-[#6E655D] text-[10px] block">Followers</span>
-                    <span className="font-semibold text-[#1E1B18] tabular-nums">
+                    <span className="text-content-muted text-[10px] block">Followers</span>
+                    <span className="font-semibold text-content-primary tabular-nums">
                       {p.followers.toLocaleString()}
                     </span>
                   </div>
                   <div>
-                    <span className="text-[#6E655D] text-[10px] block">Views / Likes</span>
-                    <span className="font-semibold text-[#1E1B18] tabular-nums">
+                    <span className="text-content-muted text-[10px] block">Views / Likes</span>
+                    <span className="font-semibold text-content-primary tabular-nums">
                       {p.views.toLocaleString()}
                     </span>
                   </div>
                   <div>
-                    <span className="text-[#6E655D] text-[10px] block">Posts</span>
-                    <span className="font-semibold text-[#1E1B18] tabular-nums">
+                    <span className="text-content-muted text-[10px] block">Posts</span>
+                    <span className="font-semibold text-content-primary tabular-nums">
                       {p.postsCount.toLocaleString()}
                     </span>
                   </div>
@@ -521,7 +552,7 @@ ${bottom5
               {(data?.aiExecutiveInsights || []).map((line, idx) => (
                 <div
                   key={idx}
-                  className="rounded-xl border border-[#EFE9E1] bg-[#FAF6F1] px-3.5 py-2.5 text-xs text-[#1E1B18] leading-relaxed"
+                  className="rounded-xl border border-border-subtle bg-surface px-3.5 py-2.5 text-xs text-content-primary leading-relaxed"
                 >
                   {line}
                 </div>
@@ -544,10 +575,10 @@ ${bottom5
               {(data?.bestPostingHours || []).map((h) => (
                 <div
                   key={h.hourLabel}
-                  className="flex items-center justify-between text-xs rounded-lg border border-[#EFE9E1] bg-[#FAF6F1] px-3 py-2"
+                  className="flex items-center justify-between text-xs rounded-lg border border-border-subtle bg-surface px-3 py-2"
                 >
-                  <span className="font-semibold text-[#1E1B18]">{h.hourLabel}</span>
-                  <span className="text-[#6E655D]">
+                  <span className="font-semibold text-content-primary">{h.hourLabel}</span>
+                  <span className="text-content-muted">
                     {h.avgViews.toLocaleString()} avg views ({h.videosCount} vids)
                   </span>
                 </div>
@@ -581,7 +612,7 @@ ${bottom5
           </div>
           <div className="flex items-center gap-2 print:hidden">
             <div className="relative w-52">
-              <Search className="w-3.5 h-3.5 text-[#8E847A] absolute left-2.5 top-1/2 -translate-y-1/2" />
+              <Search className="w-3.5 h-3.5 text-content-muted absolute left-2.5 top-1/2 -translate-y-1/2" />
               <Input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -608,7 +639,7 @@ ${bottom5
         <CardContent className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
-              <tr className="border-b border-[#E7DFD5] text-[#6E655D]">
+              <tr className="border-b border-border text-content-muted">
                 <th className="py-2.5 pr-3 font-semibold">Video</th>
                 <th className="py-2.5 px-3 font-semibold">Published</th>
                 <th className="py-2.5 px-3 font-semibold text-right">Views</th>
@@ -620,7 +651,7 @@ ${bottom5
             </thead>
             <tbody className="divide-y divide-[#EFE9E1]">
               {filteredVideos.slice(0, 50).map((v) => (
-                <tr key={v.id} className="hover:bg-[#FAF6F1]">
+                <tr key={v.id} className="hover:bg-surface">
                   <td className="py-2.5 pr-3 max-w-[320px]">
                     <div className="flex items-center gap-2.5">
                       {v.thumbnailUrl && (
@@ -628,24 +659,24 @@ ${bottom5
                         <img
                           src={v.thumbnailUrl}
                           alt={v.title}
-                          className="w-12 h-8 rounded object-cover flex-shrink-0 border border-[#E7DFD5]"
+                          className="w-12 h-8 rounded object-cover flex-shrink-0 border border-border"
                         />
                       )}
-                      <span className="font-medium text-[#1E1B18] line-clamp-2">
+                      <span className="font-medium text-content-primary line-clamp-2">
                         {v.title}
                       </span>
                     </div>
                   </td>
-                  <td className="py-2.5 px-3 text-[#6E655D] whitespace-nowrap">
+                  <td className="py-2.5 px-3 text-content-muted whitespace-nowrap">
                     {v.publishedAt?.slice(0, 10)}
                   </td>
-                  <td className="py-2.5 px-3 text-right font-semibold text-[#1E1B18] tabular-nums">
+                  <td className="py-2.5 px-3 text-right font-semibold text-content-primary tabular-nums">
                     {v.views.toLocaleString()}
                   </td>
-                  <td className="py-2.5 px-3 text-right text-[#4E463F] tabular-nums">
+                  <td className="py-2.5 px-3 text-right text-content-secondary tabular-nums">
                     {v.likes.toLocaleString()}
                   </td>
-                  <td className="py-2.5 px-3 text-right text-[#4E463F] tabular-nums">
+                  <td className="py-2.5 px-3 text-right text-content-secondary tabular-nums">
                     {v.comments.toLocaleString()}
                   </td>
                   <td className="py-2.5 px-3 text-right">

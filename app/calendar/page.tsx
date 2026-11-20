@@ -87,18 +87,28 @@ export default function CalendarPage() {
 
   return (
     <div className="space-y-5">
-      {/* Header Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-card border border-studio-border shadow-card">
-        <div>
-          <h1 className="text-lg font-bold text-ink-primary tracking-tight">
-            Planning &amp; Content Calendar
-          </h1>
-          <p className="text-xs text-ink-muted mt-0.5">
+      {/* Header Bar (Stitch Social Calendar & Scheduler) */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2 text-brand text-xs font-semibold uppercase tracking-wider">
+            <CalendarIcon className="w-3.5 h-3.5" />
+            <span>Campaign Operations</span>
+          </div>
+          <div className="flex items-center gap-3 flex-wrap">
+            <h1 className="font-serif text-2xl sm:text-3xl font-medium text-content-primary tracking-tight">
+              Social Calendar &amp; Scheduler
+            </h1>
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20 text-[11px] font-semibold">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              Live Sync Active
+            </span>
+          </div>
+          <p className="text-xs sm:text-sm text-content-secondary">
             Organize monthly, weekly, and daily posts with Metricool best-hours recommendations
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5">
           <Link href="/publishing">
             <Button variant="secondary" size="sm">
               Publishing Queue
@@ -129,11 +139,11 @@ export default function CalendarPage() {
       {/* Scheduled & Published Timeline Feed */}
       <Card className="space-y-4">
         <CardHeader
-          icon={<Clock className="w-4 h-4 text-[#00D2B4]" />}
+          icon={<Clock className="w-4 h-4 text-brand" />}
           title="Scheduled &amp; Published Timeline"
           subtitle="Quick actions for upcoming slots and recent dispatches"
           action={
-            <span className="text-xs font-mono font-semibold text-slate-500">
+            <span className="text-xs font-mono font-semibold text-content-muted">
               {posts.length} total posts
             </span>
           }
@@ -221,7 +231,7 @@ export default function CalendarPage() {
                           href={url}
                           target="_blank"
                           rel="noreferrer"
-                          className="h-7 px-2 rounded-md bg-slate-100 hover:bg-slate-200 border border-slate-200 text-emerald-600 inline-flex items-center gap-1 text-[11px] font-bold"
+                          className="h-7 px-2 rounded-md bg-surface-container hover:bg-surface-high border border-border text-emerald-600 dark:text-emerald-400 inline-flex items-center gap-1 text-[11px] font-bold"
                           title={`Open ${plat}`}
                         >
                           <ExternalLink className="w-3 h-3" />
@@ -243,7 +253,7 @@ export default function CalendarPage() {
 
                     <Link
                       href={`/composer?clone=${encodeURIComponent(post.id)}`}
-                      className="h-7 w-7 rounded-md bg-[#FFFFFF] hover:bg-slate-100 border border-slate-200 text-slate-600 hover:text-slate-900 inline-flex items-center justify-center transition-colors shadow-xs"
+                      className="h-7 w-7 rounded-md bg-surface-lowest hover:bg-surface-high border border-border text-content-secondary hover:text-content-primary inline-flex items-center justify-center transition-colors shadow-card"
                       title="Clone / Edit in Composer"
                     >
                       <Copy className="w-3.5 h-3.5" />
@@ -252,7 +262,7 @@ export default function CalendarPage() {
                     <button
                       type="button"
                       onClick={() => handleDelete(post.id)}
-                      className="h-7 w-7 rounded-md hover:bg-red-50 text-slate-400 hover:text-red-600 inline-flex items-center justify-center transition-colors"
+                      className="h-7 w-7 rounded-md hover:bg-red-500/10 text-content-muted hover:text-red-600 dark:hover:text-red-400 inline-flex items-center justify-center transition-colors"
                       title="Delete post"
                     >
                       <Trash2 className="w-3.5 h-3.5" />

@@ -305,24 +305,24 @@ export default function CalendarView({
           setActiveModalPost(post);
         }}
         className={cn(
-          'group rounded-lg bg-[#FFFFFF] border border-slate-200 hover:border-[#00D2B4] p-2 cursor-pointer transition-all shadow-xs space-y-1.5',
+          'group rounded-lg bg-surface-lowest border border-border hover:border-[#C27345] p-2 cursor-pointer transition-all shadow-xs space-y-1.5',
           canDrag && 'cursor-grab active:cursor-grabbing',
           draggedPostId === post.id && 'opacity-50'
         )}
       >
         <div className="flex items-center justify-between gap-1">
-          <span className="inline-flex items-center gap-1 text-[10px] font-mono text-slate-500 tabular-nums font-semibold">
+          <span className="inline-flex items-center gap-1 text-[10px] font-mono text-content-muted tabular-nums font-semibold">
             {canDrag && (
-              <GripVertical className="w-2.5 h-2.5 text-[#6E655D] opacity-0 group-hover:opacity-100 transition-opacity" />
+              <GripVertical className="w-2.5 h-2.5 text-content-muted opacity-0 group-hover:opacity-100 transition-opacity" />
             )}
-            <Clock className="w-2.5 h-2.5 text-[#00D2B4]" />
+            <Clock className="w-2.5 h-2.5 text-[#C27345]" />
             {timeStr}
           </span>
           <StatusPill status={post.status} className="text-[9px] px-1.5 py-0" />
         </div>
 
         {!compact && post.coverUrl && (
-          <div className="w-full h-14 rounded overflow-hidden bg-slate-900 border border-slate-200">
+          <div className="w-full h-14 rounded overflow-hidden bg-slate-900 border border-border">
             <img
               src={post.coverUrl}
               alt="Post cover"
@@ -331,7 +331,7 @@ export default function CalendarView({
           </div>
         )}
 
-        <p className="text-[11px] font-bold text-slate-800 line-clamp-1 group-hover:text-[#00A38C] transition-colors">
+        <p className="text-[11px] font-bold text-content-primary line-clamp-1 group-hover:text-[#C27345] transition-colors">
           {post.globalCaption || post.mediaFileName}
         </p>
 
@@ -348,28 +348,28 @@ export default function CalendarView({
     <>
       <Card className="space-y-4">
         {/* Calendar Toolbar */}
-        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3 pb-3.5 border-b border-slate-200">
+        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3 pb-3.5 border-b border-border">
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex items-center gap-2">
-              <CalendarIcon className="w-4 h-4 text-[#00D2B4]" />
-              <h2 className="text-sm font-bold text-slate-900 tracking-tight">
+              <CalendarIcon className="w-4 h-4 text-[#C27345]" />
+              <h2 className="text-sm font-bold text-content-primary tracking-tight">
                 {headerTitle}
               </h2>
             </div>
 
-            <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg border border-slate-200">
+            <div className="flex items-center gap-1 bg-surface-container p-0.5 rounded-lg border border-border">
               <button
                 type="button"
                 onClick={() => handleNavigate(-1)}
                 aria-label="Previous period"
-                className="p-1.5 rounded-md hover:bg-slate-200 text-slate-600 hover:text-slate-900"
+                className="p-1.5 rounded-md hover:bg-surface-high text-content-secondary hover:text-content-primary"
               >
                 <ChevronLeft className="w-3.5 h-3.5" />
               </button>
               <button
                 type="button"
                 onClick={() => handleNavigate(0)}
-                className="px-2.5 py-1 text-xs font-bold text-slate-700 hover:bg-slate-200 rounded-md"
+                className="px-2.5 py-1 text-xs font-bold text-content-secondary hover:bg-surface-high rounded-md"
               >
                 Today
               </button>
@@ -377,13 +377,13 @@ export default function CalendarView({
                 type="button"
                 onClick={() => handleNavigate(1)}
                 aria-label="Next period"
-                className="p-1.5 rounded-md hover:bg-slate-200 text-slate-600 hover:text-slate-900"
+                className="p-1.5 rounded-md hover:bg-surface-high text-content-secondary hover:text-content-primary"
               >
                 <ChevronRight className="w-3.5 h-3.5" />
               </button>
             </div>
 
-            <span className="text-[11px] font-mono font-medium text-slate-500">
+            <span className="text-[11px] font-mono font-medium text-content-muted">
               {filteredPosts.length} post{filteredPosts.length === 1 ? '' : 's'}
             </span>
           </div>
@@ -417,13 +417,13 @@ export default function CalendarView({
         </div>
 
         {/* Drag Hint & Optimal Window Legend */}
-        <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-500">
+        <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-content-muted">
           <div className="flex items-center gap-3">
-            <span className="inline-flex items-center gap-1.5 font-semibold text-[#00A38C] bg-[#E6FAF7] px-2 py-0.5 rounded-full border border-[#7FE8D9]">
-              <span className="w-2 h-2 rounded-full bg-[#00D2B4]" />
+            <span className="inline-flex items-center gap-1.5 font-semibold text-[#C27345] bg-brand-container px-2 py-0.5 rounded-full border border-brand/25">
+              <span className="w-2 h-2 rounded-full bg-[#C27345]" />
               <span>Metricool Peak Window: 18:30 PKT</span>
             </span>
-            <span className="hidden sm:inline text-[#4E463F]">•</span>
+            <span className="hidden sm:inline text-content-secondary">•</span>
             <span className="hidden sm:inline">
               Drag posts to any date cell to reschedule automatically
             </span>
@@ -456,18 +456,18 @@ export default function CalendarView({
                   className={cn(
                     'min-h-[220px] rounded-xl p-2.5 border flex flex-col justify-between transition-all',
                     isDragTarget
-                      ? 'bg-[#E6FAF7] border-[#00D2B4]'
+                      ? 'bg-brand-container border-[#C27345]'
                       : isToday
-                      ? 'bg-emerald-50/40 border-[#00D2B4] shadow-xs'
-                      : 'bg-[#FFFFFF] border-slate-200 hover:border-slate-300'
+                      ? 'bg-brand-container/40 border-[#C27345] shadow-xs'
+                      : 'bg-surface-lowest border-border hover:border-border'
                   )}
                 >
                   <div className="space-y-2">
-                    <div className="flex items-center justify-between pb-2 border-b border-slate-200">
+                    <div className="flex items-center justify-between pb-2 border-b border-border">
                       <span
                         className={cn(
                           'text-[11px] font-bold uppercase tracking-wider',
-                          isToday ? 'text-[#00A38C]' : 'text-slate-500'
+                          isToday ? 'text-[#C27345]' : 'text-content-muted'
                         )}
                       >
                         {date.toLocaleDateString('en-US', { weekday: 'short' })}
@@ -476,8 +476,8 @@ export default function CalendarView({
                         className={cn(
                           'w-6 h-6 rounded-full flex items-center justify-center text-xs font-mono font-bold',
                           isToday
-                            ? 'bg-[#00D2B4] text-[#0D1525]'
-                            : 'text-slate-700'
+                            ? 'bg-[#C27345] text-brand-contrast'
+                            : 'text-content-secondary'
                         )}
                       >
                         {date.getDate()}
@@ -487,10 +487,10 @@ export default function CalendarView({
                     <button
                       type="button"
                       onClick={() => handleSlotClick(date, 18, 30)}
-                      className="w-full py-1 px-2 rounded-md bg-[#E6FAF7] hover:bg-[#D4F7F2] border border-[#7FE8D9] flex items-center justify-between text-[10px] font-bold text-[#00A38C] transition-colors"
+                      className="w-full py-1 px-2 rounded-md bg-brand-container hover:bg-brand-container/80 border border-brand/25 flex items-center justify-between text-[10px] font-bold text-[#C27345] transition-colors"
                     >
                       <span>18:30 Peak</span>
-                      <Sparkles className="w-2.5 h-2.5 text-[#00D2B4]" />
+                      <Sparkles className="w-2.5 h-2.5 text-[#C27345]" />
                     </button>
 
                     <div className="space-y-1.5">
@@ -501,7 +501,7 @@ export default function CalendarView({
                   <button
                     type="button"
                     onClick={() => handleSlotClick(date)}
-                    className="w-full mt-2.5 py-1.5 rounded-lg border border-dashed border-slate-300 hover:border-[#00D2B4] text-[11px] text-slate-500 hover:text-[#00A38C] flex items-center justify-center gap-1 transition-colors bg-slate-50/50 hover:bg-[#E6FAF7]"
+                    className="w-full mt-2.5 py-1.5 rounded-lg border border-dashed border-border hover:border-[#C27345] text-[11px] text-content-muted hover:text-[#C27345] flex items-center justify-center gap-1 transition-colors bg-surface-low hover:bg-brand-container"
                   >
                     <Plus className="w-3 h-3" />
                     <span>Add Post</span>
@@ -515,7 +515,7 @@ export default function CalendarView({
         {/* VIEW 2: MONTHLY GRID */}
         {viewMode === 'month' && (
           <div className="space-y-2">
-            <div className="grid grid-cols-7 gap-1.5 text-center text-[11px] font-bold uppercase tracking-wider text-slate-500">
+            <div className="hidden sm:grid sm:grid-cols-7 gap-1.5 text-center text-[11px] font-bold uppercase tracking-wider text-content-muted">
               {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => (
                 <div key={d} className="py-1">
                   {d}
@@ -549,12 +549,12 @@ export default function CalendarView({
                     className={cn(
                       'min-h-[118px] rounded-lg p-2 border flex flex-col justify-between transition-colors',
                       isDragTarget
-                        ? 'bg-[#E6FAF7] border-[#00D2B4]'
+                        ? 'bg-brand-container border-[#C27345]'
                         : isToday
-                        ? 'bg-emerald-50/50 border-[#00D2B4]'
+                        ? 'bg-brand-container/40 border-[#C27345]'
                         : inCurrentMonth
-                        ? 'bg-[#FFFFFF] border-slate-200 hover:border-slate-300'
-                        : 'bg-slate-50/60 border-slate-200/60 opacity-60'
+                        ? 'bg-surface-lowest border-border hover:border-border'
+                        : 'bg-surface-low/60 border-border/60 opacity-60'
                     )}
                   >
                     <div className="space-y-1.5">
@@ -563,8 +563,8 @@ export default function CalendarView({
                           className={cn(
                             'text-[11px] font-mono font-bold w-5 h-5 rounded-full flex items-center justify-center',
                             isToday
-                              ? 'bg-[#00D2B4] text-[#0D1525]'
-                              : 'text-slate-700'
+                              ? 'bg-[#C27345] text-brand-contrast'
+                              : 'text-content-secondary'
                           )}
                         >
                           {date.getDate()}
@@ -573,7 +573,7 @@ export default function CalendarView({
                           type="button"
                           onClick={() => handleSlotClick(date)}
                           aria-label={`Schedule on ${key}`}
-                          className="p-0.5 rounded text-[#6E655D] hover:text-slate-800 hover:bg-slate-100"
+                          className="p-0.5 rounded text-content-muted hover:text-content-primary hover:bg-surface-container"
                         >
                           <Plus className="w-3 h-3" />
                         </button>
@@ -588,7 +588,7 @@ export default function CalendarView({
                               setAnchorDate(date);
                               setViewMode('day');
                             }}
-                            className="w-full text-left px-1.5 py-0.5 rounded bg-slate-100 text-[10px] font-mono text-slate-700 hover:bg-slate-200 font-semibold"
+                            className="w-full text-left px-1.5 py-0.5 rounded bg-surface-container text-[10px] font-mono text-content-secondary hover:bg-surface-high font-semibold"
                           >
                             +{dayPosts.length - 2} more
                           </button>
@@ -631,19 +631,19 @@ export default function CalendarView({
                   className={cn(
                     'p-3 rounded-lg border flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-colors',
                     isDragTarget
-                      ? 'bg-[#E6FAF7] border-[#00D2B4]'
+                      ? 'bg-brand-container border-[#C27345]'
                       : isPeak
-                      ? 'bg-[#E6FAF7]/40 border-[#7FE8D9]'
-                      : 'bg-[#FFFFFF] border-slate-200 hover:border-slate-300'
+                      ? 'bg-brand-container/40 border-brand/25'
+                      : 'bg-surface-lowest border-border hover:border-border'
                   )}
                 >
                   <div className="flex items-center gap-3">
-                    <span className="w-14 text-xs font-mono font-bold text-slate-600">
+                    <span className="w-14 text-xs font-mono font-bold text-content-secondary">
                       {String(hour).padStart(2, '0')}:00
                     </span>
                     {isPeak && (
-                      <span className="text-[10px] font-bold text-[#00A38C] bg-[#E6FAF7] px-2 py-0.5 rounded-full border border-[#7FE8D9] flex items-center gap-1">
-                        <Sparkles className="w-2.5 h-2.5 text-[#00D2B4]" />
+                      <span className="text-[10px] font-bold text-[#C27345] bg-brand-container px-2 py-0.5 rounded-full border border-brand/25 flex items-center gap-1">
+                        <Sparkles className="w-2.5 h-2.5 text-[#C27345]" />
                         Metricool Peak Window
                       </span>
                     )}
@@ -654,7 +654,7 @@ export default function CalendarView({
                     <button
                       type="button"
                       onClick={() => handleSlotClick(anchorDate, hour, 0)}
-                      className="h-7 px-2.5 rounded-md border border-dashed border-slate-300 hover:border-[#00D2B4] text-xs font-semibold text-slate-500 hover:text-[#00A38C] flex items-center gap-1 transition-colors bg-slate-50/50"
+                      className="h-7 px-2.5 rounded-md border border-dashed border-border hover:border-[#C27345] text-xs font-semibold text-content-muted hover:text-[#C27345] flex items-center gap-1 transition-colors bg-surface-low"
                     >
                       <Plus className="w-3 h-3" />
                       <span>Schedule at {hour}:00</span>
@@ -715,7 +715,7 @@ export default function CalendarView({
         >
           <div className="space-y-4">
             {activeModalPost.coverUrl && (
-              <div className="w-full h-48 rounded-xl overflow-hidden bg-slate-900 border border-slate-200">
+              <div className="w-full h-48 rounded-xl overflow-hidden bg-slate-900 border border-border">
                 <img
                   src={activeModalPost.coverUrl}
                   alt="Post Cover"
@@ -725,16 +725,16 @@ export default function CalendarView({
             )}
 
             <div>
-              <label className="text-[11px] font-bold uppercase tracking-wider text-[#6E655D]">
+              <label className="text-[11px] font-bold uppercase tracking-wider text-content-muted">
                 Caption
               </label>
-              <p className="mt-1 text-xs text-slate-800 bg-slate-50 p-3 rounded-lg border border-slate-200 whitespace-pre-wrap leading-relaxed">
+              <p className="mt-1 text-xs text-content-primary bg-surface-low p-3 rounded-lg border border-border whitespace-pre-wrap leading-relaxed">
                 {activeModalPost.globalCaption || 'No caption provided.'}
               </p>
             </div>
 
-            <div className="flex items-center justify-between text-xs text-slate-600 bg-slate-50 p-3 rounded-lg border border-slate-200">
-              <span className="font-semibold text-slate-700">Target Platforms</span>
+            <div className="flex items-center justify-between text-xs text-content-secondary bg-surface-low p-3 rounded-lg border border-border">
+              <span className="font-semibold text-content-secondary">Target Platforms</span>
               <div className="flex items-center gap-1.5 flex-wrap">
                 {activeModalPost.targetPlatforms.map((plat) => (
                   <PlatformBadge key={plat} platform={plat} showName />
