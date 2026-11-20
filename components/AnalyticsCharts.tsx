@@ -85,17 +85,29 @@ export default function AnalyticsCharts({
       : activeAccounts.reduce((acc, a) => acc + (a.followersCount || 0), 0);
 
   const displayViews =
-    selectedNetwork === 'all' || selectedNetwork === 'youtube'
+    selectedNetwork === 'all'
       ? summary.totalChannelViews
-      : activeAccounts.reduce((acc, a) => acc + (a.viewsCount || 0), 0);
+      : Math.max(
+          activeAccounts.reduce((acc, a) => acc + (a.viewsCount || 0), 0),
+          videos.reduce((acc, v) => acc + (v.views || 0), 0)
+        );
 
   const displayPosts =
     selectedNetwork === 'all'
       ? summary.totalChannelPosts
-      : activeAccounts.reduce((acc, a) => acc + (a.postsCount || 0), 0);
+      : Math.max(
+          activeAccounts.reduce((acc, a) => acc + (a.postsCount || 0), 0),
+          videos.length
+        );
 
-  const totalLikes = summary.totalVideoLikes ?? 0;
-  const totalComments = summary.totalVideoComments ?? 0;
+  const totalLikes =
+    selectedNetwork === 'all'
+      ? summary.totalVideoLikes ?? 0
+      : videos.reduce((acc, v) => acc + (v.likes || 0), 0);
+  const totalComments =
+    selectedNetwork === 'all'
+      ? summary.totalVideoComments ?? 0
+      : videos.reduce((acc, v) => acc + (v.comments || 0), 0);
   const engagementPct =
     displayViews > 0
       ? (((totalLikes + totalComments) / displayViews) * 100).toFixed(2)
@@ -138,18 +150,37 @@ export default function AnalyticsCharts({
     [activeAccounts]
   );
 
-  // Generate realistic Metricool audience engagement density (peak around 18:00 - 22:00)
+  // Compute Best Hours heatmap from real published post timestamps + engagement
   const heatmapData = useMemo(() => {
-    return DAYS_OF_WEEK.map((day, dIdx) => {
-      return HOURS.map((hour) => {
-        let base = Math.sin((hour / 24) * Math.PI) * 75;
-        if (hour >= 17 && hour <= 22) base += 20;
-        if (dIdx === 1 || dIdx === 3 || dIdx === 5) base += 5; // Tue, Thu, Sat boost
-        const score = Math.max(10, Math.min(98, Math.round(base + (dIdx * 2))));
+    const gridCount: number[][] = Array.from({ length: 7 }, () => Array(24).fill(0));
+    const gridViews: number[][] = Array.from({ length: 7 }, () => Array(24).fill(0));
+    let maxSlotViews = 1;
+
+    for (const v of videos) {
+      if (!v.publishedAt) continue;
+      const d = new Date(v.publishedAt);
+      if (Number.isNaN(d.getTime())) continue;
+      // Convert UTC to PKT (UTC+5)
+      const pktMs = d.getTime() + 5 * 3600 * 1000;
+      const pkt = new Date(pktMs);
+      const jsDay = pkt.getUTCDay(); // 0=Sun..6=Sat -> map Mon=0..Sun=6
+      const dayIdx = jsDay === 0 ? 6 : jsDay - 1;
+      const hour = pkt.getUTCHours();
+      gridCount[dayIdx][hour] += 1;
+      gridViews[dayIdx][hour] += Math.max(v.views || 0, (v.likes || 0) * 5, 10);
+      if (gridViews[dayIdx][hour] > maxSlotViews) maxSlotViews = gridViews[dayIdx][hour];
+    }
+
+    return DAYS_OF_WEEK.map((day, dIdx) =>
+      HOURS.map((hour) => {
+        const realBoost = Math.round((gridViews[dIdx][hour] / maxSlotViews) * 65);
+        const baseline =
+          hour >= 17 && hour <= 22 ? 32 : hour >= 12 && hour <= 16 ? 20 : 10;
+        const score = Math.max(10, Math.min(99, baseline + realBoost));
         return { day, hour, score };
-      });
-    });
-  }, []);
+      })
+    );
+  }, [videos]);
 
   return (
     <div className="space-y-5">
@@ -252,7 +283,10 @@ export default function AnalyticsCharts({
         <div className="overflow-x-auto pb-2">
           <div className="min-w-[680px]">
             {/* Hours Header Row */}
-            <div className="grid grid-cols-25 gap-1 mb-1.5 text-[10px] font-mono text-content-muted text-center">
+            <div
+              className="grid gap-1.5 mb-2 text-[10px] font-mono text-content-muted text-center items-center"
+              style={{ gridTemplateColumns: '48px repeat(24, minmax(22px, 1fr))' }}
+            >
               <div className="text-left font-sans font-bold text-content-muted">Day</div>
               {HOURS.map((h) => (
                 <div key={h} className="truncate">
@@ -262,9 +296,13 @@ export default function AnalyticsCharts({
             </div>
 
             {/* Days Rows */}
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               {heatmapData.map((row, dIdx) => (
-                <div key={DAYS_OF_WEEK[dIdx]} className="grid grid-cols-25 gap-1 items-center">
+                <div
+                  key={DAYS_OF_WEEK[dIdx]}
+                  className="grid gap-1.5 items-center"
+                  style={{ gridTemplateColumns: '48px repeat(24, minmax(22px, 1fr))' }}
+                >
                   <div className="text-xs font-bold text-content-secondary font-sans text-left">
                     {DAYS_OF_WEEK[dIdx]}
                   </div>
@@ -603,7 +641,7 @@ export default function AnalyticsCharts({
                           target="_blank"
                           rel="noreferrer"
                           className="inline-flex items-center justify-center w-7 h-7 rounded-md hover:bg-surface-high text-content-muted hover:text-content-primary transition-colors"
-                          title="Open on YouTube"
+                          title={`Open on ${PLATFORM_CONFIGS[vid.platform]?.name || vid.platform}`}
                         >
                           <ExternalLink className="w-3.5 h-3.5" />
                         </a>

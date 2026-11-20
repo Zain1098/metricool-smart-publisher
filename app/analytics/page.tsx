@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import AnalyticsCharts from '@/components/AnalyticsCharts';
 import {
@@ -367,9 +368,11 @@ ${bottom5
 
       {/* Network Filter Pills */}
       <div className="flex flex-wrap items-center gap-1.5 print:hidden">
-        {['all', 'youtube', 'instagram', 'facebook', 'tiktok', 'twitter', 'threads'].map(
+        {['all', 'youtube', 'instagram', 'facebook', 'tiktok', 'twitter', 'threads', 'linkedin', 'pinterest'].map(
           (net) => {
             const active = selectedNetwork === net;
+            const acc = data?.accounts?.find((a) => a.platform === net);
+            const isConn = net === 'all' ? true : Boolean(acc?.isConnected);
             const label =
               net === 'all' ? 'All Platforms' : PLATFORM_CONFIGS[net as keyof typeof PLATFORM_CONFIGS]?.name || net;
             return (
@@ -378,12 +381,20 @@ ${bottom5
                 type="button"
                 onClick={() => setSelectedNetwork(net)}
                 className={cn(
-                  'px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all',
+                  'px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all inline-flex items-center gap-1.5',
                   active
                     ? 'bg-brand text-brand-contrast border-brand shadow-soft'
                     : 'bg-surface-lowest text-content-secondary border-border hover:bg-surface-high hover:text-content-primary'
                 )}
               >
+                {net !== 'all' && (
+                  <span
+                    className={cn(
+                      'w-1.5 h-1.5 rounded-full',
+                      isConn ? 'bg-emerald-500' : 'bg-content-muted/40'
+                    )}
+                  />
+                )}
                 {label}
               </button>
             );
@@ -490,49 +501,68 @@ ${bottom5
               Followers, views, posts, and audience share across every channel
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3">
-            {(data?.platformBreakdown || []).map((p) => (
-              <div
-                key={p.id}
-                className="rounded-xl border border-border-subtle bg-surface p-3 space-y-2"
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <span className="text-xs font-bold text-content-primary capitalize">
-                      {PLATFORM_CONFIGS[p.platform as keyof typeof PLATFORM_CONFIGS]?.name || p.platform}
-                    </span>
-                    <span className="text-[11px] text-content-muted truncate">
-                      {p.handle || p.accountName}
-                    </span>
+          <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {(data?.platformBreakdown || []).map((p) => {
+              const cfg = PLATFORM_CONFIGS[p.platform as keyof typeof PLATFORM_CONFIGS];
+              return (
+                <div
+                  key={p.id}
+                  onClick={() => setSelectedNetwork(p.platform)}
+                  className={cn(
+                    'rounded-xl border bg-surface p-3.5 space-y-2.5 cursor-pointer transition-all hover:border-brand/50',
+                    selectedNetwork === p.platform ? 'border-brand ring-1 ring-brand/20' : 'border-border-subtle'
+                  )}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span
+                        className="w-2 h-2 rounded-full flex-shrink-0"
+                        style={{ backgroundColor: cfg?.color || '#C27345' }}
+                      />
+                      <span className="text-xs font-bold text-content-primary capitalize">
+                        {cfg?.name || p.platform}
+                      </span>
+                      <span className="text-[11px] text-content-muted truncate">
+                        {p.isConnected ? p.handle || p.accountName : ''}
+                      </span>
+                    </div>
+                    {p.isConnected ? (
+                      <Badge variant="sage" className="text-[10px]">Live</Badge>
+                    ) : (
+                      <Link
+                        href="/connections"
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-[10px] font-semibold text-brand hover:underline"
+                      >
+                        Connect →
+                      </Link>
+                    )}
                   </div>
-                  <Badge variant={p.isConnected ? 'sage' : 'outline'} className="text-[10px]">
-                    {p.isConnected ? 'Connected' : 'Not Connected'}
-                  </Badge>
-                </div>
 
-                <div className="grid grid-cols-3 gap-2 text-xs">
-                  <div>
-                    <span className="text-content-muted text-[10px] block">Followers</span>
-                    <span className="font-semibold text-content-primary tabular-nums">
-                      {p.followers.toLocaleString()}
-                    </span>
+                  <div className="grid grid-cols-3 gap-2 text-xs">
+                    <div>
+                      <span className="text-content-muted text-[10px] block">Followers</span>
+                      <span className="font-semibold text-content-primary tabular-nums">
+                        {p.followers.toLocaleString()}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-content-muted text-[10px] block">Views / Likes</span>
+                      <span className="font-semibold text-content-primary tabular-nums">
+                        {p.views.toLocaleString()}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-content-muted text-[10px] block">Posts</span>
+                      <span className="font-semibold text-content-primary tabular-nums">
+                        {p.postsCount.toLocaleString()}
+                      </span>
+                    </div>
                   </div>
-                  <div>
-                    <span className="text-content-muted text-[10px] block">Views / Likes</span>
-                    <span className="font-semibold text-content-primary tabular-nums">
-                      {p.views.toLocaleString()}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-content-muted text-[10px] block">Posts</span>
-                    <span className="font-semibold text-content-primary tabular-nums">
-                      {p.postsCount.toLocaleString()}
-                    </span>
-                  </div>
+                  <Progress value={p.sharePct} indicatorColor={cfg?.color || '#C27345'} />
                 </div>
-                <Progress value={p.sharePct} indicatorColor="#C27345" />
-              </div>
-            ))}
+              );
+            })}
           </CardContent>
         </Card>
 
@@ -596,6 +626,7 @@ ${bottom5
           videos={filteredVideos}
           timeline={data.timeline}
           topicInsights={data.topicInsights}
+          selectedNetwork={selectedNetwork}
         />
       )}
 
@@ -637,10 +668,35 @@ ${bottom5
           </div>
         </CardHeader>
         <CardContent className="overflow-x-auto">
+          {filteredVideos.length === 0 ? (
+            <div className="py-10 text-center space-y-2">
+              <p className="text-sm font-semibold text-content-primary">
+                No synced posts found for{' '}
+                <span className="capitalize">
+                  {selectedNetwork === 'all' ? 'this filter' : selectedNetwork}
+                </span>
+              </p>
+              <p className="text-xs text-content-muted max-w-md mx-auto">
+                {selectedNetwork !== 'all' &&
+                !data?.accounts?.find((a) => a.platform === selectedNetwork)?.isConnected
+                  ? 'This channel is not connected yet. Connect its OAuth token in Connections to pull live analytics.'
+                  : 'Click "Sync Live" at the top right to fetch the latest posts and metrics.'}
+              </p>
+              <div className="pt-2 flex items-center justify-center gap-2">
+                <Link
+                  href="/connections"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand text-white text-xs font-semibold hover:opacity-90"
+                >
+                  Open Connections
+                </Link>
+              </div>
+            </div>
+          ) : (
           <table className="w-full text-left border-collapse text-xs">
             <thead>
               <tr className="border-b border-border text-content-muted">
-                <th className="py-2.5 pr-3 font-semibold">Video</th>
+                <th className="py-2.5 pr-3 font-semibold">Content</th>
+                <th className="py-2.5 px-3 font-semibold">Platform</th>
                 <th className="py-2.5 px-3 font-semibold">Published</th>
                 <th className="py-2.5 px-3 font-semibold text-right">Views</th>
                 <th className="py-2.5 px-3 font-semibold text-right">Likes</th>
@@ -666,6 +722,11 @@ ${bottom5
                         {v.title}
                       </span>
                     </div>
+                  </td>
+                  <td className="py-2.5 px-3">
+                    <Badge variant="outline" className="capitalize text-[10px]">
+                      {v.platform}
+                    </Badge>
                   </td>
                   <td className="py-2.5 px-3 text-content-muted whitespace-nowrap">
                     {v.publishedAt?.slice(0, 10)}
@@ -699,6 +760,7 @@ ${bottom5
               ))}
             </tbody>
           </table>
+          )}
         </CardContent>
       </Card>
     </div>

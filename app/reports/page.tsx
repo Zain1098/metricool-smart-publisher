@@ -338,7 +338,7 @@ export default function ReportsStudioPage() {
                           value={blk.notes || ''}
                           onChange={(e) => updateBlockNotes(blk.id, e.target.value)}
                           rows={3}
-                          className="w-full text-xs rounded-md border border-border bg-surface-card p-2 focus:outline-none focus:ring-1 focus:ring-brand"
+                          className="w-full text-xs rounded-md border border-border bg-surface-lowest text-content-primary p-2 focus:outline-none focus:ring-1 focus:ring-brand"
                           placeholder="Add strategist notes..."
                         />
                       )}

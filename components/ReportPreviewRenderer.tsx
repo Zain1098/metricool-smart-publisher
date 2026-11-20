@@ -123,7 +123,7 @@ export default function ReportPreviewRenderer({
     <div className="space-y-6 print:space-y-4">
       {/* Report Header Banner */}
       <div
-        className="rounded-2xl border border-border bg-surface-card p-6 md:p-8 shadow-sm"
+        className="rounded-2xl border border-border bg-surface-lowest text-content-primary p-6 md:p-8 shadow-sm"
         style={{ borderTopWidth: '4px', borderTopColor: report.accentColor || '#C27345' }}
       >
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">

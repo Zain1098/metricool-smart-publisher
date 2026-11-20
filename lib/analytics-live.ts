@@ -209,30 +209,67 @@ async function refreshMetaLive(): Promise<void> {
         title: String(p.message || 'Facebook Post').slice(0, 120),
         publishedAt: String(p.created_time || new Date().toISOString()),
         thumbnailUrl: String(p.full_picture || ''),
-        views: likes * 12,
+        views: 0,
         likes,
         comments,
         duration: 'Post',
         privacyStatus: 'public',
         url: String(p.permalink_url || 'https://www.facebook.com/'),
-        engagementRate: calcEng(Math.max(likes * 12, 1), likes, comments),
+        engagementRate: likes + comments > 0 ? Number((likes + comments).toFixed(2)) : 0,
       };
     });
     savePlatformPosts('facebook', fbPosts);
+    store.toggleAccountConnection('facebook', true, {
+      postsCount: fbPosts.length,
+    });
   }
 }
 
 async function refreshTikTokLive(): Promise<void> {
   const acc = store.getRawAccount('tiktok');
-  const token = acc?.credentials?.accessToken || process.env.TIKTOK_ACCESS_TOKEN;
-  if (!token) return;
+  let token = acc?.credentials?.accessToken || process.env.TIKTOK_ACCESS_TOKEN;
+  const refreshToken = acc?.credentials?.refreshToken || process.env.TIKTOK_REFRESH_TOKEN;
+  const clientKey = acc?.credentials?.clientId || process.env.TIKTOK_CLIENT_KEY;
+  const clientSecret = acc?.credentials?.clientSecret || process.env.TIKTOK_CLIENT_SECRET;
 
-  const res = await fetchJsonWithTimeout(
-    'https://open.tiktokapis.com/v2/user/info/?fields=open_id,display_name,follower_count,likes_count,video_count',
-    { headers: { Authorization: `Bearer ${token}` } }
-  );
+  if (!token && !refreshToken) return;
+
+  let res = token
+    ? await fetchJsonWithTimeout(
+        'https://open.tiktokapis.com/v2/user/info/?fields=open_id,display_name,follower_count,likes_count,video_count',
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
+    : null;
+
+  // Refresh TikTok OAuth v2 token if expired
+  if (!res?.data?.user && refreshToken && clientKey && clientSecret) {
+    const tokenRes = await fetchJsonWithTimeout('https://open.tiktokapis.com/v2/oauth/token/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        client_key: clientKey,
+        client_secret: clientSecret,
+        grant_type: 'refresh_token',
+        refresh_token: refreshToken,
+      }).toString(),
+    });
+    if (tokenRes?.access_token) {
+      token = String(tokenRes.access_token);
+      res = await fetchJsonWithTimeout(
+        'https://open.tiktokapis.com/v2/user/info/?fields=open_id,display_name,follower_count,likes_count,video_count',
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+    }
+  }
+
   const user = res?.data?.user;
-  if (!user) return;
+  if (!user) {
+    store.toggleAccountConnection('tiktok', Boolean(acc?.isConnected), {
+      tokenStatus: 'expired',
+      tokenStatusNote: 'TikTok token expired — reconnect in Connections',
+    });
+    return;
+  }
 
   store.toggleAccountConnection('tiktok', true, {
     accountName: user.display_name || acc?.accountName,
@@ -241,6 +278,13 @@ async function refreshTikTokLive(): Promise<void> {
     viewsCount: Number(user.likes_count || acc?.viewsCount || 0),
     tokenStatus: 'valid',
     tokenStatusNote: `Live synced ${new Date().toLocaleTimeString()}`,
+    credentials: {
+      accountId: String(user.open_id || acc?.credentials?.accountId || ''),
+      accessToken: token,
+      refreshToken: refreshToken || acc?.credentials?.refreshToken,
+      clientId: clientKey,
+      clientSecret,
+    },
   });
 
   // Fetch per-video TikTok list
@@ -392,6 +436,17 @@ async function refreshThreadsLive(): Promise<void> {
   const threadsRes = await fetchJsonWithTimeout(
     `https://graph.threads.net/v1.0/me/threads?fields=id,text,timestamp,permalink,media_type&limit=20&access_token=${encodeURIComponent(token)}`
   );
+  const insightsRes = await fetchJsonWithTimeout(
+    `https://graph.threads.net/v1.0/me/threads_insights?metric=views,likes,replies,followers_count&access_token=${encodeURIComponent(token)}`
+  );
+  let threadsViews = 0;
+  let threadsFollowers = acc?.followersCount || 0;
+  if (Array.isArray(insightsRes?.data)) {
+    for (const m of insightsRes.data) {
+      if (m.name === 'views') threadsViews = Number(m.total_value?.value || 0);
+      if (m.name === 'followers_count') threadsFollowers = Number(m.total_value?.value || threadsFollowers);
+    }
+  }
   if (Array.isArray(threadsRes?.data)) {
     const tPosts: LivePostMetric[] = threadsRes.data.map((t: any) => ({
       id: String(t.id),
@@ -408,6 +463,11 @@ async function refreshThreadsLive(): Promise<void> {
       engagementRate: 0,
     }));
     savePlatformPosts('threads', tPosts);
+    store.toggleAccountConnection('threads', true, {
+      followersCount: threadsFollowers,
+      viewsCount: threadsViews,
+      postsCount: tPosts.length,
+    });
   }
 }
 

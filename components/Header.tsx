@@ -23,6 +23,11 @@ const PAGE_TITLES: Record<string, string> = {
   '/composer': 'Post Composer',
   '/media': 'Media Library',
   '/analytics': 'Analytics & Insights',
+  '/reports': 'Reporting Studio',
+  '/web-analytics': 'Web & Blog Pixel',
+  '/competitors': 'Competitors & Hashtags',
+  '/flows': 'Evergreen Flows',
+  '/smartlinks': 'SmartLinks (Link-in-Bio)',
   '/connections': 'Connected Channels',
   '/settings': 'Settings & Admin',
 };

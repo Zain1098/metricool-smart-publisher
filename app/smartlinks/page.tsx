@@ -245,7 +245,7 @@ export default function SmartLinksPage() {
 
           {/* Mobile Live Preview */}
           <div className="lg:col-span-5 flex justify-center">
-            <div className="w-full max-w-[340px] rounded-[32px] border-4 border-content-primary/15 bg-surface-card p-6 shadow-lg space-y-5">
+            <div className="w-full max-w-[340px] rounded-[32px] border-4 border-content-primary/15 bg-surface-lowest text-content-primary p-6 shadow-lg space-y-5">
               <div className="text-center space-y-1.5 pt-2">
                 <div
                   className="w-16 h-16 rounded-full mx-auto flex items-center justify-center text-white text-xl font-bold"

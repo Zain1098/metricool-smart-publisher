@@ -141,7 +141,7 @@ export default function WebAnalyticsPage() {
               placeholder="Site ID (e.g. my-blog)"
               className="sm:w-52 text-xs"
             />
-            <code className="flex-1 px-3 py-2 rounded-lg bg-surface border border-border text-xs font-mono overflow-x-auto whitespace-nowrap">
+            <code className="flex-1 px-3 py-2 rounded-lg bg-surface-low text-content-primary border border-border text-xs font-mono overflow-x-auto whitespace-nowrap">
               {snippet}
             </code>
             <Button type="button" size="sm" onClick={copySnippet}>

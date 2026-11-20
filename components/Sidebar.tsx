@@ -19,6 +19,10 @@ import {
   X,
   Plus,
   Search,
+  FileText,
+  Globe,
+  Repeat,
+  Radar,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ConnectedAccount, ScheduledPost } from '@/lib/types';
@@ -30,6 +34,11 @@ const PRIMARY_NAV = [
   { href: '/composer', label: 'Post Composer', shortLabel: 'Compose', icon: PenSquare },
   { href: '/media', label: 'Media Library', shortLabel: 'Media', icon: FolderOpen },
   { href: '/analytics', label: 'Analytics & Insights', shortLabel: 'Analytics', icon: BarChart3 },
+  { href: '/reports', label: 'Reporting Studio', shortLabel: 'Reports', icon: FileText },
+  { href: '/web-analytics', label: 'Web Pixel', shortLabel: 'Pixel', icon: Globe },
+  { href: '/competitors', label: 'Competitors & Tags', shortLabel: 'Compete', icon: Radar },
+  { href: '/flows', label: 'Evergreen Flows', shortLabel: 'Flows', icon: Repeat },
+  { href: '/smartlinks', label: 'SmartLinks', shortLabel: 'Bio', icon: Link2 },
   { href: '/connections', label: 'Connected Channels', shortLabel: 'Channels', icon: Link2, badgeKey: 'accounts' as const },
 ];
 

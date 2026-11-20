@@ -75,16 +75,25 @@ export default function PublicSmartLinkPage({
           {profile.links
             .filter((l) => l.enabled)
             .map((lnk) => (
-              <button
+              <a
                 key={lnk.id}
-                type="button"
-                onClick={() => handleLinkClick(lnk.id, lnk.url)}
+                href={lnk.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => {
+                  fetch('/api/smartlinks/click', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ slug: params.slug, linkId: lnk.id }),
+                    keepalive: true,
+                  }).catch(() => {});
+                }}
                 className="w-full py-3.5 px-5 rounded-xl font-semibold text-sm text-white shadow-sm hover:opacity-90 transition flex items-center justify-between"
                 style={{ backgroundColor: profile.accentColor || '#C27345' }}
               >
                 <span>{lnk.label}</span>
                 <ExternalLink className="w-4 h-4 opacity-80" />
-              </button>
+              </a>
             ))}
         </div>
       </div>
